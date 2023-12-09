@@ -1,0 +1,15 @@
+runtime: php
+
+env: flex
+
+runtime_config:
+  runtime_version: "8.2"
+  document_root: public
+
+env_variables:
+  APP_KEY: base64:ZaZi4XfdKv+sLXFsqZJnt9ixW53SgZqEjIkaXEC0rig=
+  APP_NAME: "Laravel"
+  APP_ENV: "development"
+  APP_DEBUG: "false"
+  APP_URL: "https://your-app-id.appspot.com"
+  LOG_CHANNEL: "stack"

@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\profile;
 use App\Models\user;
+use App\Models\provinsi;
+use App\Models\kabupaten;
+use App\Models\paket;
 
 class ProfileController extends Controller
 {
@@ -22,6 +25,18 @@ class ProfileController extends Controller
                 return response()->json(['is_success'=>true,
                     'data'=>$profile,
                     'message'=>"Profile Ditemukan"],'200');
+            }
+            return response()->json(['is_success'=>false,
+            'data'=>$profile,
+            'message'=>"Profile Tidak Ditemukan"],'404');
+        }
+
+        public function user(Request $request){
+            $profile = user::find($request->id);
+            if($profile){
+                return response()->json(['is_success'=>true,
+                    'data'=>$profile,
+                    'message'=>"User Ditemukan"],'200');
             }
             return response()->json(['is_success'=>false,
             'data'=>$profile,
@@ -100,5 +115,25 @@ class ProfileController extends Controller
             return response()->json(['is_success'=>false,
                     'data'=>$profile,
                     'message'=>"Profile Berhasil Di tambahkan"],'404');
+        }
+
+        public function profile_EO(){
+            $EO_prof = Profile::join('users', 'profile.ID_User', '=', 'users.ID_User')
+            ->join('provinsi','profile.provinsi','=','provinsi.ID_provinsi')
+            ->join('kabupaten','profile.kota','=','kabupaten.id')
+            ->join('paket','profile.Kategori_paket','=','paket.ID_paket')
+            ->select([
+                    'profile.ID_User',
+                    'profile.nama_lengkap',
+                    'users.email',
+                    'provinsi.nama as nama_provinsi',
+                    'kabupaten.nama as nama_kabupaten',
+                    'paket.nama_paket'
+                ])
+             ->paginate(3);
+            return response()->json([
+                'is_success'=>true,
+                'data'=>$EO_prof,
+            'message'=>'Data berhasil ditemukan'],'200');
         }
 }

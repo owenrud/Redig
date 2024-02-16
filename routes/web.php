@@ -17,6 +17,10 @@ use App\Http\Controllers\RegisterController;
 Route::get('/', function () {
     return view('login');
 })->name('login');
+Route::get('/test/pdf', function () {
+    return view('pdf_sertif');
+});
+
 Route::post('/login',[RegisterController::class,'Login']);
 
 Route::get('/register',[RegisterController::class,'index']);
@@ -26,7 +30,7 @@ Route::get('/auth/redirect', function () {
  
 Route::get('/auth/google/callback',[RegisterController::class,'Login_G']);
 
-Route::group(['middleware' => 'auth'], function () {
+Route::group(['middleware' => ['auth', 'role:EO']], function () {
     Route::get('/dashboard', function () {
         return view('eo.dashboard');
     })->name('home');
@@ -43,23 +47,31 @@ Route::group(['middleware' => 'auth'], function () {
         return view('eo.profile');
     })->name('profile');
     Route::get('/create/free', function () {
-        return view('eo.newEvent');
+        return view('eo.newFreeEvent');
     })->name('create');
+    Route::get('/create/premium', function () {
+        return view('eo.newEvent');
+    })->name('create_premium');
     Route::get('/event/detail/{id}', function () {
         return view('eo.DetailEvent');
     })->name('Detail');
     Route::get('/event/detail/{id}/operator', function () {
         return view('eo.form_operator');
-    })->name('Detail');
+    })->name('DetailOp');
+    Route::get('/event/detail/{id}/sertifikat', function () {
+        return view('eo.manage_sertifikat');
+    })->name('DetailSertif');
     Route::get('/event/detail/{id}/tamu', function () {
         return view('eo.form_tamu');
-    })->name('Detail');
+    })->name('DetailTamu');
     Route::get('/event/detail/{id}/operator/{id_operator}', function () {
         return view('eo.form_edit_operator');
-    })->name('Detail');
+    })->name('DetailProfOp');
     Route::get('/event/detail/{id}/tamu/{id_tamu}', function () {
         return view('eo.form_edit_tamu');
     });
+});
+    Route::group(['middleware' => ['auth', 'role:Admin']], function () {
     Route::get('/admin/paket', function () {
         return view('admin.paket');
     });
@@ -102,11 +114,12 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/admin/transaksi', function () {
         return view('admin.transaksi');
     });
+});
     Route::get('/logout',function(){
         Auth::Logout();
         return redirect('/');
     });
-});
+
 
 
  

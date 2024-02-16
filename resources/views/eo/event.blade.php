@@ -45,6 +45,9 @@ Add data
                 <th scope="col" class="px-6 py-3">
                     Paket
                 </th>
+                <th scope="col" class="px-6 py-3 kategori"  id="columnKategori">
+                        Kategori
+                    </th>
                 <th scope="col" class="px-6 py-3">
                     Status
                 </th>
@@ -58,31 +61,15 @@ Add data
         </tbody>
     </table>
     <nav class="flex items-center flex-column flex-wrap md:flex-row justify-between pt-4 mb-4 px-8" aria-label="Table navigation">
-        <span class="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">Showing <span class="font-semibold text-gray-900 dark:text-white">1-10</span> of <span class="font-semibold text-gray-900 dark:text-white">1000</span></span>
-        <ul class="inline-flex -space-x-px rtl:space-x-reverse text-sm h-8">
-            <li>
-                <a href="#" class="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Previous</a>
-            </li>
-            <li>
-                <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">1</a>
-            </li>
-            <li>
-                <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">2</a>
-            </li>
-            <li>
-                <a href="#" aria-current="page" class="flex items-center justify-center px-3 h-8 text-violet-600 border border-gray-300 bg-violet-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white">3</a>
-            </li>
-            <li>
-                <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">4</a>
-            </li>
-            <li>
-                <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">5</a>
-            </li>
-            <li>
-        <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Next</a>
-            </li>
-        </ul>
-    </nav>
+     <span class="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">
+        Showing <span class="font-semibold text-gray-900 dark:text-white" id="startData">1</span>-
+        <span class="font-semibold text-gray-900 dark:text-white" id="endData">10</span> of 
+        <span class="font-semibold text-gray-900 dark:text-white" id="totalData">1000</span>
+    </span>
+    <ul id="paginationContainer" class="inline-flex -space-x-px rtl:space-x-reverse text-sm h-8">
+      
+    </ul>
+</nav>
 </div>
 </div>
 
@@ -117,6 +104,9 @@ Add data
 @section('script')
 
 <script>
+let currentPage = 1; // Added currentPage variable
+
+let IndexCounter = 1;
 document.addEventListener('DOMContentLoaded', function () {
     const openModalBtn = document.getElementById('openModalBtn');
     const modal = document.getElementById('myModal');
@@ -140,143 +130,150 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-</script>
 
-<!-- Add this script to your HTML body -->
-<!-- Add this script to your HTML body -->
-<script>
-  // Async function to fetch data and create UI
-  async function fetchDataAndCreateUI() {
+async function fetchDataAndCreateUI(page = 1) {
+    const maxRetries = 3;
+    const retryDelay = 1000; // 1 second delay between retries
+
+    async function fetchWithRetry(url, options, retries = maxRetries) {
+        try {
+            const response = await fetch(url, options);
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return await response.json();
+        } catch (error) {
+            if (retries > 0) {
+                console.warn(`Retrying... (${retries} attempts left)`);
+                await new Promise(resolve => setTimeout(resolve, retryDelay));
+                return fetchWithRetry(url, options, retries - 1);
+            } else {
+                console.error('Max retries exceeded. Unable to fetch data:', error);
+                throw error;
+            }
+        }
+    }
+
     try {
-      // Fetch event data
-      
-      const eventDataResponse = await fetch('http://localhost:8000/api/event/show/eo',{
-         method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ ID_EO: id }),
-      });
-      const eventData = await eventDataResponse.json();
-
-      if (eventData.is_success && Array.isArray(eventData.data)) {
-        // Get the table body
-        const tableBody = document.getElementById('tableBody'); // Replace with the actual ID
-        let indexCount = 1;
-        // Create an array of promises for each event
-        const promises = eventData.data.map(async (event) => {
-          // Fetch paket data inside the loop to get the current event's ID_paket
-          const paketDataResponse = await fetch('http://localhost:8000/api/paket/show', {
+        const eventDataResponse = await fetch(`http://localhost:8000/api/event/show/eo?page=${page}`, {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json',
+                'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ ID_paket: event.ID_paket }),
-          });
-          const paketData = await paketDataResponse.json();
+            body: JSON.stringify({ ID_EO: id }),
+        });
 
-          if (paketData.is_success && paketData.data) {
+        const responseData = await eventDataResponse.json();
+
+        const tableBody = document.getElementById('tableBody');
+        let indexCount = (page - 1) * responseData.data.per_page + 1;
+        tableBody.innerHTML = '';
+
+        responseData.data.data.forEach((event) => {
             const row = document.createElement('tr');
             row.innerHTML = `<td class="px-6 py-4">${indexCount}</td>
-                              <td class="px-6 py-4">${event.nama_event}</td>
-                              <td class="px-6 py-4">${event.start}</td>
-                              <td class="px-6 py-4">${event.end}</td>`;
-             indexCount++;
-            // Create and append "Public" or "Private" column
+                                <td class="px-6 py-4">${event.nama_event}</td>
+                                <td class="px-6 py-4">${event.start}</td>
+                                <td class="px-6 py-4">${event.end}</td>`;
+
+            indexCount++;
+
             const public = document.createElement('td');
             public.textContent = event.public == 1 ? 'Public' : 'Private';
             public.classList.add(
-              event.public == 1 ? 'text-green-600' : 'text-rose-600',
-              'px-6',
-              'py-4'
+                event.public == 1 ? 'text-green-600' : 'text-rose-600',
+                'px-6',
+                'py-4'
             );
             row.appendChild(public);
 
-            // Create and append "Tipe" column
             const tipe = document.createElement('td');
-            tipe.textContent = paketData.data.nama_paket;
-
-            if (paketData.data.nama_paket !== 'Gratis') {
-              tipe.classList.add('text-purple-600', 'font-bold', 'px-6', 'py-4');
+            tipe.textContent = event.nama_paket;
+            if (event.nama_paket !== 'Gratis') {
+                tipe.classList.add('text-purple-600', 'font-bold', 'px-6', 'py-4');
             } else {
-              tipe.classList.add('text-blue-700', 'font-bold', 'px-6', 'py-4');
+                tipe.classList.add('text-blue-700', 'font-bold', 'px-6', 'py-4');
             }
-
             row.appendChild(tipe);
 
-            // Create and append "Status" column
+            const kategori = document.createElement('td');
+            kategori.textContent = event.nama;
+            kategori.classList.add('font-bold', 'px-6', 'py-4');
+            row.appendChild(kategori);
+
             const status = document.createElement('td');
             if (event.status == 0) {
-              status.textContent = 'Selesai';
-              status.classList.add('text-rose-600', 'px-6', 'py-4');
+                status.textContent = 'Selesai';
+                status.classList.add('text-rose-600', 'px-6', 'py-4');
             } else if (event.status == 1) {
-              status.textContent = 'Sedang Berlangsung';
-              status.classList.add('text-yellow-400', 'px-6', 'py-4');
+                status.textContent = 'Sedang Berlangsung';
+                status.classList.add('text-yellow-400', 'px-6', 'py-4');
             } else {
-              status.textContent = 'Akan Datang';
-              status.classList.add('text-green-600', 'px-6', 'py-4');
+                status.textContent = 'Akan Datang';
+                status.classList.add('text-green-600', 'px-6', 'py-4');
             }
             row.appendChild(status);
 
-            // Create and append action buttons column
             const cellAction = document.createElement('td');
             cellAction.classList.add('flex', 'justify-center', 'space-x-4', 'px-6', 'py-4');
 
-            // Create "Detail" button
             const detailButton = document.createElement('a');
             detailButton.textContent = 'Detail';
             detailButton.href = `/event/detail/${event.ID_event}`;
             detailButton.classList.add(
-              'cursor-pointer',
-              'text-sky-500',
-              'hover:text-sky-700',
-              'px-3',
-              'py-1'
+                'cursor-pointer',
+                'text-sky-500',
+                'hover:text-sky-700',
+                'px-3',
+                'py-1'
             );
             cellAction.appendChild(detailButton);
 
-            // Create "Delete" button
             const deleteButton = document.createElement('button');
             deleteButton.textContent = 'Delete';
             deleteButton.classList.add(
-              'cursor-pointer',
-              'text-rose-600',
-              'hover:text-rose-800'
+                'cursor-pointer',
+                'text-rose-600',
+                'hover:text-rose-800'
             );
             deleteButton.type = 'button';
             deleteButton.onclick = function () {
-              // Define the action you want to perform when the "Delete" button is clicked
-              deleteRowAction(event.ID_event); // You need to implement the deleteRowAction function
+                deleteRowAction(event.ID_event);
             };
             cellAction.appendChild(deleteButton);
 
-            // Append action buttons to the row
             row.appendChild(cellAction);
-
-            // Append the row to the table body
             tableBody.appendChild(row);
-          } else {
-            console.error(`Data paket for event ${event.ID_event} tidak valid atau tidak ditemukan`);
-          }
         });
 
-        // Wait for all promises to resolve before proceeding
-        await Promise.all(promises);
-      } else {
-        console.error('Data event tidak valid atau tidak ditemukan');
-      }
+        // Pagination logic
+        const paginationContainer = document.getElementById('paginationContainer');
+        paginationContainer.innerHTML = '';
+        for (let i = 1; i <= responseData.data.last_page; i++) {
+            const button = document.createElement('li');
+            button.innerHTML = `<a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">${i}</a>`;
+            paginationContainer.appendChild(button);
+        }
+
+        const paginationButtons = document.querySelectorAll('#paginationContainer a');
+        paginationButtons.forEach((button, index) => {
+            button.addEventListener('click', () => fetchDataAndCreateUI(index + 1));
+        });
+
+        const startData = document.getElementById('startData');
+        const endData = document.getElementById('endData');
+        const totalData = document.getElementById('totalData');
+
+        startData.textContent = responseData.data.from;
+        endData.textContent = responseData.data.to;
+        totalData.textContent = responseData.data.total;
     } catch (error) {
-      console.error('Error fetching data event:', error);
-      // Display an error message or handle it as needed
+        console.error('Error fetching data event:', error);
     }
-  }
+}
 
-  // Call the async function to fetch data and create UI
-  fetchDataAndCreateUI();
-</script>
-
-
-<script>
+// Call fetchDataAndCreateUI with initial page value
+fetchDataAndCreateUI(1);
 // Function to handle row deletion
 function deleteRowAction(ID_paket) {
     const confirmation = confirm("Are you sure you want to delete this row?");
@@ -301,8 +298,7 @@ function deleteRowAction(ID_paket) {
     }
 }
 
-</script>
-<script>
+
 // Fetch user profile information
 fetch('http://localhost:8000/api/profile/show', {
   method: 'POST',
@@ -325,17 +321,16 @@ fetch('http://localhost:8000/api/profile/show', {
             const profileContainer = document.getElementById('profileContainer');
 
             // Function to create the UI for each instance
-            async function createProfileUI(title, features, items) {
-              const profileDiv = document.createElement('div');
-              profileDiv.className = 'w-full max-w-sm mb-auto p-4 bg-white border border-gray-200 rounded-lg shadow-lg shadow sm:p-8 dark:bg-gray-800 dark:border-gray-700';
+              async function createProfileUI(title, features, items) {
+                const profileDiv = document.createElement('div');
+                profileDiv.className = 'w-full max-w-sm mb-auto p-4 bg-white border border-gray-200 rounded-lg shadow-lg shadow sm:p-8 dark:bg-gray-800 dark:border-gray-700';
 
-              // Modify anchor link based on package type
-              const anchorLink = title === 'Gratis'
-                ? '<a href="/create/free">'
-                : (title === 'Premium' && accountTypeID === 1)
-                ? '<a href="/create/premium">' // Replace "YOUR_PREMIUM_LINK" with the actual link
-                : '<a href="/create/other">'; // Replace "YOUR_OTHER_LINK" with the actual link for other cases
-
+                // Modify anchor link based on package type
+                 if (title === 'Gratis') {
+                    anchorLink = '<a href="/create/free">';
+                  } else {
+                    anchorLink = '<a href="/create/premium">'; // Replace "YOUR_PREMIUM_LINK" with the actual link
+                  }
               profileDiv.innerHTML = `
                 <h5 class="mb-auto text-xl font-medium text-gray-500 dark:text-gray-400">${title}</h5>
                 <ul role="list" class="space-y-7 my-12">
@@ -359,11 +354,13 @@ fetch('http://localhost:8000/api/profile/show', {
             }
 
             // Loop through data and append instances to the existing container
-            for (const { nama_paket, ID_fitur, harga } of packageData.data) {
+            for (const { nama_paket, ID_fitur, harga ,ID_paket} of packageData.data) {
               const isDefault = nama_paket === 'Gratis';
-              const isPremium = nama_paket === 'Premium' && accountTypeID === 1;
+               const isPremium = nama_paket === 'Premium' && accountTypeID === ID_paket;
+const isBusiness = nama_paket === 'Business' && accountTypeID === ID_paket;
+const isEnterprise = nama_paket === 'Enterprise' && accountTypeID === ID_paket;
 
-              if (isDefault || isPremium) {
+              if (isDefault || isPremium || isBusiness || isEnterprise) {
                 // Fetch feature information using POST method
                 const featureResponse = await fetch('http://localhost:8000/api/fitur-paket/show', {
                   method: 'POST',
@@ -372,7 +369,7 @@ fetch('http://localhost:8000/api/profile/show', {
                   },
                   body: JSON.stringify({ ID_fitur: ID_fitur }),
                 });
-
+                
                 const featureData = await featureResponse.json();
 
                 if (featureData.is_success) {

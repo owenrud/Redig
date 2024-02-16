@@ -53,28 +53,8 @@ Add data
         <span class="font-semibold text-gray-900 dark:text-white" id="endData">10</span> of 
         <span class="font-semibold text-gray-900 dark:text-white" id="totalData">1000</span>
     </span>
-<ul class="inline-flex -space-x-px rtl:space-x-reverse text-sm h-8">
-            <li>
-                <a href="#" class="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Previous</a>
-            </li>
-            <li>
-                <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">1</a>
-            </li>
-            <li>
-                <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">2</a>
-            </li>
-            <li>
-                <a href="#" aria-current="page" class="flex items-center justify-center px-3 h-8 text-violet-600 border border-gray-300 bg-violet-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white">3</a>
-            </li>
-            <li>
-                <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">4</a>
-            </li>
-            <li>
-                <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">5</a>
-            </li>
-            <li>
-        <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Next</a>
-            </li>
+<ul id="paginationContainer" class="inline-flex -space-x-px rtl:space-x-reverse text-sm h-8">
+            
         </ul>
     </nav>
 </div>
@@ -85,170 +65,141 @@ Add data
 
 @section('script')
 <script>
-async function fetchDataAndCreateTable() {
-    try {
-        const api = "http://localhost:8000/api/profile/all";
-        const response = await fetch(api);
-        const apiData = await response.json();
+let counterData = 0;
 
+async function fetchAndDisplayData(apiEndpoint, page = 1) {
+    try {
+        
+        const response = await fetch(`${apiEndpoint}?page=${page}`);
+        const apiData = await response.json();
+        //console.log(apiData);
         if (apiData && apiData.is_success) {
             const tableBody = document.getElementById('tableBody');
+            const paginationContainer = document.getElementById('paginationContainer');
+            //console.log(paginationContainer);
+            // Clear existing data and pagination buttons
+            let counterData = (page - 1) * apiData.data.per_page + 1;
+            tableBody.innerHTML = '';
+            paginationContainer.innerHTML = '';
 
-            // Use Promise.all to fetch data from the second API for each user in parallel
-            await Promise.all(apiData.data.map(async (user) => {
+            apiData.data.data.forEach((profile) => {
+                
                 const row = document.createElement('tr');
 
-                // Kolom "Nomor" dan "Email" dari fetch API pertama
-                const nomor = document.createElement('td');
-                nomor.textContent = user.ID_User;
-                nomor.classList.add('text-center', 'px-6', 'py-4');
-                row.appendChild(nomor);
+                // Create table cells and populate with data
+                const idCell = document.createElement('td');
+                idCell.textContent = counterData;
+                idCell.classList.add('px-6', 'py-4', 'text-center');
+                row.appendChild(idCell);
 
-                const email = document.createElement('td');
-                email.textContent = user.email;
-                email.classList.add('text-center', 'px-6', 'py-4');
-                row.appendChild(email);
+                const emailCell = document.createElement('td');
+                emailCell.textContent = profile.email;
+                emailCell.classList.add('px-6', 'py-4', 'text-center');
+                row.appendChild(emailCell);
 
-                // Fetch API kedua
-                const secondApiResponse = await fetch("http://localhost:8000/api/profile/show", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ id: user.ID_User }),
-                });
+                const nameCell = document.createElement('td');
+                nameCell.textContent = profile.nama_lengkap;
+                nameCell.classList.add('px-6', 'py-4', 'text-center');
+                row.appendChild(nameCell);
 
-                const dataShow = await secondApiResponse.json();
+                const provinsiCell = document.createElement('td');
+                provinsiCell.textContent = profile.nama_provinsi;
+                provinsiCell.classList.add('px-6', 'py-4', 'text-center'); // Assuming you have the provinsi name in the API response
+                row.appendChild(provinsiCell);
 
-                if (dataShow.is_success) {
-                    const item = dataShow.data;
+                const kotaCell = document.createElement('td');
+                kotaCell.textContent = profile.nama_kabupaten;
+                kotaCell.classList.add('px-6', 'py-4', 'text-center'); // Assuming you have the kota name in the API response
+                row.appendChild(kotaCell);
 
-                    // Kolom "Nama", "Provinsi", dan "Kabupaten" dari fetch API kedua
-                    const nama = document.createElement('td');
-                    nama.textContent = item.nama_lengkap;
-                    nama.classList.add('text-center', 'px-6', 'py-4');
-                    row.appendChild(nama);
+                const typeCell = document.createElement('td');
+                typeCell.textContent = profile.nama_paket;
+                typeCell.classList.add('px-6', 'py-4', 'text-center'); // Assuming you have the kota name in the API response
+                row.appendChild(typeCell);
 
-                    const provinsiApiResponse = await fetch("http://localhost:8000/api/provinsi/show", {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ id: item.provinsi }),
-                    });
+                const cellAction = document.createElement('td');
+                cellAction.classList.add('flex', 'justify-center', 'space-x-4', 'px-6', 'py-4');
 
-                    const provinsiData = await provinsiApiResponse.json();
-                    const dataprov = provinsiData.data;
-                    const provinsi = document.createElement('td');
-                    provinsi.textContent = dataprov.nama;
-                    provinsi.classList.add('text-center', 'px-6', 'py-4');
-                    row.appendChild(provinsi);
+                // Create Delete Button
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Delete';
+                deleteButton.classList.add('cursor-pointer', 'text-rose-600', 'hover:text-rose-800');
+                deleteButton.type = 'button';
+                deleteButton.onclick = function () {
+                    // Define the action you want to perform when the "Delete" button is clicked
+                    deleteRowAction(profile.ID_User); // You need to implement the deleteRowAction function
+                };
 
-                    const kabupatenApiResponse = await fetch("http://localhost:8000/api/kabupaten/show/id", {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ id: item.kota }),
-                    });
+                cellAction.appendChild(deleteButton);
+                row.appendChild(cellAction);
+                // ... (add more cells as needed)
 
-                    const kabData = await kabupatenApiResponse.json();
-                    const data = kabData.data;
-                    const kota = document.createElement('td');
-                    kota.textContent = data.nama;
-                    kota.classList.add('text-center', 'px-6', 'py-4');
-                    row.appendChild(kota);
+                // Append the row to the table body
+                tableBody.appendChild(row);
+                counterData++;
+            });
 
-                    // Fetch API ketiga
-                    const paketApiResponse = await fetch("http://localhost:8000/api/paket/show", {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ ID_paket: item.Kategori_paket }),
-                    });
 
-                    const dataPaket = await paketApiResponse.json();
-                    const paket = dataPaket.data;
+            // Create pagination buttons
+            for (let i = 1; i <= apiData.data.last_page; i++) {
+                const button = document.createElement('li');
+                button.innerHTML = `<a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">${i}</a>`;
+                paginationContainer.appendChild(button);
+            }
 
-                    // Kolom "Type" (Nama_paket) dari fetch API ketiga
-                    const nama_paket = document.createElement('td');
-                    nama_paket.textContent = paket.nama_paket;
-                    nama_paket.classList.add('text-center', 'px-6', 'py-4');
+            // Update pagination buttons with click event
+            const paginationButtons = document.querySelectorAll('#paginationContainer a');
+            paginationButtons.forEach((button, index) => {
+                button.addEventListener('click', () => fetchAndDisplayData(apiEndpoint, index + 1));
+            });
 
-                    const cellAction = document.createElement('td');
-                    cellAction.classList.add('flex', 'justify-center', 'space-x-4', 'px-6', 'py-4');
+            // Update total data information
+            const startData = document.getElementById('startData');
+            const endData = document.getElementById('endData');
+            const totalData = document.getElementById('totalData');
 
-                    // Create Delete Button
-                    const deleteButton = document.createElement('button');
-                    deleteButton.textContent = 'Delete';
-                    deleteButton.classList.add('cursor-pointer', 'text-rose-600', 'hover:text-rose-800');
-                    deleteButton.type = 'button';
-                    deleteButton.onclick = function () {
-                        // Define the action you want to perform when the "Delete" button is clicked
-                        deleteRowAction(user.ID_User); // You need to implement the deleteRowAction function
-                    };
-
-                    // Append buttons to the cellAction
-                    cellAction.appendChild(deleteButton);
-
-                    row.appendChild(nama_paket);
-                    row.appendChild(cellAction);
-
-                    // Tambahkan baris ke dalam tabel
-                    tableBody.appendChild(row);
-                }
-            }));
+            startData.textContent = apiData.data.from;
+            endData.textContent = apiData.data.to;
+            totalData.textContent = apiData.data.total;
         }
     } catch (error) {
         console.error('Error fetching data:', error);
     }
 }
 
-// Call the async function to fetch and populate data
-fetchDataAndCreateTable();
-</script>
 
-<script>
-function deleteRowAction(userID) {
-    // Konfirmasi pengguna
-    const isConfirmed = confirm('Are you sure you want to delete this user?');
+function deleteRowAction(ID_user) {
+    const confirmation = confirm("Are you sure you want to delete this row?");
 
-    if (isConfirmed) {
-        // Hapus data dari endpoint /api/profile/delete/{id}
-        fetch(`http://localhost:8000/api/profile/delete/${userID}`, {
+    if (confirmation) {
+        // Make a DELETE request to the API
+        fetch(`http://localhost:8000/api/profile/delete/${ID_user}`, {
             method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-            },
         })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            // Hapus user dari endpoint /api/user/delete/{id}
-            return fetch(`http://localhost:8000/api/profile/delete/user/${userID}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.is_success) {
+                
+                fetch(`http://localhost:8000/api/profile/delete/user/${ID_user}`, {
+            method: 'DELETE',
         })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            // Hapus baris dari tabel atau lakukan tindakan lain setelah berhasil menghapus
-            console.log('User deleted successfully!');
-            // Misalnya, hapus baris dari tabel
-            
-                // Reload halaman setelah menghapus
+        .then(response => response.json())
+        .then(data => {
+                // Reload the page after successful deletion
                 window.location.reload();
-            
         })
-        .catch(error => console.error('Error deleting user:', error));
+            } else {
+                console.error('Failed to delete row');
+            }
+        })
+        .catch(error => console.error('Error deleting row'));
+
+  
     }
 }
+// Call the function to fetch and display data for the new API
+fetchAndDisplayData("http://localhost:8000/api/profile/eo?page=1");
 
 </script>
+
 @endsection

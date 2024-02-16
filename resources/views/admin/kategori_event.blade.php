@@ -119,6 +119,10 @@ fetch('http://localhost:8000/api/event/kategori/all')
 </script>
 <script>
 // Function to handle row deletion
+function showAlert(title, message) {
+    // Display an alert with the provided title and message
+    alert(`${title}\n\n${message}`);
+}
 function deleteRowAction(ID_paket) {
     const confirmation = confirm("Are you sure you want to delete this row?");
 
@@ -138,7 +142,8 @@ function deleteRowAction(ID_paket) {
                 console.error('Failed to delete row');
             }
         })
-        .catch(error => console.error('Error deleting row:', error));
+        .catch(error => console.error('Error deleting row'));
+        showAlert('Error', 'Kategori Sedang dipakai di data event');
     }
 }
 

@@ -122,19 +122,36 @@ startDatePicker.config.onChange.push(function(selectedDates, dateStr, instance) 
 const KategoriSelect = document.getElementById('kategori');
 const IDPaket = document.getElementById('Paket');
 
-fetch('http://127.0.0.1:8000/api/profile/show',{
-    method : 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body : JSON.stringify({id : id})
-})
-      .then(response => response.json())
-      .then(Profile => {
-        const data = Profile.data;
-        IDPaket.value = data.Kategori_paket;
-       // console.log(IDPaket.value);
-      });
+
+
+const apiUrl = 'http://localhost:8000/api/paket/all';
+
+function fetchData() {
+  fetch(apiUrl)
+    .then(response => response.json())
+    .then(paket => {
+      const data = paket.data;
+
+      // Assuming data is an array of objects with a 'name' property
+      const gratisPaket = data.find(item => item.nama_paket.toLowerCase().includes('gratis'));
+      
+      if (gratisPaket) {
+        // If a name contains "gratis" is found, update the value
+        IDPaket.value = gratisPaket.ID_paket;
+        //console.log(IDPaket);
+      } else {
+        // If not found, fetch data again (you may want to add a limit or handle it differently)
+        fetchData();
+      }
+    })
+    .catch(error => {
+      console.error('Error fetching data:', error);
+    });
+}
+
+// Call the function to start fetching data
+fetchData();
+
   // Fungsi untuk mengisi pilihan provinsi dari API
 
   function populateKategori() {

@@ -206,4 +206,16 @@ class RegisterController extends Controller
             'data'=> null,
          ],'500');
       }
+      // UserController
+public function getUserByGoogleId(Request $request) {
+    $user = User::where('google_id', $request->googleId)->first();
+
+    if ($user) {
+        // User found, return user data
+        return response()->json(['is_registered' => true, 'user' => $user]);
+    } else {
+        // User not found, return as not registered
+        return response()->json(['is_registered' => false]);
+    }
+}
 }

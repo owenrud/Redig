@@ -26,5 +26,8 @@ class User extends Authenticatable
         'email_valid',
         'google_id'
     ];
-
+    public function hasAnyRole(array $roles): bool
+    {
+        return in_array($this->Role, $roles);
+    }
 }

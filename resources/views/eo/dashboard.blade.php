@@ -10,7 +10,7 @@
    </div>
     <div class="flex flex-col p-2 mx-2 leading-normal">
         <p class="mb-2 tracking-tight text-gray-900 dark:text-white">Jumlah Event</p>
-        <p id="all" class="mb-3 font-bold text-gray-700 dark:text-gray-400">8</p>
+        <p id="all" class="mb-3 font-bold text-gray-700 dark:text-gray-400"></p>
     </div>
 </div>
 
@@ -65,38 +65,65 @@
 
 @section('script')
 <script>
-let count_all =0;
+let count_all = 0;
 let countOngoing = 0;
-let countUpcoming =0;
-let countFinished =0;
-fetch('http://localhost:8000/api/event/all')
-.then(response => response.json())
-.then(apiData =>{
-   // console.log(apiData);
-    
-        const item = apiData.data;
-        //console.log(item);
-        item.forEach(event =>{
+let countUpcoming = 0;
+let countFinished = 0;
+
+const fetchData = (page = 1) => {
+    fetch(`http://localhost:8000/api/event/show/eo?page=${page}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            // Add any other headers if needed
+        },
+        body: JSON.stringify({ ID_EO: id }),
+    })
+    .then(response => response.json())
+    .then(apiData => {
+        // Check if apiData.data.data is an array
+        if (Array.isArray(apiData.data.data)) {
+            const events = apiData.data.data;
+
+            events.forEach(event => {
+                count_all++;
+
+                if (event.status == 0) {
+                    countFinished++;
+                } else if (event.status == 1) {
+                    countOngoing++;
+                } else {
+                    countUpcoming++;
+                }
+            });
+
             const all = document.getElementById('all');
-            count_all = item.length;
-            all.textContent= count_all;
-
-            if(event.status == 0){
-             countFinished++;
-            }else if(event.status == 1){
-                countOngoing++;
-            }else{
-                countUpcoming++;
-            }
-            })
             const finishedElement = document.getElementById('finish');
-const ongoingElement = document.getElementById('ongoing');
-const upcomingElement = document.getElementById('upcoming');
+            const ongoingElement = document.getElementById('ongoing');
+            const upcomingElement = document.getElementById('upcoming');
 
-finishedElement.textContent = countFinished;
-ongoingElement.textContent = countOngoing;
-upcomingElement.textContent = countUpcoming;
-        });
-        
+            all.textContent = count_all;
+            finishedElement.textContent = countFinished;
+            ongoingElement.textContent = countOngoing;
+            upcomingElement.textContent = countUpcoming;
+
+            // Check if there are more pages
+            if (apiData.data.next_page_url) {
+                // If yes, fetch the next page
+                const nextPage = parseInt(apiData.data.current_page) + 1;
+                fetchData(nextPage);
+            }
+        } else {
+            console.error('apiData.data.data is not an array');
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching data:', error);
+    });
+};
+
+// Initial fetch for the first page
+fetchData();
 </script>
+
 @endsection

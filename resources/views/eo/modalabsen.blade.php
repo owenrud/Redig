@@ -17,16 +17,22 @@
 <form id="jam_absen">
 <div class="mb-6">
     <label  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nama</label>
-    <input name="nama" type="text"  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+    <input name="nama" type="text"  class="w-6/12 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
 </div>
 <div class="mb-6">
-    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Mulai</label>
-    <input name="mulai" type="time"  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="mulai">Mulai</label>
+    <label class="block w-full p-2.5  rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 cursor-pointer">
+        <input name="mulai" type="time" class="w-1/12 bg-transparent focus:outline-none">
+    </label>
 </div>
+
 <div class="mb-6">
-    <label  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Berakhir</label>
-    <input name="akhir" type="time"  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="akhir">Berakhir</label>
+    <label class="block w-full p-2.5  rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 cursor-pointer">
+        <input name="akhir" type="time" class="w-1/12 bg-transparent focus:outline-none">
+    </label>
 </div>
+
 <button onclick="postAbsen(event)" type="button" class="max-w-lg text-white bg-gradient-to-br from-purple-600 to-fuchsia-400 hover:bg-gradient-to-bl hover:from-purple-600 hover:to-fuchsia-400 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center">
 
 Save

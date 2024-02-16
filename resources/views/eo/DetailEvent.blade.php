@@ -11,6 +11,8 @@
 <span id="file" class="flex hover:text-violet-400 w-32 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('file')">File Tambahan</span>
 <span id="tamu" class="flex hover:text-violet-400 w-24 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('tamu')">Tamu</span>
 <span id="op" class="flex hover:text-violet-400 w-24 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('op')">Operator</span>
+<span id="sertifikat" class="flex hover:text-violet-400 w-24 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('sertifikat')">Sertifikat</span>
+
 </div>
 <hr class="flex-1 w-full mt-2 mb-4">
 
@@ -26,14 +28,29 @@
 
 @include('eo.detail.operator')
 
+@include('eo.detail.sertifikat')
+
+
+</div>
+</div>
+
 @include('eo.modalabsen')
+
+
 
 </div>
 </div>
 @endsection
 
 @section('script')
+
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+    <!-- ... other head content ... -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+
 
 <script>
    document.addEventListener('DOMContentLoaded', function () {
@@ -59,41 +76,82 @@ startDatePicker.config.onChange.push(function(selectedDates, dateStr, instance) 
 </script>
 
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const mulaiInput = document.querySelector('input[name="mulai"]');
+    const akhirInput = document.querySelector('input[name="akhir"]');
+
+    // Add event listener to 'mulai' input
+    mulaiInput.addEventListener('change', function() {
+        // Compare 'mulai' and 'akhir' values
+        if (mulaiInput.value > akhirInput.value) {
+            // If 'akhir' is less than 'mulai', set 'akhir' to be equal to 'mulai'
+            akhirInput.value = mulaiInput.value;
+        }
+    });
+
+    // Add event listener to 'akhir' input
+    akhirInput.addEventListener('change', function() {
+        // Compare 'mulai' and 'akhir' values
+        if (mulaiInput.value > akhirInput.value) {
+            // If 'akhir' is less than 'mulai', set 'mulai' to be equal to 'akhir'
+            mulaiInput.value = akhirInput.value;
+        }
+    });
+});
+
   document.addEventListener("DOMContentLoaded", function () {
-    // Hide all sections except the one with id 'profile'
+    // Retrieve the last active section from local storage
+    const lastActiveSection = localStorage.getItem('activeSection') || 'stats';
+
+    // Hide all sections except the last active one
     const sections = document.querySelectorAll('section');
     sections.forEach(section => {
-      if (section.id === 'stats') {
-        section.style.display = 'block';
-      } else {
-        section.style.display = 'none';
-      }
+        if (section.id === lastActiveSection) {
+            section.style.display = 'block';
+        } else {
+            section.style.display = 'none';
+        }
     });
-  });
 
-  function toggleSection(sectionId, link) {
+    // Set the corresponding span as active
+    setActiveSpan(lastActiveSection);
+});
+
+function toggleSection(sectionId, link) {
     const sections = document.querySelectorAll('section');
     const spanNav = document.getElementById('span-nav');
     const spans = spanNav.querySelectorAll('span');
+
     sections.forEach(section => {
-      if (section.id === sectionId) {
-        section.style.display = 'block';
-        
-      } else {
-        section.style.display = 'none';
-        
-      }
+        if (section.id === sectionId) {
+            section.style.display = 'block';
+        } else {
+            section.style.display = 'none';
+        }
     });
+
+    // Set the corresponding span as active
+    setActiveSpan(sectionId);
+
+    // Store the current active section in local storage
+    localStorage.setItem('activeSection', sectionId);
+}
+
+function setActiveSpan(activeSectionId) {
+    const spanNav = document.getElementById('span-nav');
+    const spans = spanNav.querySelectorAll('span');
+
     spans.forEach(span => {
-      if (span.id === sectionId) {
-        span.classList.add('bg-purple-600', 'hover:text-white','text-white');
-        span.classList.remove('hover:text-violet-400');
-      } else {
-        span.classList.remove('bg-purple-600','text-white','hover:text-white');
-        span.classList.add('hover:text-violet-400','text-black');
-      }
+        if (span.id === activeSectionId) {
+            span.classList.add('bg-purple-600', 'hover:text-white', 'text-white');
+            span.classList.remove('hover:text-violet-400');
+        } else {
+            span.classList.remove('bg-purple-600', 'text-white', 'hover:text-white');
+            span.classList.add('hover:text-violet-400', 'text-black');
+        }
     });
-  }
+}
+
 </script>
 <script>
   const jamId = window.location.pathname.split('/').pop();
@@ -132,12 +190,12 @@ startDatePicker.config.onChange.push(function(selectedDates, dateStr, instance) 
   }
 
   // Fungsi untuk mengisi pilihan provinsi dari API
-  function populateProvinsi() {
+  function populateProvinsi(preselectedProvinsiID) {
     fetch('http://127.0.0.1:8000/api/provinsi/all')
       .then(response => response.json())
       .then(jsonData => {
         const data = jsonData.data;
-        //console.log(data);
+        console.log(data);
          provinsiSelect.innerHTML = '';
 
       // Add a default option
@@ -153,13 +211,16 @@ startDatePicker.config.onChange.push(function(selectedDates, dateStr, instance) 
         option.text = item.nama;
         provinsiSelect.appendChild(option);
       });
+        if (preselectedProvinsiID) {
+                provinsiSelect.value = preselectedProvinsiID;
+            }
       })
       .catch(error => {
         console.error('Terjadi kesalahan:', error);
       });
   }
 
-async function populateKategori() {
+async function populateKategori(preselectedKategoriID) {
     fetch('http://127.0.0.1:8000/api/event/kategori/all')
       .then(response => response.json())
       .then(jsonData => {
@@ -180,13 +241,16 @@ async function populateKategori() {
         option.text = item.nama;
         KategoriSelect.appendChild(option);
       });
+      if (preselectedKategoriID) {
+                KategoriSelect.value = preselectedKategoriID;
+            }
       })
       .catch(error => {
         console.error('Terjadi kesalahan:', error);
       });
   }
   // Fungsi untuk mengisi pilihan kabupaten berdasarkan id provinsi yang dipilih
-  function populateKabupaten(provinsiId) {
+  function populateKabupaten(provinsiId,preselectedKabuID) {
     fetch('http://127.0.0.1:8000/api/kabupaten/show',{
           method: 'POST',
     headers: {
@@ -200,7 +264,7 @@ async function populateKategori() {
         const datakab = jsondata.data;
         // Bersihkan pilihan sebelumnya
         kabupatenSelect.innerHTML = '';
-
+       
         // Tambahkan pilihan default
         const defaultOption = document.createElement('option');
         defaultOption.value = '';
@@ -214,25 +278,38 @@ async function populateKategori() {
           option.text = item.nama;
           kabupatenSelect.appendChild(option);
         });
+         if (preselectedKabuID) {
+                kabupatenSelect.value = preselectedKabuID;
+            }
       })
       .catch(error => {
         console.error('Terjadi kesalahan:', error);
       });
   }
 
-  // Mendengarkan perubahan pada pilihan provinsi
-  provinsiSelect.addEventListener('change', () => {
-    const selectedProvinsiId = provinsiSelect.value;
+ document.addEventListener('DOMContentLoaded', () => {
+   
 
-    // Periksa apakah provinsi yang dipilih tidak kosong
-    if (selectedProvinsiId) {
-      // Panggil fungsi untuk mengisi pilihan kabupaten
-      populateKabupaten(selectedProvinsiId);
-    } else {
-      // Jika provinsi yang dipilih kosong, bersihkan pilihan kabupaten
-      kabupatenSelect.innerHTML = '';
-    }
-  });
+    // Mendengarkan perubahan pada pilihan provinsi
+    provinsiSelect.addEventListener('change', () => {
+        console.log('Provinsi Selected:', provinsiSelect.value); // Debugging line
+        const eventId = window.location.pathname.split('/').pop();
+        const selectedProvinsiId = provinsiSelect.value;
+
+        // Periksa apakah provinsi yang dipilih tidak kosong
+        if (selectedProvinsiId) {
+            // Panggil fungsi untuk mengisi pilihan kabupaten
+            
+           
+           
+            populateKabupaten(selectedProvinsiId);
+        } else {
+            // Jika provinsi yang dipilih kosong, bersihkan pilihan kabupaten
+            kabupatenSelect.innerHTML = '';
+        }
+    });
+
+});
 
   // Panggil fungsi untuk mengisi pilihan provinsi saat halaman dimuat
   populateProvinsi();
@@ -374,55 +451,115 @@ async function populateKategori() {
 </script>
 <script>
  async function fetchAndPopulateForm() {
-        try {
-            const eventId = window.location.pathname.split('/').pop();
-            //console.log(eventId);
-            const apiUrl = 'http://localhost:8000/api/event/show';
-            const detailApiUrl = `http://localhost:8000/api/event/detail/show`;
+    try {
+        const eventId = window.location.pathname.split('/').pop();
+        const apiUrl = 'http://localhost:8000/api/event/show';
+        const detailApiUrl = 'http://localhost:8000/api/event/detail/show';
+        const kategoriApiUrl = 'http://localhost:8000/api/event/kategori/show';
+        const provinsiApiUrl = 'http://localhost:8000/api/provinsi/show';
+        const kabupatenApiUrl = 'http://localhost:8000/api/kabupaten/show';
 
+        // Fetch event data
+        const eventResponse = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                ID_event: eventId,
+            }),
+        });
 
-            const response = await fetch(apiUrl, {
+        const eventData = await eventResponse.json();
+
+        if (eventResponse.ok) {
+            // Fetch detail event data
+            const detailResponse = await fetch(detailApiUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
                     ID_event: eventId,
-                    // Add other necessary data in the body if needed
                 }),
             });
 
-            const eventData = await response.json();
+            const detailData = await detailResponse.json();
 
-            if (response.ok) {
-                populateForm(eventData.data);
-                await fetchAndPopulateDetail(detailApiUrl,eventId);
+            if (detailResponse.ok) {
+                // Fetch kategori data
+                const kategoriResponse = await fetch(kategoriApiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        id: detailData.data.ID_kategori,
+                    }),
+                });
+
+                if (kategoriResponse.ok) {
+                    const kategoriData = await kategoriResponse.json();
+                    console.log('Kategori Data:', kategoriData);
+
+                    // Fetch Provinsi data
+                    const provinsiResponse = await fetch(provinsiApiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            id: detailData.data.ID_provinsi,
+                        }),
+                    });
+
+                    if (provinsiResponse.ok) {
+                        const provinsiData = await provinsiResponse.json();
+                        console.log('Provinsi Data:', provinsiData);
+
+                         provinsiSelect.value = provinsiData.data.ID_provinsi;
+                        provinsiSelect.dispatchEvent(new Event('change'));
+                        // Fetch Kabupaten data
+                        
+                            // Populate the form with event, detail, kategori, provinsi, and kabupaten data
+                            populateForm(eventData.data);
+                            populateDetail(detailData.data);
+                            populateKategori(kategoriData.data.id);
+                            populateProvinsi(provinsiData.data.ID_provinsi);
+                            populateKabupaten(provinsiData.data.ID_provinsi,detailData.data.ID_kabupaten);
+                        
+                    } else {
+                        console.error('Failed to fetch Provinsi data');
+                    }
+                } else {
+                    console.error('Failed to fetch kategori data:', kategoriData);
+                }
             } else {
-                console.error('Failed to fetch event data:', eventData);
+                console.error('Failed to fetch event detail data:', detailData);
             }
-        } catch (error) {
-            console.error('Error during fetch:', error);
+        } else {
+            console.error('Failed to fetch event data:', eventData);
         }
+    } catch (error) {
+        console.error('Error during fetch:', error);
     }
+}
 
-    // Function to populate the form with data
-            function populateForm(eventData) {
-                // Assuming your form has elements with specific IDs, update their values here
-                document.getElementById('nama_event').value = eventData.nama_event;
-                document.getElementById('desc_event').value = eventData.desc_event;
-                 // Populate other form fields accordingly
 
-                // Add logic for populating checkbox, select, date fields, etc.
+async function populateForm(eventData) {
+    try {
+        // Assuming your form has elements with specific IDs, update their values here
+        document.getElementById('nama_event').value = eventData.nama_event;
+        document.getElementById('desc_event').value = eventData.desc_event;
+        // Populate other form fields accordingly
 
-                // Example for date fields (replace 'mulai' and 'berakhir' with your actual date field IDs)
-                document.getElementById('mulai').value = eventData.start;
-                document.getElementById('berakhir').value = eventData.end;
+        // Add logic for populating checkbox, select, date fields, etc.
 
-                // Example for select fields (replace 'kategori', 'provinsi', and 'kabupaten' with your actual select IDs)
-                document.getElementById('kategori').value = eventData.kategori;
-                document.getElementById('provinsi').value = eventData.provinsi;
-                document.getElementById('kabupaten').value = eventData.kabupaten;
-                  const publicCheckbox = document.getElementById('public');
+        // Example for date fields (replace 'mulai' and 'berakhir' with your actual date field IDs)
+        document.getElementById('mulai').value = eventData.start;
+        document.getElementById('berakhir').value = eventData.end;
+
+        const publicCheckbox = document.getElementById('public');
         publicCheckbox.checked = eventData.public === 1;
 
         // Set the value of the 'public' input
@@ -432,136 +569,25 @@ async function populateKategori() {
         if (eventData.public === 1) {
             publicCheckbox.classList.add('checked');
         }
-            }
 
-    document.addEventListener('DOMContentLoaded', fetchAndPopulateForm);
+     
 
-</script>
-<script>
-async function fetchAndPopulateDetail(detailApiUrl,eventId) {
-        try {
-            const apiUrl = `http://localhost:8000/api/event/detail/show`;
-            
-            //console.log(eventId);
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    ID_event: eventId,
-                    // Add other necessary data in the body if needed
-                }),
-            });
-
-            const responseData = await response.json();
-
-            if (response.ok) {
-                populateDetail(responseData.data);
-                                  
-                fetchDataAndPopulateInputs(responseData.data);
-            } else {
-                console.error('Failed to fetch event detail data:', responseData);
-            }
-        } catch (error) {
-            console.error('Error during fetch:', error);
-        }
-    }
-
-    function populateDetail(detailData) {
-        // Populate your form fields using the detailData
-        // Example:
-        
-        document.getElementById('alamat').value = detailData.alamat;
-               
-        // ... Populate other form fields ...
-    }
-    async function fetchKategoriData(ID) {
-    const kategoriApiUrl = 'http://localhost:8000/api/event/kategori/show';
-    
-    const response = await fetch(kategoriApiUrl,{
-       method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    id : ID,
-                    // Add other necessary data in the body if needed
-                }),
-    });
-    const data = await response.json();
-    return { ID, kategori: data.data }; // Include the ID in the returned object
-}
-
-async function fetchProvinsiData(ID) {
-    const provinsiApiUrl = 'http://localhost:8000/api/provinsi/show';
-   //console.log("ID KAtegroi:"+ID);
-    const response = await fetch(provinsiApiUrl,{
-       method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    id: ID,
-                    // Add other necessary data in the body if needed
-                }),
-    });
-    const data = await response.json();
-    return { ID, provinsi: data.data }; // Include the ID in the returned object
-}
-
-async function fetchKabupatenData(ID) {
-    const kabupatenApiUrl = 'http://localhost:8000/api/kabupaten/show';
-    const response = await fetch(kabupatenApiUrl,{
-       method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    ID_provinsi: ID,
-                    // Add other necessary data in the body if needed
-                }),
-    });
-    const data = await response.json();
-    return { ID, kabupaten: data.data }; // Include the ID in the returned object
-}
-function setSelectOption(selectId, value) {
-    const selectElement = document.getElementById(selectId);
-
-    // Find the option with the specified value
-    const option = selectElement.querySelector(`option[value="${value}"]`);
-
-    // If the option is found, set it as the selected option
-    if (option) {
-        option.selected = true;
+    } catch (error) {
+        console.error('Error during form population:', error);
     }
 }
-async function fetchDataAndPopulateInputs(detailData) {
-    // Fetch kategori data
-    //console.log(detailData);
-    
-    const kategoriData = await fetchKategoriData(detailData.ID_kategori);
-    const provinsiData = await fetchProvinsiData(detailData.ID_provinsi);
-    const KabupatenData = await fetchKabupatenData(detailData.ID_kabupaten);
+async function populateDetail(detailData){
+    try{
+ document.getElementById('alamat').value = detailData.alamat;
+    } catch(error){
+        console.error('Error during population:',error);
+    }
    
-   setSelectOption('kategori', detailData.ID_kategori);
-
-// Set selected option for provinsi
-await setSelectOption('provinsi', detailData.ID_provinsi);
-const provinsiSelect = document.getElementById('provinsi');
-        provinsiSelect.dispatchEvent(new Event('change'));
-// Set selected option for kabupaten
-await setSelectOption('kabupaten', detailData.ID_kabupaten);
-
 }
 
 
-// Replace with the actual ID from your application
+document.addEventListener('DOMContentLoaded', fetchAndPopulateForm);
 
-
-    // Other functions remain unchanged...
-
-    document.addEventListener('DOMContentLoaded', fetchAndPopulateForm);
 </script>
 
 <script>
@@ -782,6 +808,10 @@ function OpenFormOperator(event){
   event.preventDefault();
   window.location.href = `/event/detail/${eventId}/operator`
 }
+function OpenSertifikat(event){
+  event.preventDefault();
+  window.location.href = `/event/detail/${eventId}/sertifikat`
+}
 async function ReadTamu(){
    try {
             //console.log(eventId);
@@ -904,85 +934,151 @@ function deleteTamuRowAction(ID_paket) {
 ReadTamu();
 </script>
 
-<script>
-async function ReadOperator(){
-   try {
-            //console.log(eventId);
-            const apiUrl = 'http://localhost:8000/api/operator/show';
+<script>async function ReadOperator() {
+    try {
+        const operatorApiUrl = 'http://localhost:8000/api/operator/show';
+        const profileApiUrl = 'http://localhost:8000/api/profile/show';
+        const userApiUrl = 'http://localhost:8000/api/profile/user';
+await new Promise(resolve => setTimeout(resolve, 5000));
+        const response = await fetch(operatorApiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                ID_event: eventId,
+                // Add other necessary data in the body if needed
+            }),
+        });
 
+        const eventData = await response.json();
 
-            const response = await fetch(apiUrl, {
+        // Create an array of promises for profile and user requests
+        
+        if (eventData.data && eventData.data.length > 0) {
+        const requests = eventData.data.map(async (operatorDataItem) => {
+            const profileResponse = await fetch(profileApiUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    ID_event: eventId,
+                    id: operatorDataItem.ID_User,
                     // Add other necessary data in the body if needed
                 }),
             });
 
-            const eventData = await response.json();
+            const userResponse = await fetch(userApiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    id: operatorDataItem.ID_User,
+                    // Add other necessary data in the body if needed
+                }),
+            });
 
-            if (response.ok && eventData && eventData.length > 0) {
-               const operatorData = eventData.data;
-            generateOperatorTableRows(operatorData);
-                 } else {
-                    return;
-                console.error('Failed to fetch event data:', eventData);
-            }
-        } catch (error) {
-            console.error('Error during fetch:', error);
-        }
+            return {
+                profileData: await profileResponse.json(),
+                userData: await userResponse.json(),
+                operatorDataItem: operatorDataItem,
+            };
+        });
+
+        // Wait for all promises to resolve
+        const results = await Promise.all(requests);
+
+        // Process results
+
+            //console.log('Profile Data:', profileData);
+            //console.log('User Data:', userData);
+            //console.log('Operator Data:', operatorDataItem);
+            // Perform actions with profileData, userData, and operatorDataItem as needed
+            // You may want to call generateOperatorTableRows here
+            generateOperatorTableRows(results);
+
+        } else {
+    console.error('No data in the first API response.');
+}
+    } catch (error) {
+        console.error('Error during fetch:', error);
+         if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.error('Server Response:', error.response.status);
+        console.error('Response Data:', await error.response.json());
+    } else if (error.request) {
+        // The request was made but no response was received
+        console.error('No Response Received');
+    } else {
+        // Something happened in setting up the request that triggered an Error
+        console.error('Error Details:', error.message);
     }
-  function generateOperatorTableRows(operatorData) {
+    }
+}
+
+function generateOperatorTableRows(results) {
     const tableBody = document.getElementById('operatorTable');
 
     // Clear existing rows
-    
+    tableBody.innerHTML = '';
 
-    // Loop through the absenData and create table rows
-    operatorData.forEach((operator, index) => {
-    const row = tableBody.insertRow();
-    
-    // Number Cell
-    const cellNumber = row.insertCell(0);
-    cellNumber.classList.add('px-6', 'py-4', 'font-medium', 'text-gray-900', 'whitespace-nowrap', 'dark:text-white');
-    cellNumber.textContent = index + 1;
+    // Iterate through each result in the array
+    results.forEach((result, index) => {
+        // Create a new table row for each result
+        const row = tableBody.insertRow();
 
-    // Type Cell
-    const cellName = row.insertCell(1);
-    cellName.classList.add('font-bold', 'px-6', 'py-2');
-    cellName.textContent = operator.nama; // Replace with the actual property name from your API response
+        // Number Cell
+        const cellNumber = row.insertCell(0);
+        cellNumber.classList.add('px-6', 'py-4', 'font-medium', 'text-gray-900', 'whitespace-nowrap', 'dark:text-white');
+        cellNumber.textContent = index + 1;
 
-    const cellEmail = row.insertCell(2);
-    cellEmail.classList.add('font-bold', 'px-6', 'py-2');
-    cellEmail.textContent = operator.email;// Replace with the actual property name from your API response
-const cellAction = document.createElement('td');
-                 cellAction.classList.add('flex', 'justify-center', 'space-x-4', 'px-6', 'py-4');
+        // Type Cell
+        const cellName = row.insertCell(1);
+        cellName.classList.add('font-bold', 'px-6', 'py-2');
+        
+        // Check if profileData is not null
+        if (result.profileData && result.profileData.data) {
+            cellName.textContent = result.profileData.data.nama_lengkap || 'N/A';
+        } else {
+            cellName.textContent = 'N/A';
+        }
 
-                            const DetailButton = document.createElement('a');
-                            DetailButton.textContent = 'Edit';
-                            DetailButton.href =`/event/detail/${operator.ID_event}/operator/${operator.ID_operator}`;
-                            DetailButton.classList.add('cursor-pointer','text-sky-500','hover:text-sky-700','px-3','py-1');
-                       
-                            // Create Delete Button
-                            const deleteButton = document.createElement('button');
-                            deleteButton.textContent = 'Delete';
-                            deleteButton.classList.add('cursor-pointer', 'text-rose-600', 'hover:text-rose-800');
-                            deleteButton.type = 'button';
-                            deleteButton.onclick = function() {
-                                // Define the action you want to perform when the "Delete" button is clicked
-                                deleteOperatorRowAction(operator.ID_event); // You need to implement the deleteRowAction function
-                            };
+        const cellEmail = row.insertCell(2);
+        cellEmail.classList.add('font-bold', 'px-6', 'py-2');
+        cellEmail.textContent = result.userData.data ? result.userData.data.email : 'N/A';
 
-                            // Append buttons to the cellAction
-                            cellAction.appendChild(DetailButton);
-                            
-                            cellAction.appendChild(deleteButton);
-                        row.append(cellAction);
-});
+        // ... (Add other cells as needed)
+
+        // Action Cell
+        const cellAction = document.createElement('td');
+        cellAction.classList.add('flex', 'justify-center', 'space-x-4', 'px-6', 'py-4');
+
+        // Create Edit Button
+        const editButton = document.createElement('a');
+        editButton.textContent = 'Edit';
+        editButton.href = `/event/detail/${result.operatorDataItem.ID_event}/operator/${result.operatorDataItem.ID_operator}`;
+        editButton.classList.add('cursor-pointer', 'text-sky-500', 'hover:text-sky-700', 'px-3', 'py-1');
+
+        // Create Delete Button
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.classList.add('cursor-pointer', 'text-rose-600', 'hover:text-rose-800');
+        deleteButton.type = 'button';
+        deleteButton.onclick = function () {
+            // Define the action you want to perform when the "Delete" button is clicked
+            deleteOperatorRowAction(result.operatorDataItem.ID_event); // You need to implement the deleteRowAction function
+        };
+
+        // Append buttons to the cellAction
+        cellAction.appendChild(editButton);
+        cellAction.appendChild(deleteButton);
+        row.append(cellAction);
+    });
 }
+
+
 function deleteOperatorRowAction(ID_paket) {
     const confirmation = confirm("Are you sure you want to delete this row?");
 
@@ -1041,38 +1137,52 @@ async function ReadFile(){
     // Assuming 'table' is your table element
     const columnsToDisplay = ['banner', 'logo', 'materi'];
     const table = document.getElementById('fileTable');
-    const row = table.insertRow();
+    let counter = 1;
 
-    // Iterate over the properties in the 'data' object
-       let counter = 1;
+    // Iterate over the specified columns
+    for (const columnName of columnsToDisplay) {
+        // Create a row for each column
+        const row = table.insertRow();
 
-        // Iterate over the specified columns
-        for (const columnName of columnsToDisplay) {
-            // Create a row for each column
-            const row = table.insertRow();
+        // Create a cell for 'No' (you can modify this based on your requirement)
+        const cellNo = row.insertCell();
+        cellNo.classList.add('px-6', 'py-3');
+        cellNo.textContent = counter; // Assuming 'ID_event' is the column you want for 'No'
 
-            // Create a cell for 'No' (you can modify this based on your requirement)
-            const cellNo = row.insertCell();
-            cellNo.classList.add('px-6', 'py-3');
-            cellNo.textContent = counter; // Assuming 'ID_event' is the column you want for 'No'
+        // Create a cell for 'Nama' (you can modify this based on your requirement)
+        const cellNama = row.insertCell();
+        cellNama.classList.add('px-6', 'py-3');
+        cellNama.textContent = columnName;
 
-            // Create a cell for 'Nama' (you can modify this based on your requirement)
-            const cellNama = row.insertCell();
-            cellNama.classList.add('px-6', 'py-3');
-            cellNama.textContent = columnName;
+        // Create a cell for 'File'
+        const cellFile = row.insertCell();
+        cellFile.classList.add('px-6', 'py-3');
+        cellFile.textContent = fileData[columnName];
 
-            // Create a cell for 'File'
-            const cellFile = row.insertCell();
-            cellFile.classList.add('px-6', 'py-3');
-            cellFile.textContent = fileData[columnName];
-
-            // If you want an "Action" column, you can add your action buttons here
-            const cellAction = row.insertCell();
-            cellAction.classList.add('px-6', 'py-3');
-            // Add your action button code here
-            counter++;
+        // If the column is a file column, make the text clickable for image preview
+        if (fileData[columnName] && (fileData[columnName].toLowerCase().endsWith('.jpg') || fileData[columnName].toLowerCase().endsWith('.png'))) {
+            cellFile.style.cursor = 'pointer';
+            cellFile.addEventListener('click', () => previewImage(fileData[columnName]));
         }
+
+        // If you want an "Action" column, you can add your action buttons here
+        const cellAction = row.insertCell();
+        cellAction.classList.add('px-6', 'py-3');
+        // Add your action button code here
+
+        counter++;
     }
+}
+
+// Function to handle image preview
+function previewImage(imageUrl) {
+    // Assuming you have a function to show the image preview (e.g., using FancyBox)
+    $.fancybox.open({
+        src: imageUrl,
+        type: 'image',
+    });
+}
+
 
 function deleteOperatorRowAction(ID_paket) {
     const confirmation = confirm("Are you sure you want to delete this row?");
@@ -1300,7 +1410,10 @@ ReadOperator();
     // Call the function whenever you need to fetch and update the chart
     fetchDataAndUpdateChart();
 </script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBhQ9Bo1TdjfFldu49JVzN-D0bzS8uFkG0&callback=initMap" async defer></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 
 <script>
 const apiUrl = 'http://localhost:8000/api/event/detail/show';
@@ -1331,40 +1444,85 @@ async function fetchDataAndInitMap() {
         console.error('Error fetching detail data:', error);
     }
 }
-fetchDataAndInitMap();
-async function initMap(detailData) {
+
+function initMap(detailData) {
     if (!detailData || typeof detailData.lat === 'undefined' || typeof detailData.long === 'undefined') {
-        
         return;
     }
 
-    const defaultLocation = { lat: parseFloat(detailData.lat), lng: parseFloat(detailData.long) };
+    const defaultLocation = [parseFloat(detailData.lat), parseFloat(detailData.long)];
 
-    const map = new google.maps.Map(document.getElementById('editmap'), {
-        center: defaultLocation,
-        zoom: 15,
+    const map = L.map('editmap').setView(defaultLocation, 15);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    const marker = L.marker(defaultLocation, { draggable: true }).addTo(map);
+
+    marker.on('dragend', function (event) {
+        const updatedLocation = marker.getLatLng();
+        document.getElementById('latitude').value = updatedLocation.lat;
+        document.getElementById('longitude').value = updatedLocation.lng;
     });
 
-    const marker = new google.maps.Marker({
-        position: defaultLocation,
-        map: map,
-        title: 'Event Location',
-        draggable: true,
-    });
+    // ... Populate other form fields with detailData ...
+}
+fetchDataAndInitMap();
 
-    google.maps.event.addListener(marker, 'dragend', function (event) {
-        const updatedLocation = marker.getPosition();
-        document.getElementById('latitude').value = updatedLocation.lat();
-        document.getElementById('longitude').value = updatedLocation.lng();
-    });
-    // ... Populate other form fields ...
+</script>
+<script>
+async function Export() {
+    const apiUrl = 'http://localhost:8000/api/export';
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                ID_event: eventId,
+            }),
+        });
+
+        //console.log('Raw response:', response); // Log the raw response for debugging
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        // Handle the binary response data
+        const blobData = await response.blob();
+
+        // Create a Blob URL and initiate download
+        const blobUrl = URL.createObjectURL(blobData);
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = 'peserta_event.xlsx';
+        link.click();
+
+        // Revoke the Blob URL
+        URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+        console.error('Error:', error.message);
+    }
 }
 
 
-// Call fetchDataAndInitMap to initiate the process
+document.addEventListener('DOMContentLoaded', function() {
+    const exportButton = document.getElementById('exportButton');
 
-
+    if (exportButton) {
+        exportButton.addEventListener('click', function(event) {
+            event.preventDefault();
+            Export();
+        });
+    }
+});
+      document.getElementById('ID_Event').value = eventId;
 </script>
+
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 @endsection
 

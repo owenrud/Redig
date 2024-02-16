@@ -33,6 +33,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::post('/create-account',[RegisterController::class,'Register']);
 Route::post('/register-account',[RegisterController::class,'Register_API']);
 Route::post('/user/login',[RegisterController::class,'Login_API']);
+Route::post('/export',[PesertaController::class,'export_excel']);
+Route::get('/test/pdf/export', [SertifikatController::class,'export']);
+
 
 Route::prefix('fitur-paket')->group(function () {
     Route::get('/all', [PaketController::class, 'all_fitur']);
@@ -57,9 +60,12 @@ Route::prefix('paket')->group(function () {
 });
 Route::prefix('event')->group(function () {
     Route::get('/all', [EventController::class, 'all']);
+    Route::get('/mobile/all', [EventController::class, 'all_mobile']);
+    Route::get('/mobile/test', [EventController::class, 'all_mobile_test']);
     Route::post('/show', [EventController::class, 'show']);
     Route::post('/show/eo', [EventController::class, 'showEO']);
     Route::post('/save', [EventController::class, 'store']);
+    Route::post('/search', [EventController::class, 'search']);
     Route::post('/update', [EventController::class, 'update']);
     Route::delete('/delete/{id}', [EventController::class, 'delete']);
     
@@ -103,7 +109,9 @@ Route::prefix('kabupaten')->group(function () {
 Route::prefix('profile')->group(function () {
     Route::get('/all', [ProfileController::class, 'all']);
     Route::post('/show', [ProfileController::class, 'show']);
+    Route::post('/user', [ProfileController::class, 'user']);
     Route::post('/save', [ProfileController::class, 'store']);
+    Route::get('/eo', [ProfileController::class, 'profile_EO']);
     Route::post('/update', [ProfileController::class, 'update']);
     Route::delete('/delete/{id}', [ProfileController::class, 'delete']);
     Route::delete('/delete/user/{id}', [ProfileController::class, 'delete_user']);
@@ -114,6 +122,7 @@ Route::prefix('peserta')->group(function () {
     Route::get('/all', [PesertaController::class, 'all']);
     Route::post('/show', [PesertaController::class, 'show']);
     Route::post('/show/guest', [PesertaController::class, 'show_guest']);
+    Route::post('/show/user', [PesertaController::class, 'user']);
     Route::post('/save', [PesertaController::class, 'store']);
     Route::post('/update', [PesertaController::class, 'update']);
     Route::delete('/delete/{id}', [PesertaController::class, 'delete']);
@@ -126,12 +135,14 @@ Route::prefix('sertifikat')->group(function () {
     Route::post('/save', [SertifikatController::class, 'store']);
     Route::post('/update', [SertifikatController::class, 'update']);
     Route::delete('/delete/{id}', [SertifikatController::class, 'delete']);
+    Route::post('/export', [SertifikatController::class,'test_export']);
     // Tambahkan rute lain di sini yang dimulai dengan '/fitur-paket'
 });
 Route::prefix('operator')->group(function () {
     Route::get('/all', [OperatorController::class, 'all']);
     Route::post('/show', [OperatorController::class, 'show_event']);
     Route::post('/show/personal', [OperatorController::class, 'show_operator']);
+    Route::post('/show/user', [OperatorController::class, 'show_user']);
     
     Route::post('/save', [OperatorController::class, 'store']);
     Route::post('/update', [OperatorController::class, 'update']);
@@ -171,5 +182,8 @@ Route::prefix('reset')->group(function () {
     Route::delete('/delete', [ResetPwdController::class, 'delete']);
     // Tambahkan rute lain di sini yang dimulai dengan '/fitur-paket'
 });
+// Laravel route
+Route::post('/user/GID', [RegisterController::class,'getUserByGoogleId']);
+
 
 

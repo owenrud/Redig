@@ -4,21 +4,28 @@
 <span class="text-purple-800 font-bold text-xl">Edit Tamu</span>
 <form id="EditTamu">
 <div class="mb-6">
-    <label  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nama</label>
+    <label  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nama <span class="text-red-500">*</span></label>
     <input id="nama" name="nama" type="text"  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
 </div>
 <div class="mb-6">
-    <label  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email</label>
+    <label  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email <span class="text-red-500">*</span></label>
     <input id="email" name="email" type="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
 </div>
 
 <div class="mb-6">
-    <label  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Gender</label>
-    <input id="gender" name="gender" type="text"  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+    <label  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Gender <span class="text-red-500">*</span></label>
+    <select id="gender" name="gender"  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+    <option value ="P">Perempuan</option>
+    <option value="L">Laki-laki</option>
+    </select>
 </div>
 <div class="mb-6">
-    <label  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Type</label>
-    <input id="type" name="type" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+    <label  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Type <span class="text-red-500">*</span></label>
+    <select id="type" name="type"  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+    <option value="normal">Normal</option>
+    <option value="VIP">VIP</option>
+    <option value ="VVIP">VVIP</option>
+    </select>
 </div>
 <div class="mb-6">
     <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Instansi</label>
@@ -50,7 +57,6 @@ Save
 @section('script')
 <script>
 const tamuId = window.location.pathname.split('/').pop();
-//console.log(tamuId);
 
 if (tamuId) {
     // Tentukan URL API
@@ -75,19 +81,37 @@ if (tamuId) {
             // Lakukan sesuatu dengan data yang diterima dari API
             console.log(apiData);
             document.getElementById('nama').value = apiData.data.nama;
-             document.getElementById('email').value = apiData.data.email;
-             document.getElementById('gender').value = apiData.data.gender;
-             document.getElementById('type').value = apiData.data.type;
-             document.getElementById('instansi').value = apiData.data.instansi;
-             document.getElementById('no_meja').value = apiData.data.no_meja;
-             document.getElementById('nama_ruang').value = apiData.data.nama_ruang;
-            
+            document.getElementById('email').value = apiData.data.email;
 
+            // Set selected value for 'gender' select
+            const genderSelect = document.getElementById('gender');
+            const genderOptions = genderSelect.options;
+            for (let i = 0; i < genderOptions.length; i++) {
+                if (genderOptions[i].value.toLowerCase() === apiData.data.gender.toLowerCase()) {
+                    genderOptions[i].selected = true;
+                    break;
+                }
+            }
+
+            // Set selected value for 'type' select
+            const typeSelect = document.getElementById('type');
+            const typeOptions = typeSelect.options;
+            for (let i = 0; i < typeOptions.length; i++) {
+                if (typeOptions[i].value.toLowerCase() === apiData.data.type.toLowerCase()) {
+                    typeOptions[i].selected = true;
+                    break;
+                }
+            }
+
+            document.getElementById('instansi').value = apiData.data.instansi;
+            document.getElementById('no_meja').value = apiData.data.no_meja;
+            document.getElementById('nama_ruang').value = apiData.data.nama_ruang;
         })
         .catch(error => console.error('Error fetching data from API:', error));
 } else {
     console.error ('ID not found in URL');
 }
+
 </script>
 <script>
 

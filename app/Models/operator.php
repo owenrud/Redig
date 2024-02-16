@@ -13,8 +13,6 @@ class operator extends Model
 
     protected $fillable=[
         'ID_event',
-        'nama',
-        'email',
-        'password'
+        'ID_User',
     ];
 }

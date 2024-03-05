@@ -15,7 +15,7 @@ class profile extends Model
 
     protected $fillable =[
         'ID_User',
-        'Kategori_paket',
+        'ID_paket',
         'nama_lengkap',
         'no_telp',
         'alamat',

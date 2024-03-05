@@ -7,7 +7,7 @@
 Daftar Event
 </span>
 <hr>
-<div>
+{{-- <div>
   <!-- Kategori Dropdown -->
   <label for="kategoriDropdown">Filter by Kategori:</label>
   <select id="kategoriDropdown" >
@@ -24,7 +24,7 @@ Daftar Event
 <button class="ml-8" onclick="resetFilters()">Reset Filters</button>
 
 </div>
-<hr>
+<hr> --}}
 
     <div class="flex flex-col overflow-x-auto  shadow-lg  sm:rounded-lg">
         <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">

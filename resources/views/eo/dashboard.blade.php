@@ -1,4 +1,6 @@
 @extends('layouts.main')
+@section('title','Dashboard EO')
+@section('page_title','Dashboard EO')
 @section('content')
 <div class ="flex flex-row h-40 p-8 space-x-4">
 <div class="flex items-center w-3/12 border border-gray-200 rounded-lg shadow">

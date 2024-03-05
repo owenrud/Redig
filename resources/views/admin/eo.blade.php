@@ -1,4 +1,6 @@
 @extends('admin.layouts.main')
+@section('title','Daftar EO')
+@section('page_title','Event Organizer')
 @section('content')
 
 <div class="flex flex-col max-h-sm overflow-y-auto my-auto mx-auto w-10/12 p-4 bg-white border border-gray-200 overflow-y-auto space-y-4 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">

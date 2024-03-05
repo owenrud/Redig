@@ -1,4 +1,6 @@
 @extends('layouts.main')
+@section('title','Event')
+@section('page_title','Event')
 @section('content')
 <div id="alert-border-4" class="flex items-center mx-4 mt-4 p-4 mb-4 text-black border-l-4 text-yellow-900 border-yellow-300 bg-slate-50 dark:text-yellow-300 dark:bg-gray-800 dark:border-yellow-800 rounded-lg" role="alert">
     <svg class="flex-shrink-0 w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
@@ -57,7 +59,6 @@ Add data
             </tr>
         </thead>
         <tbody id="tableBody">
-           
         </tbody>
     </table>
     <nav class="flex items-center flex-column flex-wrap md:flex-row justify-between pt-4 mb-4 px-8" aria-label="Table navigation">
@@ -130,6 +131,142 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+// Function to handle row deletion
+function deleteRowAction(ID_paket) {
+    const confirmation = confirm("Are you sure you want to delete this row?");
+
+    if (confirmation) {
+        // Make a DELETE request to the API
+        fetch(`http://localhost:8000/api/event/delete/${ID_paket}`, {
+            method: 'DELETE',
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.is_success) {
+                console.log('Row deleted successfully');
+                
+                // Reload the page after successful deletion
+                location.reload();
+            } else {
+                console.error('Failed to delete row');
+            }
+        })
+        .catch(error => console.error('Error deleting row:', error));
+    }
+}
+
+
+// Define an async function to fetch user profile information
+async function fetchUserProfile() {
+  try {
+    // Fetch profile data
+    const profileResponse = await fetch('http://localhost:8000/api/profile/show', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ id: id }),
+    });
+    const profileData = await profileResponse.json();
+
+    if (profileData.is_success) {
+      // Extract account type ID from the profile data
+      const accountTypeID = profileData.data.ID_paket;
+
+      // Fetch all package information
+      const packageResponse = await fetch('http://localhost:8000/api/paket/all');
+      const packageData = await packageResponse.json();
+      //console.log(packageData.data)
+
+      if (packageData.is_success) {
+        const profileContainer = document.getElementById('profileContainer');
+
+        // Initialize HTML string
+        let profileHTML = '';
+
+        // Loop through data and append instances to the HTML string
+        for (const { ID_paket, nama_paket, harga, ScanCount, FileUpCount, GuestCount, OperatorCount, SertifCount } of packageData.data) {
+    //console.log(ID_paket);
+    let isDefault = false;
+    let isConditional = false;
+
+    switch (nama_paket) {
+        case 'Gratis':
+            isDefault = true;
+            break;
+        case 'Premium':
+            isConditional = accountTypeID === ID_paket;
+            break;
+        case 'Business':
+            isConditional = accountTypeID === ID_paket;
+            break;
+        case 'Enterprise':
+            isConditional = accountTypeID === ID_paket;
+            break;
+    }
+
+    
+    // Add a conditional class for the background gradient
+    const backgroundClass = isConditional ? 'bg-gradient-to-br from-fuchsia-200 via-fuchsia-300 to-fuchsia-400 border-2 border-purple-500' : '';
+
+
+    if (isDefault || isConditional) {
+        // Generate HTML for profile UI
+        profileHTML += `
+            <div class="w-full max-w-sm p-8 bg-white border border-gray-200 rounded-lg shadow-lg shadow dark:bg-gray-800 dark:border-gray-700 ${backgroundClass}">
+                <h5 class="mb-auto text-xl font-medium text-gray-500 dark:text-gray-400">${nama_paket}</h5>
+                <ul role="list" class="space-y-7 my-12">
+                    <li class="flex items-center">
+                        <i class="fas fa-file-alt flex-shrink-0 w-4 h-4 text-purple-600 dark:text-purple-500"></i>
+                        <span class="text-base font-normal leading-tight text-gray-500 dark:text-gray-400 ms-3">Scan Count: ${ScanCount}</span>
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-upload flex-shrink-0 w-4 h-4 text-purple-600 dark:text-purple-500"></i>
+                        <span class="text-sm font-normal leading-tight text-gray-500 dark:text-gray-400 ms-3">File Upload Count: ${FileUpCount}</span>
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-user flex-shrink-0 w-4 h-4 text-purple-600 dark:text-purple-500"></i>
+                        <span class="text-base font-normal leading-tight text-gray-500 dark:text-gray-400 ms-3">Jumlah Peserta: ${GuestCount}</span>
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-user flex-shrink-0 w-4 h-4 text-purple-600 dark:text-purple-500"></i>
+                        <span class="text-base font-normal leading-tight text-gray-500 dark:text-gray-400 ms-3">Jumlah Operator: ${OperatorCount}</span>
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-file-alt flex-shrink-0 w-4 h-4 text-purple-600 dark:text-purple-500"></i>
+                        <span class="text-base font-normal leading-tight text-gray-500 dark:text-gray-400 ms-3">Sertifikat: ${SertifCount}</span>
+                    </li>
+                </ul>
+                <a href="${isDefault ? '/create/free' : '/create/premium'}">
+                    <button class="relative inline-flex items-center justify-center w-full p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-purple-300 via-purple-400 to-purple-500 group-hover:from-purple-500 group-hover:to-pink-500 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800">
+                        <span class="relative w-full px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0">
+                            Create Event
+                        </span>
+                    </button>
+                </a>
+            </div>
+        `;
+    }
+}
+
+
+        // Append the generated HTML to the profile container
+        profileContainer.innerHTML = profileHTML;
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+  }
+}
+
+
+// Call the async function to fetch user profile information
+fetchUserProfile();
+
+
+</script>
+
+<script>
 
 async function fetchDataAndCreateUI(page = 1) {
     const maxRetries = 3;
@@ -164,6 +301,7 @@ async function fetchDataAndCreateUI(page = 1) {
         });
 
         const responseData = await eventDataResponse.json();
+        console.log(responseData);
 
         const tableBody = document.getElementById('tableBody');
         let indexCount = (page - 1) * responseData.data.per_page + 1;
@@ -274,125 +412,6 @@ async function fetchDataAndCreateUI(page = 1) {
 
 // Call fetchDataAndCreateUI with initial page value
 fetchDataAndCreateUI(1);
-// Function to handle row deletion
-function deleteRowAction(ID_paket) {
-    const confirmation = confirm("Are you sure you want to delete this row?");
-
-    if (confirmation) {
-        // Make a DELETE request to the API
-        fetch(`http://localhost:8000/api/event/delete/${ID_paket}`, {
-            method: 'DELETE',
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data && data.is_success) {
-                console.log('Row deleted successfully');
-                
-                // Reload the page after successful deletion
-                location.reload();
-            } else {
-                console.error('Failed to delete row');
-            }
-        })
-        .catch(error => console.error('Error deleting row:', error));
-    }
-}
-
-
-// Fetch user profile information
-fetch('http://localhost:8000/api/profile/show', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({ id: id }),
-})
-  .then(response => response.json())
-  .then(profileData => {
-    if (profileData.is_success) {
-      // Extract account type ID from the profile data
-      const accountTypeID = profileData.data.Kategori_paket;
-
-      // Fetch all package information
-      fetch('http://localhost:8000/api/paket/all')
-        .then(response => response.json())
-        .then(async packageData => {
-          if (packageData.is_success) {
-            const profileContainer = document.getElementById('profileContainer');
-
-            // Function to create the UI for each instance
-              async function createProfileUI(title, features, items) {
-                const profileDiv = document.createElement('div');
-                profileDiv.className = 'w-full max-w-sm mb-auto p-4 bg-white border border-gray-200 rounded-lg shadow-lg shadow sm:p-8 dark:bg-gray-800 dark:border-gray-700';
-
-                // Modify anchor link based on package type
-                 if (title === 'Gratis') {
-                    anchorLink = '<a href="/create/free">';
-                  } else {
-                    anchorLink = '<a href="/create/premium">'; // Replace "YOUR_PREMIUM_LINK" with the actual link
-                  }
-              profileDiv.innerHTML = `
-                <h5 class="mb-auto text-xl font-medium text-gray-500 dark:text-gray-400">${title}</h5>
-                <ul role="list" class="space-y-7 my-12">
-                  ${items.map(item => `
-                    <li class="flex items-center">
-                      <i class="fas ${item.icon} flex-shrink-0 w-4 h-4 text-purple-600 dark:text-purple-500"></i>
-                      <span class="text-base font-normal leading-tight text-gray-500 dark:text-gray-400 ms-3">${item.text}</span>
-                    </li>
-                  `).join('')}
-                </ul>
-                ${anchorLink}
-                  <button class="relative inline-flex items-center justify-center w-full p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-purple-300 via-purple-400 to-purple-500 group-hover:from-purple-500 group-hover:to-pink-500 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800">
-                    <span class="relative w-full px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0">
-                      Create Event
-                    </span>
-                  </button>
-                </a>
-              `;
-
-              profileContainer.appendChild(profileDiv);
-            }
-
-            // Loop through data and append instances to the existing container
-            for (const { nama_paket, ID_fitur, harga ,ID_paket} of packageData.data) {
-              const isDefault = nama_paket === 'Gratis';
-               const isPremium = nama_paket === 'Premium' && accountTypeID === ID_paket;
-const isBusiness = nama_paket === 'Business' && accountTypeID === ID_paket;
-const isEnterprise = nama_paket === 'Enterprise' && accountTypeID === ID_paket;
-
-              if (isDefault || isPremium || isBusiness || isEnterprise) {
-                // Fetch feature information using POST method
-                const featureResponse = await fetch('http://localhost:8000/api/fitur-paket/show', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({ ID_fitur: ID_fitur }),
-                });
-                
-                const featureData = await featureResponse.json();
-
-                if (featureData.is_success) {
-                  const features = featureData.data;
-                  const items = [
-                    { text: `Scan Count: ${features.scan_count}`, icon: 'fa-file-alt' },
-                    { text: `File Upload Count: ${features.file_up_count}`, icon: 'fa-upload' },
-                     { text: `Jumlah Peserta: ${features.guest_count}`, icon: 'fa-user' },
-                     { text: `Jumlah Operator: ${features.operator_count}`, icon: 'fa-user' },
-                    { text: `Sertifikat: ${features.sertif_count}`, icon: 'fa-file-alt' },
-                    // Add more features as needed
-                  ];
-
-                  createProfileUI(nama_paket, features, items);
-                }
-              }
-            }
-          }
-        });
-    }
-  });
-
-
 </script>
 
 @endsection

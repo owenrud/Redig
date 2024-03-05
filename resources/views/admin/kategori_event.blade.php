@@ -1,4 +1,6 @@
 @extends('admin.layouts.main')
+@section('title','Kategori Event')
+@section('page_title','Kategori Event')
 @section('content')
 
 

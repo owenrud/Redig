@@ -1,4 +1,6 @@
 @extends('admin.layouts.main')
+@section('title','Paket')
+@section('page_title','Paket')
 @section('content')
 
 <div class="flex flex-col max-h-sm overflow-y-auto my-auto mx-auto w-10/12 p-4 bg-white border border-gray-200 overflow-y-auto space-y-4 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
@@ -26,10 +28,25 @@ Add data
                 <th scope="col" class="px-6 py-3">
                     Nama Paket
                 </th>
+                
+                <th scope="col" class="px-6 py-3">
+                   Jumlah Scan/Hari
+                </th>
+                <th scope="col" class="px-6 py-3">
+                   Jumlah Upload File
+                </th>
+                <th scope="col" class="px-6 py-3">
+                   Jumlah Maksimum Peserta
+                </th>
+                <th scope="col" class="px-6 py-3">
+                   Jumlah Operator Event
+                </th>
+                <th scope="col" class="px-6 py-3">
+                   Jumlah Sertifikat
+                </th>
                 <th scope="col" class="px-6 py-3">
                    Harga
                 </th>
-                
                 <th scope="col" class="text-center px-6 py-3">
                     Action
                 </th>
@@ -90,12 +107,18 @@ fetch('http://localhost:8000/api/paket/all')
             let Counter = 1;
             // Loop melalui setiap item dalam data paket
             data.data.forEach(paket => {
-                console.log(paket.harga);
+                //console.log(paket.harga);
                 const row = document.createElement('tr');
 
                 // Sisipkan kolom paket ke dalam baris menggunakan elemen <td>
                 row.innerHTML = `<td class="px-6 py-4">${Counter}</td>
-                                  <td class="px-6 py-4">${paket.nama_paket}</td>
+                                <td class="px-6 py-4">${paket.nama_paket}</td>
+                                  
+                                  <td class="px-6 py-4">${paket.ScanCount}</td>
+                                  <td class="px-6 py-4">${paket.FileUpCount}</td>
+                                  <td class="px-6 py-4">${paket.GuestCount}</td>
+                                  <td class="px-6 py-4">${paket.OperatorCount}</td>
+                                  <td class="px-6 py-4">${paket.SertifCount}</td>
                                   `;
                 Counter++;
                 // Sisipkan baris ke dalam elemen tbody

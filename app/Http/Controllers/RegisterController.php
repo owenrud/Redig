@@ -10,6 +10,7 @@ use App\Models\paket;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
+
 class RegisterController extends Controller
 {
     public function Login_G(){
@@ -101,16 +102,21 @@ class RegisterController extends Controller
     }*/
 
     public function Login(Request $req){
-        //dd($req);
         $credentials = $req->only('email','password');
-        //dd ($credentials);
-        //dd(Auth::attempt($credentials));
+        
         if(Auth::attempt($credentials)){
             $user = Auth::user();
-            //dd($user);
-            return redirect('/dashboard');
+            //dd($user->Role);
+            // Check user's role
+            if ($user->isAdmin()) {
+                return redirect()->route('admin.dashboard'); // Redirect Admin to their dashboard
+            } elseif($user->isEO()) {
+                return redirect()->route('eo.dashboard'); // Redirect User to their dashboard
+            }else{
+                abort(403);
+            }
         }else{
-            return redirect('/');
+            return redirect()->back()->with('error', 'Invalid credentials.'); // Redirect back with error for invalid credentials
         }
     }
 

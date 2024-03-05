@@ -8,7 +8,7 @@
 @yield('link')
 </head>
 <body>
-<title>Dashboard</title>
+<title>@yield('title')</title>
 <div class="flex h-screen overflow-y-auto">
   @include('admin.layouts.navbar')
  

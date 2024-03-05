@@ -8,7 +8,7 @@
 @yield('link')
 </head>
 <body>
-<title>Dashboard</title>
+<title>@yield('title')</title>
 <div class="flex h-screen">
   @include('layouts.navbar')
 

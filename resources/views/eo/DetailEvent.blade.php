@@ -1,4 +1,5 @@
 @extends('layouts.main')
+@section('page_title','Detail Event')
 @section('content')
 
 <div class="flex-1 flex-col justify-center items-center  p-4 w-full overflow-x-auto">
@@ -135,6 +136,15 @@ function toggleSection(sectionId, link) {
 
     // Store the current active section in local storage
     localStorage.setItem('activeSection', sectionId);
+
+    const pageTitle = document.querySelector('page_title');
+    console.log(pageTitle);
+    if (pageTitle) {
+        const tabName = link.textContent; // Assuming the link parameter is passed
+        pageTitle.textContent = tabName;
+    } else {
+        console.error('Element with id "page_title" not found.');
+    }
 }
 
 function setActiveSpan(activeSectionId) {

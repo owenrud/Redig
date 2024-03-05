@@ -1,4 +1,6 @@
 @extends('layouts.main')
+@section('title','Create Event')
+@section('page_title','Buat Event Baru (Berbayar)')
 @section('content')
 
 <div class="flex-1 flex-col justify-center items-center p-8 w-full overflow-x-auto">

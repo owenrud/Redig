@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\peserta_event;
+use App\Models\event;
+use App\Models\paket;
 use Maatwebsite\Excel\Facades\Excel;
 
 use Maatwebsite\Excel\Exceptions\LaravelExcelException;
@@ -81,6 +83,12 @@ class PesertaController extends Controller
             $kode_doorprize = rand(10000000, 99999999);
             $check_user = peserta_event::where('ID_event',$request->ID_event)
             ->where('ID_User',$request->ID_user)->first();
+            $check_event = event::where('ID_event',$request->ID_event)
+            ->join('paket','event.id_paket','=','paket.id_paket')
+            ->select('event.ID_event','paket.id_paket','nama_paket')
+            ->get();
+            $namaPaket = $check_event[0]->nama_paket;
+            return $namaPaket.tolowercase() ;
            //return $check_user;
             //dd($check_user);
                 if(!$check_user){

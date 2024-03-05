@@ -16,7 +16,7 @@ use App\Http\Controllers\RegisterController;
 
 Route::get('/', function () {
     return view('login');
-})->name('login');
+})->name('home');
 Route::get('/test/pdf', function () {
     return view('pdf_sertif');
 });
@@ -30,10 +30,10 @@ Route::get('/auth/redirect', function () {
  
 Route::get('/auth/google/callback',[RegisterController::class,'Login_G']);
 
-Route::group(['middleware' => ['auth', 'role:EO']], function () {
+Route::group(['middleware' => 'auth'], function () {
     Route::get('/dashboard', function () {
         return view('eo.dashboard');
-    })->name('home');
+    })->name('eo.dashboard');
     Route::get('/paket', function () {
         return view('eo.paket');
     })->name('paket');
@@ -70,8 +70,8 @@ Route::group(['middleware' => ['auth', 'role:EO']], function () {
     Route::get('/event/detail/{id}/tamu/{id_tamu}', function () {
         return view('eo.form_edit_tamu');
     });
-});
-    Route::group(['middleware' => ['auth', 'role:Admin']], function () {
+});  
+    Route::group(['middleware' => 'admin'], function () {
     Route::get('/admin/paket', function () {
         return view('admin.paket');
     });
@@ -86,7 +86,7 @@ Route::group(['middleware' => ['auth', 'role:EO']], function () {
     });
     Route::get('/admin', function () {
         return view('admin.dashboard');
-    });
+    })->name('admin.dashboard');
     Route::get('/paket/edit/{id}', function () {
         return view('admin.edit_paket');
     });

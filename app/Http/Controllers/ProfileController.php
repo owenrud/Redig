@@ -121,7 +121,7 @@ class ProfileController extends Controller
             $EO_prof = Profile::join('users', 'profile.ID_User', '=', 'users.ID_User')
             ->join('provinsi','profile.provinsi','=','provinsi.ID_provinsi')
             ->join('kabupaten','profile.kota','=','kabupaten.id')
-            ->join('paket','profile.Kategori_paket','=','paket.ID_paket')
+            ->join('paket','profile.ID_paket','=','paket.ID_paket')
             ->select([
                     'profile.ID_User',
                     'profile.nama_lengkap',

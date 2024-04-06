@@ -137,7 +137,7 @@ function deleteRowAction(ID_paket) {
 
     if (confirmation) {
         // Make a DELETE request to the API
-        fetch(`http://localhost:8000/api/event/delete/${ID_paket}`, {
+        fetch(`http://${Endpoint}/api/event/delete/${ID_paket}`, {
             method: 'DELETE',
         })
         .then(response => response.json())
@@ -160,7 +160,7 @@ function deleteRowAction(ID_paket) {
 async function fetchUserProfile() {
   try {
     // Fetch profile data
-    const profileResponse = await fetch('http://localhost:8000/api/profile/show', {
+    const profileResponse = await fetch(`http://${Endpoint}/api/profile/show`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -174,7 +174,7 @@ async function fetchUserProfile() {
       const accountTypeID = profileData.data.ID_paket;
 
       // Fetch all package information
-      const packageResponse = await fetch('http://localhost:8000/api/paket/all');
+      const packageResponse = await fetch(`http://${Endpoint}/api/paket/all`);
       const packageData = await packageResponse.json();
       //console.log(packageData.data)
 
@@ -207,34 +207,36 @@ async function fetchUserProfile() {
 
     
     // Add a conditional class for the background gradient
-    const backgroundClass = isConditional ? 'bg-gradient-to-br from-fuchsia-200 via-fuchsia-300 to-fuchsia-400 border-2 border-purple-500' : '';
+    const backgroundClass = isConditional ? 'bg-gradient-to-br from-fuchsia-300 to-purple-300 border-2 border-purple-500' : '';
+     // Add a conditional class for the text color
+    const textColorClass = isConditional ? 'text-slate-100' : 'text-gray-500 dark:text-gray-400';
 
 
     if (isDefault || isConditional) {
         // Generate HTML for profile UI
         profileHTML += `
             <div class="w-full max-w-sm p-8 bg-white border border-gray-200 rounded-lg shadow-lg shadow dark:bg-gray-800 dark:border-gray-700 ${backgroundClass}">
-                <h5 class="mb-auto text-xl font-medium text-gray-500 dark:text-gray-400">${nama_paket}</h5>
+                <h5 class="mb-auto text-xl font-medium ${textColorClass}">${nama_paket}</h5>
                 <ul role="list" class="space-y-7 my-12">
-                    <li class="flex items-center">
+                    <li class="flex items-center ">
                         <i class="fas fa-file-alt flex-shrink-0 w-4 h-4 text-purple-600 dark:text-purple-500"></i>
-                        <span class="text-base font-normal leading-tight text-gray-500 dark:text-gray-400 ms-3">Scan Count: ${ScanCount}</span>
+                        <span class="text-base font-normal leading-tight ms-3 ${textColorClass}">Scan Count: ${ScanCount}</span>
                     </li>
                     <li class="flex items-center">
                         <i class="fas fa-upload flex-shrink-0 w-4 h-4 text-purple-600 dark:text-purple-500"></i>
-                        <span class="text-sm font-normal leading-tight text-gray-500 dark:text-gray-400 ms-3">File Upload Count: ${FileUpCount}</span>
+                        <span class="text-sm font-normal leading-tight ms-3 ${textColorClass}">File Upload Count: ${FileUpCount}</span>
                     </li>
                     <li class="flex items-center">
                         <i class="fas fa-user flex-shrink-0 w-4 h-4 text-purple-600 dark:text-purple-500"></i>
-                        <span class="text-base font-normal leading-tight text-gray-500 dark:text-gray-400 ms-3">Jumlah Peserta: ${GuestCount}</span>
+                        <span class="text-base font-normal leading-tight ms-3 ${textColorClass}">Jumlah Peserta: ${GuestCount}</span>
                     </li>
                     <li class="flex items-center">
                         <i class="fas fa-user flex-shrink-0 w-4 h-4 text-purple-600 dark:text-purple-500"></i>
-                        <span class="text-base font-normal leading-tight text-gray-500 dark:text-gray-400 ms-3">Jumlah Operator: ${OperatorCount}</span>
+                        <span class="text-base font-normal leading-tight ms-3 ${textColorClass}">Jumlah Operator: ${OperatorCount}</span>
                     </li>
                     <li class="flex items-center">
                         <i class="fas fa-file-alt flex-shrink-0 w-4 h-4 text-purple-600 dark:text-purple-500"></i>
-                        <span class="text-base font-normal leading-tight text-gray-500 dark:text-gray-400 ms-3">Sertifikat: ${SertifCount}</span>
+                        <span class="text-base font-normal leading-tight ms-3 ${textColorClass}">Sertifikat: ${SertifCount}</span>
                     </li>
                 </ul>
                 <a href="${isDefault ? '/create/free' : '/create/premium'}">
@@ -292,7 +294,7 @@ async function fetchDataAndCreateUI(page = 1) {
     }
 
     try {
-        const eventDataResponse = await fetch(`http://localhost:8000/api/event/show/eo?page=${page}`, {
+        const eventDataResponse = await fetch(`http://${Endpoint}/api/event/show/eo?page=${page}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

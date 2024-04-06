@@ -19,8 +19,9 @@
 </div>
 <script>
 const id = {{ $authUser->ID_User }};
+const Endpoint = "localhost:8000";
 const nama = document.getElementById('username');
-fetch("http://localhost:8000/api/profile/show",{
+fetch(`http://${Endpoint}/api/profile/show`,{
       method: 'POST',
     headers: {
               'Content-Type': 'application/json',

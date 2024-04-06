@@ -1,4 +1,6 @@
 @extends('layouts.main')
+@section('title','Kelola Sertifikat')
+@section('page_title','Kelola Sertifikat')
 @section('link')
  <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
 
@@ -92,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function () {
         formData.append('ID_event', eventId);
         
         //console.log(formData);
-        fetch('http://localhost:8000/api/sertifikat/save', {
+        fetch(`http://${Endpoint}/api/sertifikat/save`, {
             method: 'POST',
             body: formData,
         })
@@ -124,7 +126,7 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 <script>
 // Fetch data from the API
-fetch('http://localhost:8000/api/kabupaten/all')
+fetch(`http://${Endpoint}/api/kabupaten/all`)
     .then(response => response.json())
     .then(apiData => {
         // Check if apiData.data is an array

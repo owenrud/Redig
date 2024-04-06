@@ -66,7 +66,7 @@ const eventId = window.location.pathname.split('/')[3];
     const formData = new FormData(form);
     formData.append('ID_event',eventId)
 
-    fetch('http://localhost:8000/api/peserta/save', {
+    fetch(`http://${Endpoint}/api/peserta/save`, {
         method: 'POST',
         body: formData,
     })

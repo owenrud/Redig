@@ -1,4 +1,6 @@
 @extends('admin.layouts.main')
+@section('title','create kategori')
+@section('page_title','Create Kategori')
 @section('content')
 <div class="flex flex-col p-8">
 <div class="w-full  space-y-4 mb-auto  bg-white border border-gray-200 rounded-lg shadow-lg shadow sm:p-8 dark:bg-gray-800 dark:border-gray-700">
@@ -30,7 +32,7 @@ Save
     const form = document.querySelector('form');
     const formData = new FormData(form);
 
-    fetch('http://localhost:8000/api/event/kategori/save', {
+    fetch(`http://${Endpoint}/api/event/kategori/save`, {
         method: 'POST',
         body: formData,
     })

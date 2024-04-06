@@ -1,4 +1,6 @@
 @extends('admin.layouts.main')
+@section('title','create paket')
+@section('page_title','Create Paket')
 @section('content')
 
 <div class="flex flex-col p-8">
@@ -36,7 +38,7 @@ Save
 <script>
 const fitur = document.getElementById('fitur');
 
-fetch('http://localhost:8000/api/fitur-paket/all')
+fetch(`http://${Endpoint}/api/fitur-paket/all`)
 .then(response => response.json())
 .then(data =>{
     data.data.forEach(item =>{
@@ -54,7 +56,7 @@ fetch('http://localhost:8000/api/fitur-paket/all')
         const form = document.querySelector('form');
         const formData = new FormData(form);
 
-        fetch('http://localhost:8000/api/paket/save', {
+        fetch(`http://${Endpoint}/api/paket/save`, {
             method: 'POST',
             body: formData,
         })

@@ -97,7 +97,7 @@ Add data
 <script>
 
  // Fetch API pertama untuk mendapatkan data paket
-fetch('http://localhost:8000/api/paket/all')
+fetch(`http://${Endpoint}/api/paket/all`)
     .then(response => response.json())
     .then(data => {
         // Pastikan respons memiliki properti "data" dan "data" adalah array
@@ -180,7 +180,7 @@ function deleteRowAction(ID_paket) {
 
     if (confirmation) {
         // Make a DELETE request to the API
-        fetch(`http://localhost:8000/api/paket/delete/${ID_paket}`, {
+        fetch(`http://${Endpoint}/api/paket/delete/${ID_paket}`, {
             method: 'DELETE',
         })
         .then(response => response.json())

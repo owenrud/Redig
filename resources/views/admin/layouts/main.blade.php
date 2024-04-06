@@ -19,6 +19,9 @@
 </div>
 <script>                </script>
 <script src="https://unpkg.com/flowbite@1.5.1/dist/flowbite.js"></script>
+<script>
+const Endpoint = "localhost:8000";
+</script>
 @yield('script')
 </body>
 </html>

@@ -175,14 +175,14 @@ function deleteRowAction(ID_user) {
 
     if (confirmation) {
         // Make a DELETE request to the API
-        fetch(`http://localhost:8000/api/profile/delete/${ID_user}`, {
+        fetch(`http://${Endpoint}/api/profile/delete/${ID_user}`, {
             method: 'DELETE',
         })
         .then(response => response.json())
         .then(data => {
             if (data && data.is_success) {
                 
-                fetch(`http://localhost:8000/api/profile/delete/user/${ID_user}`, {
+                fetch(`http://${Endpoint}/api/profile/delete/user/${ID_user}`, {
             method: 'DELETE',
         })
         .then(response => response.json())
@@ -200,7 +200,7 @@ function deleteRowAction(ID_user) {
     }
 }
 // Call the function to fetch and display data for the new API
-fetchAndDisplayData("http://localhost:8000/api/profile/eo?page=1");
+fetchAndDisplayData(`http://${Endpoint}/api/profile/eo?page=1`);
 
 </script>
 

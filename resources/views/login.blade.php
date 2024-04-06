@@ -39,11 +39,10 @@
   <input type="password" name="password" id="password" class="rounded-none rounded-r-lg bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Password">
 </div>
       <div class="flex justify-between text-sm mb-8 mx-16 ">
-            <a href="/forgot-password" class="text-white  font-semibold ">Forgot password?</a>
-            <a href="/register" class="text-white  font-semibold ">Belum punya akun?</a>
+              <a href="/register" class="text-white  font-semibold ">Belum punya akun?</a>
           </div>
       <div>
-       <button type="submit" class="mx-20 flex w-9/12 h-12 text-xl justify-center text-white bg-gradient-to-r from-purple-600 via-purple-700 to-purple-800 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-purple-300 dark:focus:ring-purple-800 shadow-lg shadow-purple-600/50 dark:shadow-lg dark:shadow-purple-800/80 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
+       <button type="submit" onclick="validateLoginForm()" class="mx-20 flex w-9/12 h-12 text-xl justify-center text-white bg-gradient-to-r from-purple-600 via-purple-700 to-purple-800 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-purple-300 dark:focus:ring-purple-800 shadow-lg shadow-purple-600/50 dark:shadow-lg dark:shadow-purple-800/80 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
        Login
        </button>
         </div>
@@ -65,7 +64,27 @@ Sign in with Google
     </div>
   </div>
 
-</body>
+</body><script>
+function validateLoginForm() {
+  var email = document.getElementById('email').value.trim();
+  var password = document.getElementById('password').value.trim();
+
+  if (email === '' && password === '') {
+    showAlert('Please fill email and password.');
+  } else if (email === '') {
+    showAlert('Please fill email.');
+  } else if (password === '') {
+    showAlert('Please fill password.');
+  } else {
+   
+  }
+}
+
+function showAlert(message) {
+  alert(message);
+}
+</script>
+
 <script>
 const googleLoginButton = document.getElementById('google-login-button');
 

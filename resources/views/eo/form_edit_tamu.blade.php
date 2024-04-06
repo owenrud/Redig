@@ -60,7 +60,7 @@ const tamuId = window.location.pathname.split('/').pop();
 
 if (tamuId) {
     // Tentukan URL API
-    const apiUrl = 'http://localhost:8000/api/peserta/show/guest';
+    const apiUrl = `http://${Endpoint}/api/peserta/show/guest`;
 
     // Persiapkan data yang akan dikirim
     const data = { id : tamuId };
@@ -123,7 +123,7 @@ const eventId = window.location.pathname.split('/')[3];
     const formData = new FormData(form);
     formData.append('id',tamuId)
 
-    fetch('http://localhost:8000/api/peserta/update', {
+    fetch(`http://${Endpoint}/api/peserta/update`, {
         method: 'POST',
         body: formData,
     })

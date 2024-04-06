@@ -32,6 +32,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 Route::post('/create-account',[RegisterController::class,'Register']);
 Route::post('/register-account',[RegisterController::class,'Register_API']);
+Route::post('/verify/otp',[RegisterController::class,'verifyOTP']);
 Route::post('/user/login',[RegisterController::class,'Login_API']);
 Route::post('/export',[PesertaController::class,'export_excel']);
 Route::get('/test/pdf/export', [SertifikatController::class,'export']);

@@ -6,13 +6,14 @@
 <div href="#" class=" flex-1 block flex-col  p-2 bg-white border border-gray-200 rounded-lg shadow  dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
 
 <div id="span-nav" class="flex flex-row p-2 space-x-3">
-<span id="stats" class="flex bg-purple-600 w-24 h-10 p-2 justify-center items-center rounded-lg text-white"  onclick="toggleSection('stats')">Statistik</span>
-<span id="edit" class="flex hover:text-violet-400 w-24 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('edit')" >Detail/Edit</span>
-<span id="absen" class="flex hover:text-violet-400 w-24 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('absen')">Jam Absen</span>
-<span id="file" class="flex hover:text-violet-400 w-32 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('file')">File Tambahan</span>
-<span id="tamu" class="flex hover:text-violet-400 w-24 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('tamu')">Tamu</span>
-<span id="op" class="flex hover:text-violet-400 w-24 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('op')">Operator</span>
-<span id="sertifikat" class="flex hover:text-violet-400 w-24 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('sertifikat')">Sertifikat</span>
+<span id="stats" class="flex bg-purple-600 w-24 h-10 p-2 justify-center items-center rounded-lg text-white"  onclick="toggleSection('stats', 'Statistik')">Statistik</span>
+<span id="edit" class="flex hover:text-violet-400 w-24 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('edit', 'Detail & Edit Event')" >Detail/Edit</span>
+<span id="absen" class="flex hover:text-violet-400 w-24 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('absen', 'Jam Absen')">Jam Absen</span>
+<span id="file" class="flex hover:text-violet-400 w-32 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('file', 'File Tambahan')">File Tambahan</span>
+<span id="tiket_tamu" class="hidden flex hover:text-violet-400 w-24 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('tiket_tamu', 'Tiket Tamu')">Tiket Tamu</span>
+<span id="tamu" class="flex hover:text-violet-400 w-24 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('tamu', 'Tamu')">Tamu</span>
+<span id="op" class="flex hover:text-violet-400 w-24 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('op', 'Operator')">Operator</span>
+<span id="sertifikat" class="flex hover:text-violet-400 w-24 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('sertifikat', 'Sertifikat')">Sertifikat</span>
 
 </div>
 <hr class="flex-1 w-full mt-2 mb-4">
@@ -24,6 +25,8 @@
 @include('eo.detail.absen')
 
 @include('eo.detail.file')
+
+@include('eo.detail.tiket_tamu')
 
 @include('eo.detail.tamu')
 
@@ -52,7 +55,33 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
 
+<script>
+const UrlID = window.location.pathname.split('/').pop();
+console.log(UrlID);
+async function CheckPremium(){
+    const APIURL = `http://${Endpoint}/api/event/show`;
+    const response = await fetch(APIURL,{
+        method: "POST",
+        headers :{
+            'Content-Type' : 'application/json'
+        },
+        body : JSON.stringify({
+            ID_event : UrlID
+        })
+    })
 
+    const responseData = await response.json();
+    if(responseData){
+        const check = responseData.data[0].nama_paket.toLowerCase();
+    if(check != 'gratis'){
+        document.getElementById('tiket_tamu').classList.remove('hidden');
+    }
+    
+    }
+    
+}
+CheckPremium();
+</script>
 <script>
    document.addEventListener('DOMContentLoaded', function () {
     // Initialize Flatpickr for the 'start' input
@@ -118,7 +147,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setActiveSpan(lastActiveSection);
 });
 
-function toggleSection(sectionId, link) {
+function toggleSection(sectionId, pageTitle) {
     const sections = document.querySelectorAll('section');
     const spanNav = document.getElementById('span-nav');
     const spans = spanNav.querySelectorAll('span');
@@ -137,14 +166,13 @@ function toggleSection(sectionId, link) {
     // Store the current active section in local storage
     localStorage.setItem('activeSection', sectionId);
 
-    const pageTitle = document.querySelector('page_title');
-    console.log(pageTitle);
-    if (pageTitle) {
-        const tabName = link.textContent; // Assuming the link parameter is passed
-        pageTitle.textContent = tabName;
-    } else {
-        console.error('Element with id "page_title" not found.');
-    }
+    document.querySelector('title').innerText = pageTitle;
+   var pageTitleElement = document.getElementById('page_title');
+            if (pageTitleElement) {
+                pageTitleElement.textContent = pageTitle;
+            } else {
+                console.error('Element with id "page_title" not found.');
+            }
 }
 
 function setActiveSpan(activeSectionId) {
@@ -205,7 +233,7 @@ function setActiveSpan(activeSectionId) {
       .then(response => response.json())
       .then(jsonData => {
         const data = jsonData.data;
-        console.log(data);
+        //console.log(data);
          provinsiSelect.innerHTML = '';
 
       // Add a default option
@@ -302,7 +330,7 @@ async function populateKategori(preselectedKategoriID) {
 
     // Mendengarkan perubahan pada pilihan provinsi
     provinsiSelect.addEventListener('change', () => {
-        console.log('Provinsi Selected:', provinsiSelect.value); // Debugging line
+        //console.log('Provinsi Selected:', provinsiSelect.value); // Debugging line
         const eventId = window.location.pathname.split('/').pop();
         const selectedProvinsiId = provinsiSelect.value;
 
@@ -330,7 +358,7 @@ async function populateKategori(preselectedKategoriID) {
  <script>
         async function fetchEventDates() {
           const eventId = window.location.pathname.split('/').pop();
-            const apiUrl = 'http://localhost:8000/api/event/show';
+            const apiUrl = `http://${Endpoint}/api/event/show`;
             const response = await fetch(apiUrl,{
                 method: 'POST',
                 headers: {
@@ -376,7 +404,7 @@ async function populateKategori(preselectedKategoriID) {
             
             try {
                 const eventId = { ID_event: jamId }; // Replace with the actual event ID
-                const response = await fetch('http://localhost:8000/api/peserta/show', {
+                const response = await fetch(`http://${Endpoint}/api/peserta/show`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -463,11 +491,11 @@ async function populateKategori(preselectedKategoriID) {
  async function fetchAndPopulateForm() {
     try {
         const eventId = window.location.pathname.split('/').pop();
-        const apiUrl = 'http://localhost:8000/api/event/show';
-        const detailApiUrl = 'http://localhost:8000/api/event/detail/show';
-        const kategoriApiUrl = 'http://localhost:8000/api/event/kategori/show';
-        const provinsiApiUrl = 'http://localhost:8000/api/provinsi/show';
-        const kabupatenApiUrl = 'http://localhost:8000/api/kabupaten/show';
+        const apiUrl = `http://${Endpoint}/api/event/show`;
+        const detailApiUrl = `http://${Endpoint}/api/event/detail/show`;
+        const kategoriApiUrl = `http://${Endpoint}/api/event/kategori/show`;
+        const provinsiApiUrl = `http://${Endpoint}/api/provinsi/show`;
+        const kabupatenApiUrl = `http://${Endpoint}/api/kabupaten/show`;
 
         // Fetch event data
         const eventResponse = await fetch(apiUrl, {
@@ -510,7 +538,7 @@ async function populateKategori(preselectedKategoriID) {
 
                 if (kategoriResponse.ok) {
                     const kategoriData = await kategoriResponse.json();
-                    console.log('Kategori Data:', kategoriData);
+                    //console.log('Kategori Data:', kategoriData);
 
                     // Fetch Provinsi data
                     const provinsiResponse = await fetch(provinsiApiUrl, {
@@ -525,7 +553,7 @@ async function populateKategori(preselectedKategoriID) {
 
                     if (provinsiResponse.ok) {
                         const provinsiData = await provinsiResponse.json();
-                        console.log('Provinsi Data:', provinsiData);
+                        //console.log('Provinsi Data:', provinsiData);
 
                          provinsiSelect.value = provinsiData.data.ID_provinsi;
                         provinsiSelect.dispatchEvent(new Event('change'));
@@ -613,7 +641,7 @@ const eventId = window.location.pathname.split('/').pop();
     //console.log(formData);
 
 
-    fetch('http://localhost:8000/api/absen/save', {
+    fetch(`http://${Endpoint}/api/absen/save`, {
         method: 'POST',
         body: formData,
     })
@@ -654,7 +682,7 @@ const eventId = window.location.pathname.split('/').pop();
     //console.log(formData);
 
 
-    fetch('http://localhost:8000/api/event/update', {
+    fetch(`http://${Endpoint}/api/event/update`, {
         method: 'POST',
         body: formData,
     })
@@ -675,7 +703,7 @@ const eventId = window.location.pathname.split('/').pop();
                 ID_kabupaten :kabupaten,
             };
             if(kabupaten !== '' && provinsi!== '' && kategori !==''){
-            fetch('http://localhost:8000/api/event/detail/update',{
+            fetch(`http://${Endpoint}/api/event/detail/update`,{
               method:'POST',
               headers: {
               'Content-Type': 'application/json',
@@ -711,8 +739,8 @@ const eventId = window.location.pathname.split('/').pop();
 async function ReadAbsen(){
    try {
             //console.log(eventId);
-            const apiUrl = 'http://localhost:8000/api/absen/show';
-            const detailApiUrl = `http://localhost:8000/api/event/detail/show`;
+            const apiUrl = `http://${Endpoint}/api/absen/show`;
+            const detailApiUrl = `http://${Endpoint}/api/event/detail/show`;
 
 
             const response = await fetch(apiUrl, {
@@ -790,7 +818,7 @@ function deleteRowAction(ID_paket) {
 
     if (confirmation) {
         // Make a DELETE request to the API
-        fetch(`http://localhost:8000/api/absen/delete/${ID_paket}`, {
+        fetch(`http://${Endpoint}/api/absen/delete/${ID_paket}`, {
             method: 'DELETE',
         })
         .then(response => response.json())
@@ -825,7 +853,7 @@ function OpenSertifikat(event){
 async function ReadTamu(){
    try {
             //console.log(eventId);
-            const apiUrl = 'http://localhost:8000/api/peserta/show';
+            const apiUrl = `http://${Endpoint}/api/peserta/show`;
 
 
             const response = await fetch(apiUrl, {
@@ -923,7 +951,7 @@ function deleteTamuRowAction(ID_paket) {
 
     if (confirmation) {
         // Make a DELETE request to the API
-        fetch(`http://localhost:8000/api/peserta/delete/${ID_paket}`, {
+        fetch(`http://${Endpoint}/api/peserta/delete/${ID_paket}`, {
             method: 'DELETE',
         })
         .then(response => response.json())
@@ -946,9 +974,9 @@ ReadTamu();
 
 <script>async function ReadOperator() {
     try {
-        const operatorApiUrl = 'http://localhost:8000/api/operator/show';
-        const profileApiUrl = 'http://localhost:8000/api/profile/show';
-        const userApiUrl = 'http://localhost:8000/api/profile/user';
+        const operatorApiUrl = `http://${Endpoint}/api/operator/show`;
+        const profileApiUrl = `http://${Endpoint}/api/profile/show`;
+        const userApiUrl = `http://${Endpoint}/api/profile/user`;
 await new Promise(resolve => setTimeout(resolve, 5000));
         const response = await fetch(operatorApiUrl, {
             method: 'POST',
@@ -1094,7 +1122,7 @@ function deleteOperatorRowAction(ID_paket) {
 
     if (confirmation) {
         // Make a DELETE request to the API
-        fetch(`http://localhost:8000/api/operator/delete/${ID_paket}`, {
+        fetch(`http://${Endpoint}/api/operator/delete/${ID_paket}`, {
             method: 'DELETE',
         })
         .then(response => response.json())
@@ -1116,7 +1144,7 @@ function deleteOperatorRowAction(ID_paket) {
 async function ReadFile(){
    try {
             //console.log(eventId);
-            const apiUrl = 'http://localhost:8000/api/event/detail/show';
+            const apiUrl = `http://${Endpoint}/api/event/detail/show`;
 
 
             const response = await fetch(apiUrl, {
@@ -1199,7 +1227,7 @@ function deleteOperatorRowAction(ID_paket) {
 
     if (confirmation) {
         // Make a DELETE request to the API
-        fetch(`http://localhost:8000/api/operator/delete/${ID_paket}`, {
+        fetch(`http://${Endpoint}/api/operator/delete/${ID_paket}`, {
             method: 'DELETE',
         })
         .then(response => response.json())
@@ -1247,7 +1275,7 @@ ReadOperator();
     // Tambahkan file ke FormData
     formData.append('ID_event', eventId);
 
-    fetch('http://localhost:8000/api/event/detail/update', {
+    fetch(`http://${Endpoint}/api/event/detail/update`, {
         method: 'POST',
         body: formData,
     })
@@ -1278,7 +1306,7 @@ ReadOperator();
     async function fetchDataAndUpdateChart() {
         try {
             const eventId = { ID_event: jamId }; // Replace with the actual event ID
-            const response = await fetch('http://localhost:8000/api/peserta/show', {
+            const response = await fetch(`http://${Endpoint}/api/peserta/show`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1426,10 +1454,10 @@ ReadOperator();
 <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 
 <script>
-const apiUrl = 'http://localhost:8000/api/event/detail/show';
+const apiUrl = `http://${Endpoint}/api/event/detail/show`;
 
 async function fetchDataAndInitMap() {
-    const apiUrl = 'http://localhost:8000/api/event/detail/show';
+    const apiUrl = `http://${Endpoint}/api/event/detail/show`;
 
     try {
         const response = await fetch(apiUrl, {
@@ -1483,7 +1511,7 @@ fetchDataAndInitMap();
 </script>
 <script>
 async function Export() {
-    const apiUrl = 'http://localhost:8000/api/export';
+    const apiUrl = `http://${Endpoint}/api/export`;
 
     try {
         const response = await fetch(apiUrl, {

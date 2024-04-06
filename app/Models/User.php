@@ -24,7 +24,15 @@ class User extends Authenticatable
         'password',
         'Role',
         'email_valid',
-        'google_id'
+        'google_id',
+        'ID_paket',
+        'nama_lengkap',
+        'otp',
+        'no_telp',
+        'alamat',
+        'provinsi',
+        'kabupaten',
+        'foto'
     ];
     public function isAdmin()
 {

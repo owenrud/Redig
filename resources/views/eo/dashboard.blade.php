@@ -73,7 +73,7 @@ let countUpcoming = 0;
 let countFinished = 0;
 
 const fetchData = (page = 1) => {
-    fetch(`http://localhost:8000/api/event/show/eo?page=${page}`, {
+    fetch(`http://${Endpoint}/api/event/show/eo?page=${page}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

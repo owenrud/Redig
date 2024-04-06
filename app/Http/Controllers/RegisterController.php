@@ -7,20 +7,28 @@ use Laravel\Socialite\Facades\Socialite;
 use App\Models\User;
 use App\Models\Profile;
 use App\Models\paket;
+use App\Models\provinsi;
+use App\Models\kabupaten;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
 
 
 class RegisterController extends Controller
 {
-    public function Login_G(){
+    public function Login_G(Request $request){
+        $request->session()->forget(['google_login_completed', 'Guser']);
         $Guser = Socialite::driver('google')->user();
         //dd($user);
         $find = User::where('email',$Guser->email)->get();
         $findG_ID = User::where('google_id',$Guser->id)->get();
          //dd($find);    
         if($find->isEmpty() && $findG_ID->isEmpty()){
-         return redirect('/register')->with('Guser',$Guser);
+            //dd($Guser->email);
+            $request->session()->put('Guser', $Guser);
+           // dd($request->session());
+         return redirect('/register');
            // return redirect('/register')->action([UserController::class, 'register'], ['data' => $Guser]);
         }else{
             if($findG_ID){
@@ -37,8 +45,11 @@ class RegisterController extends Controller
             
         }
     }
-    public function index(){
-        return view('registrasi');
+    public function index(Request $request){
+        $Guser = $request->session()->get('Guser');
+        // Forget the 'Guser' session
+    $request->session()->forget('Guser');
+        return view('registrasi',compact('Guser'));
     }
 
     /*public function Register(Request $request){
@@ -139,12 +150,38 @@ class RegisterController extends Controller
         }
     }
     
+// Function to send OTP to email
+private function sendOTPByEmail($email, $otp){
+    $data = ['otp' => $otp];
+    Mail::send('emails.otp', $data, function($message) use ($email) {
+        $message->to($email)->subject('Verify OTP');
+    });
+}
 
     
-    
+private function generateOTP() {
+    do {
+        $otp = random_int(1000, 9999); // Generate a 4-digit OTP
+    } while(User::where('otp', $otp)->exists()); // Check if the OTP already exists in the database
+
+    return $otp;
+}
+
+
+
     public function Register_API(Request $request){
         // dd($request);
           //dd($request->google_id);
+          $namaProvinsi = Provinsi::find($request->provinsi);
+          $namaKabupaten = kabupaten::find($request->kabupaten);
+          //return $namaKabupaten->nama;
+          if (strtolower($request->role) !== "admin" || strtolower($request->role) !== "eo") {
+            $otp = $this->generateOTP();
+            // Send OTP to user's email
+            $this->sendOTPByEmail($request->email, $otp);
+        } else {
+            $otp = null; // Set OTP to null if not generated
+        } 
           $paket = Paket::where('nama_paket','LIKE','%Gratis%')->first();
           $default_Paket = $paket->ID_paket;
           if(isset($request->google_id)){
@@ -153,26 +190,16 @@ class RegisterController extends Controller
                   'password' => bcrypt($request->password),
                   'Role'=> $request->role,
                   'email_valid'=>$request->verify_email,
-                  'google_id' =>$request->google_id
-              ]);
-  
-              //dd($user);
-              $id = $user->ID_User;
-              //dd($id);
-              
-              $find = Profile::where('ID_User',$id)->get();
-               if($find->isEmpty()){
-                  $profile = Profile::Create([
-                      'ID_User' => $id,
-                      'nama_lengkap' => $request->full_name,
+                  'google_id' =>$request->google_id,
+                  'nama_lengkap' => $request->full_name,
+                  'otp'=>$otp,
                       'no_telp' => $request->no_telp,
-                      'Kategori_paket'=> $default_Paket,
+                      'ID_paket'=> $default_Paket,
                       'alamat' => $request->alamat,
-                      'provinsi'=> $request->provinsi,
-                      'kota' => $request->kabupaten,
+                      'provinsi'=> $namaProvinsi->nama,
+                      'kabupaten' => $namaKabupaten->nama,
                       'foto' => $request->profile_picture
-                  ]);
-               }
+              ]);
              
                   }else{
               $user = User::Create([
@@ -180,37 +207,48 @@ class RegisterController extends Controller
                   'password' => bcrypt($request->password),
                   'Role'=> $request->role,
                   'email_valid'=>$request->verify_email,
-                  'google_id' =>null
-              ]);
-              $id = $user->ID_User;
-              //d($user->ID_User);
-              $find = Profile::where('ID_User',$id)->get();
-               if($find->isEmpty()){
-                  $profile = Profile::Create([
-                      'ID_User' => $id,
-                      'nama_lengkap' => $request->full_name,
+                  'google_id' =>null,
+                  'nama_lengkap' => $request->full_name,
+                  'otp'=>$otp,
                       'no_telp' => $request->no_telp,
-                      'Kategori_paket'=> $default_Paket,
+                      'ID_paket'=> $default_Paket,
                       'alamat' => $request->alamat,
-                      'provinsi'=> $request->provinsi,
-                      'kota' => $request->kabupaten,
+                      'provinsi'=> $namaProvinsi->nama,
+                      'kabupaten' => $namaKabupaten->nama,
                       'foto' => $request->profile_picture
-                  ]);
-               }
+              ]);
           }
-          if($user !== null && $profile !== null){
+          if($user !== null){
             return response()->json([
                 'is_success'=> true,
                 'data'=>[
                     'user' => $user,
-                    'profile' => $profile
-                ]
+                ],
+                'message' => 'OTP sent to email. Please verify.'
             ],'201');
           }
          return response()->json([
             'is_success' => false,
             'data'=> null,
          ],'500');
+      }
+      public function verifyOTP(Request $request){
+        $verify_user = User::where('otp',$request->otp)->first();
+        if($verify_user){
+            $verify_user->email_valid = 1;
+            $verify_user->otp = 0;
+            $verify_user->save();
+
+            return response()->json([
+                'is_success'=>true,
+                'data'=>$verify_user,
+                'message'=>"User Berhasil di verifikasi"
+            ]);
+        }
+        return response()->json([
+            'is_success'=>false,
+            'message'=>'OTP Salah'
+        ]);
       }
       // UserController
 public function getUserByGoogleId(Request $request) {

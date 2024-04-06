@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use App\Models\event;
 use App\Models\kategori_event;
 
@@ -14,9 +15,13 @@ use App\Models\profile;
 
 class EventController extends Controller
 {
-    public function all(Request $request) {
-        $perPage = $request->input('perPage', 5); // Default to 10 items per page
-        $events = Event::paginate($perPage);
+    public function all() {
+         // Default to 10 items per page
+        $events = Event::join('paket','event.ID_paket','paket.ID_paket')
+        ->join('kategori_event','ID_kategori','kategori_event.id')
+        ->select('nama_event','start','end','public','status',
+        'nama_paket','kategori_event.nama as nama_kategori')
+        ->paginate(5);
     
         return response()->json([
             'is_success' => true,
@@ -27,13 +32,33 @@ class EventController extends Controller
 
     public function all_mobile() {
          // Default to 10 items per page
-        $events = Event::all();
-    
-        return response()->json([
-            'is_success' => true,
-            'data' => $events,
-            'message' => 'Semua data Event',
-        ], 200);
+         $events = Cache::remember('all_events', 60, function () {
+         return Event::join('paket','event.ID_paket','=','paket.ID_paket')
+         ->join('profile','event.ID_EO','=','profile.ID_User')
+         ->join('kategori_event','ID_kategori','=','kategori_event.id')
+         ->join('provinsi','event.ID_provinsi','=','provinsi.ID_provinsi')
+         ->join('kabupaten','ID_kabupaten','=','kabupaten.id')
+         ->select([
+          'event.ID_event as id',
+          'event.nama_event',
+          'event.desc_event as deskripsi',
+          'event.start',
+          'event.end',
+          'event.public',
+          'event.status',
+          'paket.nama_paket',
+          'profile.nama_lengkap',
+          'kategori_event.nama as kategori',
+          'provinsi.nama as provinsi',
+          'kabupaten.nama as kabupaten'
+         ])
+         ->get();
+        });
+         return response()->json([
+             'is_success' => true,
+             'data' => $events,
+             'message' => 'Semua data Event',
+         ], 200);
     }
     public function all_mobile_test() {
         // Default to 10 items per page
@@ -67,11 +92,10 @@ class EventController extends Controller
    }
    public function search(Request $request){
     $events = Event::where('nama_event','LIKE','%'.$request->input('search').'%')
-    ->join('detail_event','event.ID_event','=','detail_event.ID_event')
        ->join('paket','event.ID_paket','=','paket.ID_paket')
        ->join('profile','event.ID_EO','=','profile.ID_User')
-       ->join('kategori_event','detail_event.ID_kategori','=','kategori_event.id')
-       ->join('provinsi','detail_event.ID_provinsi','=','provinsi.ID_provinsi')
+       ->join('kategori_event','ID_kategori','=','kategori_event.id')
+       ->join('provinsi','event.ID_provinsi','=','provinsi.ID_provinsi')
        ->join('kabupaten','detail_event.ID_kabupaten','=','kabupaten.id')
        ->select([
         'event.ID_event as id',
@@ -98,7 +122,9 @@ class EventController extends Controller
    
         
         public function show(Request $request){
-            $event = event::find($request->ID_event);
+            $event = event::join('paket','event.ID_paket','=','paket.ID_paket')
+            ->where('ID_Event',$request->ID_event)
+            ->get();
             if($event){
                 return response()->json(['is_success'=>true,
                 'data'=>$event,
@@ -111,9 +137,9 @@ class EventController extends Controller
         ],'404');
         }
         public function showEO(Request $request){
-            $event = event::where('ID_EO',$request->ID_EO)->join('detail_event','event.ID_event','=','detail_event.ID_event')
+            $event = event::where('ID_EO',$request->ID_EO)
             ->join('paket','event.ID_paket','=','paket.ID_paket')
-            ->join('kategori_event','detail_event.ID_kategori','=','kategori_event.id')
+            ->join('kategori_event','ID_kategori','=','kategori_event.id')
             ->select([
                 'event.ID_event',
                 'event.nama_event',
@@ -142,12 +168,20 @@ class EventController extends Controller
                 $event =event::Create([
                     'ID_paket' => $request->ID_paket,
                     'ID_EO' => $request->ID_EO,
+                    'ID_kategori'=> $request->ID_kategori,
+                    'ID_provinsi' => $request->ID_provinsi,
+                    'ID_kabupaten'=>$request->ID_kabupaten,
                     'nama_event' => $request->nama_event,
                     'desc_event' => $request->desc_event,
+                    'lokasi'=>$request->lokasi,
+                    'alamat'=>$request->alamat,
+                    'latitude'=>$request->latitude,
+                    'longitude'=>$request->longitude,
                     'start' => $request->start,
                     'end' => $request->end,
                     'public' => $request->public,
-                    'status' => $request->status
+                    'status' => $request->status,
+                    
                 ]);
                 if($event){
                     return response()->json(['is_success'=>true,
@@ -166,12 +200,29 @@ class EventController extends Controller
                     // Daftar atribut yang ingin diperbarui
                     $atributToUpdate = [
                         'ID_paket','nama_event','desc_event',
-                    'start','end','public','status'];
+                    'start','end','public','status', 'ID_kategori', 'alamat',
+                    'ID_provinsi', 'ID_kabupaten', 'lat', 'long', 'banner', 'logo'
+                    ,'materi'];
                     
                     // Loop melalui atribut dan periksa apakah ada dalam permintaan
                     foreach ($atributToUpdate as $atribut) {
                         if ($request->has($atribut)) {
-                            $event->$atribut = $request->input($atribut);
+                            if ($atribut == 'banner' || $atribut == 'logo' || $atribut =='materi') {
+                                $file = $request->file($atribut);
+                                //dd($request->file('banner'));
+                                // Modify the filename
+                                $modifiedFilename = time() . '_' . str_replace(' ', '_', $file->getClientOriginalName());
+        
+                                // Store the file with the modified filename
+                                $path = $file->storeAs('uploads', $modifiedFilename, 'public');
+        
+        
+                                // Save the modified filename to the model
+                                $event->$atribut = $modifiedFilename;
+                            } else {
+                                // If it's not a file, update the attribute directly
+                                $event->$atribut = $request->input($atribut);
+                            }
                         }
                     }
                 $event->save();

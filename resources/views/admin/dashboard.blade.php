@@ -71,7 +71,7 @@ let count_eo =0;
 let count_fitur = 0;
 let count_paket =0;
 let count_kat_event =0;
-fetch('http://localhost:8000/api/profile/all')
+fetch(`http://${Endpoint}/api/profile/all`)
 .then(response => response.json())
 .then(apiData =>{
    // console.log(apiData);
@@ -87,7 +87,7 @@ fetch('http://localhost:8000/api/profile/all')
         })
         
     });
-fetch('http://localhost:8000/api/fitur-paket/all')
+fetch(`http://${Endpoint}/api/fitur-paket/all`)
 .then(response => response.json())
 .then(apiData =>{
    // console.log(apiData);
@@ -102,7 +102,7 @@ fetch('http://localhost:8000/api/fitur-paket/all')
         })
         
     });
-    fetch('http://localhost:8000/api/paket/all')
+    fetch(`http://${Endpoint}/api/paket/all`)
 .then(response => response.json())
 .then(apiData =>{
    // console.log(apiData);
@@ -118,7 +118,7 @@ fetch('http://localhost:8000/api/fitur-paket/all')
         })
         
     });
-fetch('http://localhost:8000/api/event/kategori/all')
+fetch(`http://${Endpoint}/api/event/kategori/all`)
 .then(response => response.json())
 .then(apiData =>{
    // console.log(apiData);

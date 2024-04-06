@@ -1,4 +1,6 @@
 @extends('admin.layouts.main')
+@section('title','daftar transaksi')
+@section('page_title','Daftar Transaksi')
 @section('content')
 
 <div class="flex flex-col max-h-sm overflow-y-auto my-auto mx-auto w-10/12 p-4 bg-white border border-gray-200 overflow-y-auto space-y-4 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
@@ -82,7 +84,7 @@ Daftar Transaksi
 <script>
 async function ReadInvoice(){
  try {
-                const response = await fetch('http://localhost:8000/api/invoice/all');
+                const response = await fetch(`http://${Endpoint}/api/invoice/all`);
                 const data = await response.json();
 
                 if (response.ok) {
@@ -169,7 +171,7 @@ function deleteInvoiceRowAction(userID) {
 
     if (isConfirmed) {
         // Hapus data dari endpoint /api/profile/delete/{id}
-        fetch(`http://localhost:8000/api/invoice/delete/${userID}`, {
+        fetch(`http://${Endpoint}/api/invoice/delete/${userID}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',

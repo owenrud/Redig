@@ -50,7 +50,7 @@ const idPaket = match ? match[1] : null;
 
 if (idPaket) {
     // Tentukan URL API
-    const apiUrl = 'http://localhost:8000/api/paket/show';
+    const apiUrl = `http://${Endpoint}/api/paket/show`;
 
     // Persiapkan data yang akan dikirim
     const data = { ID_paket : idPaket };
@@ -88,7 +88,7 @@ if (idPaket) {
 <script>
 const fitur = document.getElementById('fitur');
 
-fetch('http://localhost:8000/api/fitur-paket/all')
+fetch(`http://${Endpoint}/api/fitur-paket/all`)
 .then(response => response.json())
 .then(data =>{
     data.data.forEach(item =>{
@@ -117,7 +117,7 @@ fetch('http://localhost:8000/api/fitur-paket/all')
         // Tambahkan ID ke dalam FormData
         formData.append('ID_paket', idPaket);
 
-        fetch('http://localhost:8000/api/paket/update', {
+        fetch(`http://${Endpoint}/api/paket/update`, {
             method: 'POST',
             body: formData,
         })

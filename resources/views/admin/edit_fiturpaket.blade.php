@@ -59,7 +59,7 @@ const idFitur = match ? match[1] : null;
 
 if (idFitur) {
     // Tentukan URL API
-    const apiUrl = 'http://localhost:8000/api/fitur-paket/show';
+    const apiUrl = `http://${Endpoint}/api/fitur-paket/show`;
 
     // Persiapkan data yang akan dikirim
     const data = { ID_fitur : idFitur };
@@ -115,7 +115,7 @@ if (idFitur) {
         // Tambahkan ID ke dalam FormData
         formData.append('ID_fitur', idFitur);
 
-        fetch('http://localhost:8000/api/fitur-paket/update', {
+        fetch(`http://${Endpoint}/api/fitur-paket/update`, {
             method: 'POST',
             body: formData,
         })

@@ -45,9 +45,7 @@
       <li>
         <a href="/admin/paket" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Paket</a>
       </li>
-      <li>
-        <a href="/fitur-paket" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Fitur Paket</a>
-      </li>
+     
      
     </ul>
 </div>
@@ -90,7 +88,7 @@
   <div class="flex-1 flex flex-col">
     <nav class="bg-slate-50 w-full h-16">
       <div class="max-w-screen-xl flex items-center justify-between mx-auto pt-4">
-       <p class="text-2xl font-bold text-purple-900">@yield('page_title')</p>
+       <p  class="text-2xl font-bold text-purple-900">@yield('page_title')</p>
        
        
 <img id="avatarButton" type="button" data-dropdown-toggle="userDropdown" data-dropdown-placement="bottom-start" class="w-10 h-10 rounded-full cursor-pointer" src="https://flowbite.com/docs/images/logo.svg" alt="User dropdown">

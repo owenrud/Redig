@@ -37,7 +37,7 @@ const OpId = window.location.pathname.split('/').pop();
 
 if (OpId) {
     // Tentukan URL API
-    const apiUrl = 'http://localhost:8000/api/operator/show/personal';
+    const apiUrl = `http://${Endpoint}/api/operator/show/personal`;
 
     // Persiapkan data yang akan dikirim
     const data = { ID_operator : OpId };
@@ -80,7 +80,7 @@ const eventId = window.location.pathname.split('/')[3];
     //console.log(OpId);
     formData.append('ID_operator',OpId);
 
-    fetch('http://localhost:8000/api/operator/update', {
+    fetch(`http://${Endpoint}/api/operator/update`, {
         method: 'POST',
         body: formData,
     })

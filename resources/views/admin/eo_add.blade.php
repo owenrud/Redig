@@ -1,4 +1,6 @@
 @extends('admin.layouts.main')
+@section('title','create EO')
+@section('page_title','Create Account EO')
 @section('content')
 
 <div class="flex flex-col p-8">
@@ -64,7 +66,7 @@ Save
     const form = document.querySelector('form');
     const formData = new FormData(form);
 
-    fetch('http://localhost:8000/api/register-account', {
+    fetch(`http://${Endpoint}/api/register-account`, {
         method: 'POST',
         body: formData,
     })
@@ -94,7 +96,7 @@ form.addEventListener('submit', postEO);
 
   // Fungsi untuk mengisi pilihan provinsi dari API
   function populateProvinsi() {
-    fetch('http://127.0.0.1:8000/api/provinsi/all')
+    fetch(`http://${Endpoint}/api/provinsi/all`)
       .then(response => response.json())
       .then(jsonData => {
         const data = jsonData.data;
@@ -122,7 +124,7 @@ form.addEventListener('submit', postEO);
 
   // Fungsi untuk mengisi pilihan kabupaten berdasarkan id provinsi yang dipilih
   function populateKabupaten(provinsiId) {
-    fetch('http://127.0.0.1:8000/api/kabupaten/show',{
+    fetch(`http://${Endpoint}/api/kabupaten/show`,{
           method: 'POST',
     headers: {
       'Content-Type': 'application/json',

@@ -260,7 +260,7 @@ const checkboxValue = checkbox.checked ? 1 : 0;
     //console.log(formData);
     formData.append('public',checkboxValue);
 
-    fetch('http://localhost:8000/api/event/save', {
+    fetch(`http://${Endpoint}/api/event/save`, {
         method: 'POST',
         body: formData,
     })
@@ -285,7 +285,7 @@ const checkboxValue = checkbox.checked ? 1 : 0;
                 longitude:longitude
             };
            // return console.log(secondApiData);
-            fetch('http://localhost:8000/api/event/detail/save',{
+            fetch(`http://${Endpoint}/api/event/detail/save`,{
               method:'POST',
               headers: {
               'Content-Type': 'application/json',

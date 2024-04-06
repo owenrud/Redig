@@ -6,6 +6,7 @@
   @vite('resources/css/app.css')
   <script src="https://kit.fontawesome.com/43733cda5c.js" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.0.0/flowbite.min.js"></script>
+<title>Register</title>
 </head>
 <body>
 
@@ -76,7 +77,7 @@
         <i class="fa-solid fa-phone fa-xl"></i>
     </span>
    
-    <input type="text" name="no_telp" id="website-admin" class="rounded-none rounded-r-lg bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Nomor Telepon ">
+    <input type="number" name="no_telp" id="website-admin" class="rounded-none rounded-r-lg bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Nomor Telepon ">
 
     </div>
 
@@ -115,7 +116,7 @@
 
         </div>
       <div class='pr-4'>
-        <button onclick="register(event)" type="submit" class="mx-20 my-8 flex w-9/12 h-12 text-xl justify-center text-white bg-gradient-to-r from-purple-600 via-purple-700 to-purple-800 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-purple-300 dark:focus:ring-purple-800 shadow-lg shadow-purple-600/25 dark:shadow-lg dark:shadow-purple-800/80 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
+        <button onclick="validateForm(event)" type="submit" class="mx-20 my-8 flex w-9/12 h-12 text-xl justify-center text-white bg-gradient-to-r from-purple-600 via-purple-700 to-purple-800 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-purple-300 dark:focus:ring-purple-800 shadow-lg shadow-purple-600/25 dark:shadow-lg dark:shadow-purple-800/80 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
        Register
        </button>
        </div>
@@ -127,10 +128,11 @@
 
   const provinsiSelect = document.getElementById('provinsi');
   const kabupatenSelect = document.getElementById('kabupaten');
+  const Endpoint = "localhost:8000";
 
   // Fungsi untuk mengisi pilihan provinsi dari API
   function populateProvinsi() {
-    fetch('http://127.0.0.1:8000/api/provinsi/all')
+    fetch(`http://${Endpoint}/api/provinsi/all`)
       .then(response => response.json())
       .then(jsonData => {
         const data = jsonData.data;
@@ -158,7 +160,7 @@
 
   // Fungsi untuk mengisi pilihan kabupaten berdasarkan id provinsi yang dipilih
   function populateKabupaten(provinsiId) {
-    fetch('http://127.0.0.1:8000/api/kabupaten/show',{
+    fetch(`http://${Endpoint}/api/kabupaten/show`,{
           method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -216,16 +218,23 @@
   function validatePassword() {
     const password = passwordInput.value;
     const confirmPassword = confirmPasswordInput.value;
+     let errorMessage = '';
+
+     if (password.length < 8) {
+      errorMessage = 'Password should be at least 8 characters long.';
+    }
 
     if (password === confirmPassword) {
       // Kata sandi cocok, atur border menjadi normal
-      passwordInput.style.borderColor = 'initial';
+     passwordInput.style.borderColor = 'initial';
       confirmPasswordInput.style.borderColor = 'initial';
-      passwordError.style.display = 'none';
+      passwordError.textContent = errorMessage;
+      passwordError.style.display = errorMessage ? 'block' : 'none';
     } else {
       // Kata sandi tidak cocok, atur border menjadi merah
-      passwordInput.style.borderColor = 'red';
+     passwordInput.style.borderColor = 'red';
       confirmPasswordInput.style.borderColor = 'red';
+      passwordError.textContent = 'Passwords do not match.';
       passwordError.style.display = 'block';
     }
   }
@@ -235,11 +244,44 @@
   confirmPasswordInput.addEventListener('input', validatePassword);
 </script>
 <script>
-    function register(event) {
-    event.preventDefault();  // Mencegah tindakan default formulir
+  function validateForm(event) {
+    event.preventDefault(); // Prevent form submission
+    
+    // Get form input values
+    const email = document.getElementById('website-admin').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const confirmPassword = document.getElementById('confirm').value.trim();
+    const fullName = document.getElementsByName('full_name')[0].value.trim();
+    const phone = document.getElementsByName('no_telp')[0].value.trim();
+    const address = document.getElementsByName('alamat')[0].value.trim();
+    const province = document.getElementById('provinsi').value.trim();
+    const city = document.getElementById('kabupaten').value.trim();
+    //console.log("Kabupaten",city);
+    
+    // Check if any field is empty
+    if (!email || !password || !confirmPassword || !fullName || !phone || !address || !province || !city) {
+      alert('Please fill in all fields.');
+      return;
+    }
+    
+    // Check if password and confirm password match
+    if (password !== confirmPassword) {
+      alert('Passwords do not match.');
+      return;
+    }
+   
+    
+    // Proceed with form submission if validation passes
+    register();
+  }
+  </script>
+<script>
+    function register() {
+      // Mencegah tindakan default formulir
 
     const form = document.querySelector('form');
     const formData = new FormData(form);
+    console.log("ini adalah hasil Kabupaten yg di pilih :",formData.get('kabupaten'));
 
     fetch('http://localhost:8000/api/register-account', {
         method: 'POST',

@@ -45,7 +45,7 @@ const eventId = window.location.pathname.split('/')[3];
     //console.log(formData);
 
 
-    fetch('http://localhost:8000/api/operator/save', {
+    fetch(`http://${Endpoint}/api/operator/save`, {
         method: 'POST',
         body: formData,
     })

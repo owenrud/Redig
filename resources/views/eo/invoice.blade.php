@@ -78,7 +78,7 @@ Riwayat Invoice
   // Async function to fetch data for invoice
   async function fetchInvoiceData() {
     try {
-      const response = await fetch('http://localhost:8000/api/invoice/show/user', {
+      const response = await fetch(`http://${Endpoint}/api/invoice/show/user`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -90,7 +90,7 @@ Riwayat Invoice
 
       if (data.is_success) {
                 const invoiceItemsPromises = data.data.map(async (item) => {
-          const paketResponse = await fetch('http://localhost:8000/api/paket/show', {
+          const paketResponse = await fetch(`http://${Endpoint}/api/paket/show`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

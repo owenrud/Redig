@@ -18,6 +18,12 @@ class PaymentController extends Controller
         //return $profileUser;
         // Set your Midtrans credentials
         Config::$serverKey = env('MIDTRANS_SERVER_KEY');
+        // Get the value of Config::$serverKey
+// $serverKey = Config::$serverKey;
+
+// // Return the value as part of the response
+// return response()->json(['serverKey' => $serverKey]);
+        //$serverKey = "SB-Mid-server-82xg1Gbhq0VxjRzMcFLketCi";
         Config::$isProduction = env('MIDTRANS_IS_PRODUCTION');
         Config::$isSanitized = true;
         
@@ -32,7 +38,7 @@ class PaymentController extends Controller
             'order_id' => uniqid(),
             'gross_amount' => $plan->harga,
         ];
-
+        //return $transactionDetails;
         // Create the customer details (you need to replace this with your logic)
         $customerDetails = [
             'first_name' => $profileUser->nama_lengkap,
@@ -40,22 +46,24 @@ class PaymentController extends Controller
             'phone' => $profileUser->no_telp,
             'address'=> $profileUser->alamat,
         ];
-
+        //return $customerDetails;
         // Create the item details
         $itemDetails = [
             [
-                'id' => $plan->id,
+                'id' => $plan->ID_paket,
                 'price' => $plan->harga,
                 'quantity' => 1,
                 'name' => $plan->nama_paket,
             ],
         ];
-
+        //return $itemDetails;
         // Create the credit card secure token (you need to replace this with your logic)
         $creditCardOptions = [
             'secure' => true,
         ];
+       
 
+        //return $snapToken;
         try {
             // Create Snap Token
             $snapToken = Snap::getSnapToken([

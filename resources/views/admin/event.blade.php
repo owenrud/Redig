@@ -1,4 +1,6 @@
 @extends('admin.layouts.main')
+@section('tilte','Daftar Event')
+@section('page_title','Event')
 @section('content')
 
 
@@ -79,101 +81,71 @@ Daftar Event
 let selectedKategori = '';
 let selectedPaket = '';
 let currentPage = 1; // Added currentPage variable
-const perPage = 3; // Set perPage to match your API call
+let perPage = 5; // Set perPage to match your API call
 let IndexCounter = 1;
 // Function to fetch data from the second API
-async function fetchDataFromSecondAPI(event) {
-    const response = await fetch('http://localhost:8000/api/paket/show', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ ID_paket: event.ID_paket }),
-    });
-
-    const dataShow = await response.json();
-
-    if (dataShow && dataShow.data) {
-        const item = dataShow.data;
-
-        const tipe = document.createElement('td');
-        tipe.textContent = item.nama_paket;
-         tipe.setAttribute('data-id', item.ID_paket);
-        if (item.nama_paket !== 'Gratis') {
-            tipe.classList.add('text-purple-600', 'font-bold', 'px-6', 'py-4');
-        } else {
-            tipe.classList.add('text-blue-700', 'font-bold', 'px-6', 'py-4');
-        }
-
-        return tipe;
-    }
-
-    return null;
-}
-
-// Fetch API pertama untuk mendapatkan data event
-
-// Function to fetch data from the third API
-async function fetchDataFromThirdAPI(event) {
+async function loadPage(pageNumber) {
     try {
-        const response = await fetch(`http://localhost:8000/api/event/detail/show`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ ID_event: event.ID_event }), // Include the necessary body
-        });
+        const response = await fetch(`http://${Endpoint}/api/event/all?perPage=${perPage}&page=${pageNumber}`);
+        const responseData = await response.json();
 
-        if (!response.ok) {
-            console.error(`Error fetching detail data for event ${event.ID_event}. Status: ${response.status}`);
-            return null;
-        }
+        if (responseData.is_success && responseData.data) {
+            const totalItems = responseData.data.total;
 
-        const data = await response.json();
+            // Update pagination information
+            currentPage = responseData.data.from;
+            perPage = responseData.data.to;
+            updatePaginationInfo(currentPage,perPage,totalItems);
 
-        if (data && data.is_success) {
-            const ID_kategori = data.data.ID_kategori; // Store ID_kategori for the fourth API call
-            return ID_kategori;
+            // Update page buttons
+            updatePageButtons(responseData.data.links);
+
+            // Clear existing rows in the table
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
+
+            // Insert new rows based on fetched data
+            const events = responseData.data.data;
+            IndexCounter = 1;
+            events.forEach(event => {
+                const row = document.createElement('tr');
+               const publicClass = event.public == 1 ? 'text-green-600 font-medium' : 'text-red-600 font-medium';
+                const publicText = event.public == 1 ? 'Public' : 'Private';
+                const paketClass = event.nama_paket != 'Gratis' ? 'text-purple-600 font-medium' : 'text-gray-600 font-medium';
+                const statusText = event.status == 0 ? 'Selesai' : (event.status == 1 ? 'Sedang Berlangsung' : 'Akan Datang');
+                const statusClass = event.status == 0 ? 'text-red-600 font-medium' : 
+                (event.status == 1 ? 'text-blue-600 font-medium' : 'text-green-600 font-medium');
+                row.innerHTML = `<td class="px-6 py-4">${IndexCounter}</td>
+                                <td class="px-6 py-4">${event.nama_event}</td>
+                                <td class="px-6 py-4">${event.start}</td>
+                                <td class="px-6 py-4">${event.end}</td>
+                                <td class="px-6 py-4 ${publicClass}">${publicText}</td>
+                                <td class="px-6 py-4 ${paketClass}">${event.nama_paket}</td>
+                                <td class="px-6 py-4 font-medium">${event.nama_kategori}</td>
+                                <td class="px-6 py-4 ${statusClass}">${statusText}</td>`;
+                IndexCounter++;
+
+                // Insert the row into the table body
+                tableBody.appendChild(row);
+            });
+
+            console.log('All data has been fetched and processed.');
         } else {
-            console.error('Invalid or not found detail data for event:', event.ID_event);
-            return null;
+            console.error('Invalid or not found event data');
         }
     } catch (error) {
-        console.error('Error fetching detail data for event:', event.ID_event, error);
-        return null;
+        console.error('Error fetching event data:', error);
     }
 }
 
-// Function to fetch data from the fourth API
-async function fetchDataFromFourthAPI(ID_kategori) {
-   // console.log(ID_kategori);
-    try {
-        const response = await fetch(`http://localhost:8000/api/event/kategori/show`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ id : ID_kategori }), // Include the necessary body
-        });
-        const data = await response.json();
-        //console.log(data);
-        if (data && data.is_success) {
-            const kategori = document.createElement('td');
-            kategori.textContent = data.data.nama;
-            kategori.setAttribute('data-id', data.id);
-            kategori.classList.add('px-6', 'py-4','font-bold');
-            return kategori;
-        } else {
-            console.error('Invalid or not found data from fourth API for ID_kategori:', ID_kategori);
-            return null;
-        }
-    } catch (error) {
-        console.error('Error fetching data from fourth API for ID_kategori:', ID_kategori, error);
-        return null;
-    }
+function updatePaginationInfo(currentPage,perPage,totalItems) {
+   const startItem = currentPage;
+    const endItem =perPage;
+    const paginationInfo = document.getElementById('pagination-info');
+    paginationInfo.textContent = `Showing ${startItem}-${endItem} of ${totalItems}`;
+
 }
-
-
+loadPage(1);
 function updatePageButtons(links) {
     const paginationElement = document.getElementById('pagination');
     paginationElement.innerHTML = '';
@@ -198,162 +170,6 @@ function updatePageButtons(links) {
     });
 }
 
-
-fetch('http://localhost:8000/api/event/kategori/all')
-  .then(response => response.json())
-  .then(data => {
-    if (data && data.is_success && Array.isArray(data.data)) {
-      // Populate Kategori Dropdown
-      const kategoriDropdown = document.getElementById('kategoriDropdown');
-      data.data.forEach(kategori => {
-        const option = document.createElement('option');
-        option.value =  kategori.id; 
-        option.textContent = kategori.nama;
-        kategoriDropdown.appendChild(option);
-      });
- } else {
-      console.error('Failed to fetch data for dropdowns');
-    }
-  })
-  .catch(error => console.error('Error fetching dropdown data:', error));
-      // Populate Paket Dropdown (adjust the API endpoint and logic accordingly)
-      fetch('http://localhost:8000/api/paket/all')
-  .then(response => response.json())
-  .then(data => {
-     if (data && data.is_success && Array.isArray(data.data)) {
-      const paketDropdown = document.getElementById('paketDropdown');
-      data.data.forEach(paket => {
-        const option = document.createElement('option');
-        option.value = paket.ID_paket;
-        option.textContent = paket.nama_paket;
-        paketDropdown.appendChild(option);
-      });
-       } else {
-      console.error('Failed to fetch data for dropdowns');
-    }
-  })
-  .catch(error => console.error('Error fetching dropdown data:', error));
-   
-async function loadPage(pageNumber) {
-    try {
-        const response = await fetch(`http://localhost:8000/api/event/all?perPage=${perPage}&page=${pageNumber}`);
-        const responseData = await response.json();
-        IndexCounter = 1;
-
-        if (responseData.is_success && responseData.data) {
-            const totalItems = responseData.data.total;
-           // console.log(responseData.data.total);
-            // Update pagination information
-             
-            updatePaginationInfo(responseData.data.total);
-
-            // Update page buttons
-            updatePageButtons(responseData.data.links);
-
-            // Clear existing rows in the table
-            const tableBody = document.getElementById('tableBody');
-            tableBody.innerHTML = '';
-
-            // Insert new rows based on fetched data
-            const fetchPromises = responseData.data.data.map(async event => {
-                const row = document.createElement('tr');
-
-                // Insert event columns into the row using <td> elements
-                row.innerHTML = `<td class="px-6 py-4">${IndexCounter}</td>
-                                <td class="px-6 py-4">${event.nama_event}</td>
-                                <td class="px-6 py-4">${event.start}</td>
-                                <td class="px-6 py-4">${event.end}</td>`;
-                IndexCounter++;
-
-                // Insert row into the table body
-                tableBody.appendChild(row);
-
-                // Insert "Public" or "Private" column based on event.public value
-                const public = document.createElement('td');
-                public.textContent = event.public == 1 ? 'Public' : 'Private';
-                public.classList.add(event.public == 1 ? 'text-green-600' : 'text-rose-600', 'px-6', 'py-4');
-                row.appendChild(public);
-
-                // Fetch data from the second API and store the promise in an array
-                const fetchPromiseSecondAPI = fetchDataFromSecondAPI(event);
-
-                try {
-                    // Wait for the fetch promise to resolve
-                    const tipe = await fetchPromiseSecondAPI;
-
-                    if (tipe !== null) {
-                        // Insert the fetched data into the row
-                        row.appendChild(tipe);
-
-                        // Fetch data from the third API
-                        const fetchPromiseThirdAPI = fetchDataFromThirdAPI(event);
-
-                        try {
-                            // Wait for the fetch promise to resolve
-                            const kategori = await fetchPromiseThirdAPI;
-
-                            if (kategori !== null) {
-                                // Insert the fetched data into the row
-
-                                // Fetch data from the fourth API
-                                const fetchPromiseFourthAPI = fetchDataFromFourthAPI(kategori);
-
-                                try {
-                                    // Wait for the fetch promise to resolve
-                                    const fourthData = await fetchPromiseFourthAPI;
-
-                                    if (fourthData !== null) {
-                                        // Insert the fetched data into the row
-                                        row.appendChild(fourthData);
-                                    } else {
-                                        console.error('Failed to fetch data from fourth API for ID_kategori:', kategori.ID_kategori);
-                                    }
-                                } catch (error) {
-                                    console.error('Error during fourth API fetch:', error);
-                                }
-                            } else {
-                                console.error('Failed to fetch data from third API for ID_event:', event.ID_event);
-                            }
-                        } catch (error) {
-                            console.error('Error during third API fetch:', error);
-                        }
-                    }
-
-                    // Insert "Selesai," "Sedang Berlangsung," or "Akan Datang" column based on event.status value
-                    const status = document.createElement('td');
-                    if (event.status == 0) {
-                        status.textContent = 'Selesai';
-                        status.classList.add('text-rose-600', 'px-6', 'py-4');
-                    } else if (event.status == 1) {
-                        status.textContent = 'Sedang Berlangsung';
-                        status.classList.add('text-yellow-400', 'px-6', 'py-4');
-                    } else {
-                        status.textContent = 'Akan Datang';
-                        status.classList.add('text-green-600', 'px-6', 'py-4');
-                    }
-                    row.appendChild(status);
-                } catch (error) {
-                    console.error('Error during fetch from second API:', error);
-                }
-            });
-
-            // After the loop is complete, use Promise.all to wait for all fetches to finish
-            await Promise.all(fetchPromises);
-
-            // All fetches are done, do whatever needs to be done afterward
-            console.log('All data has been fetched and processed.');
-        } else {
-            console.error('Invalid or not found event data');
-        }
-    } catch (error) {
-        console.error('Error fetching event data:', error);
-    }
-}
-function updatePaginationInfo(totalItems) {
-    const paginationInfo = document.getElementById('pagination-info');
-    paginationInfo.textContent = `Showing ${currentPage}-${currentPage + perPage - 1} of ${totalItems}`;
-}
-loadPage(1);
 
    // Your existing script
 function applyFilters() {

@@ -118,16 +118,13 @@ class ProfileController extends Controller
         }
 
         public function profile_EO(){
-            $EO_prof = Profile::join('users', 'profile.ID_User', '=', 'users.ID_User')
-            ->join('provinsi','profile.provinsi','=','provinsi.ID_provinsi')
-            ->join('kabupaten','profile.kota','=','kabupaten.id')
-            ->join('paket','profile.ID_paket','=','paket.ID_paket')
+            $EO_prof = user::join('paket','users.ID_paket','=','paket.ID_paket')
             ->select([
-                    'profile.ID_User',
-                    'profile.nama_lengkap',
-                    'users.email',
-                    'provinsi.nama as nama_provinsi',
-                    'kabupaten.nama as nama_kabupaten',
+                    'ID_User',
+                    'nama_lengkap',
+                    'email',
+                    'provinsi',
+                    'kabupaten',
                     'paket.nama_paket'
                 ])
              ->paginate(3);

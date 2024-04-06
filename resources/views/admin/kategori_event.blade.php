@@ -73,7 +73,7 @@ Add data
 @section('script')
 <script>
 let counter = 1;
-fetch('http://localhost:8000/api/event/kategori/all')
+fetch(`http://${Endpoint}/api/event/kategori/all`)
 .then(response => response.json())
 .then(apiData =>{
     const table = document.getElementById('tableBody');
@@ -81,6 +81,7 @@ fetch('http://localhost:8000/api/event/kategori/all')
     apiData.data.forEach(item =>{
     const row = document.createElement('tr');
     const no = document.createElement('td');
+    no.id = "nomor";
     no.textContent = counter;
     no.classList.add('px-6','py-4');
     const nama = document.createElement('td');
@@ -130,7 +131,7 @@ function deleteRowAction(ID_paket) {
 
     if (confirmation) {
         // Make a DELETE request to the API
-        fetch(`http://localhost:8000/api/event/kategori/delete/${ID_paket}`, {
+        fetch(`http://${Endpoint}/api/event/kategori/delete/${ID_paket}`, {
             method: 'DELETE',
         })
         .then(response => response.json())
@@ -142,10 +143,13 @@ function deleteRowAction(ID_paket) {
                 location.reload();
             } else {
                 console.error('Failed to delete row');
+                showAlert('Error', 'Failed to delete row');
             }
         })
-        .catch(error => console.error('Error deleting row'));
-        showAlert('Error', 'Kategori Sedang dipakai di data event');
+        .catch(error => {
+            //console.error('Error deleting row:', error);
+            showAlert('Error', 'Kategori Sedang dipakai di data event');
+        });
     }
 }
 

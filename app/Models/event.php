@@ -15,11 +15,21 @@ class event extends Model
     protected $fillable =[
         'ID_paket',
         'ID_EO',
+        'ID_kategori',
+        'ID_provinsi',
+        'ID_kabupaten',
         'nama_event',
         'desc_event',
+        'lokasi',
+        'alamat',
+        'latitude',
+        'longitude',
         'start',
         'end',
         'public',
         'status',
+        'banner',
+        'logo',
+        'materi'
     ];
 }

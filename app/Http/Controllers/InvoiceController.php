@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\invoice;
-use App\Models\Profile;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class InvoiceController extends Controller
@@ -13,7 +13,7 @@ class InvoiceController extends Controller
      */
     public function all()
     {
-        $invoice =invoice::all();
+        $invoice =invoice::paginate(5);
         return response()->json(['is_success'=>true,
         'data'=>$invoice,
         'message'=>"Semua data invoice"
@@ -71,9 +71,9 @@ class InvoiceController extends Controller
        
         if($invoice){
             if($invoice->status == 200){
-                $profile = Profile::find($request->ID_user);
+                $profile = user::find($request->ID_user);
                 if($profile){
-                    $profile->Kategori_paket = $invoice->ID_paket;
+                    $profile->ID_paket = $invoice->ID_paket;
                     $profile->save();
                 }
             }

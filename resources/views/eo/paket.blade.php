@@ -21,18 +21,14 @@
  
 
   // Async function to handle payment
-  async function handlePayment(event) {
-    const planId = event.currentTarget.getAttribute('data-id-paket');
-    // Implement your payment logic here
-    console.log(`Selected plan with ID ${planId}. Implement payment logic.`);
-  } async function createPlansUI() {
+   async function createPlansUI() {
     try {
       // Show loading spinner
       const loadingSpinner = document.getElementById('loadingSpinner');
       loadingSpinner.classList.remove('hidden');
 
       // Fetch plans data
-      const response = await fetch(`http://${Endpoint}/api/paket/all`);
+      const response = await fetch(`http://${Endpoint}/api/paket/all/active`);
       const plansData = await response.json();
 
       // Check if data retrieval was successful

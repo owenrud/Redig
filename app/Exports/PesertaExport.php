@@ -36,6 +36,7 @@ class PesertaExport implements FromCollection, WithHeadings, ShouldAutoSize
         return [
             'ID_peserta',
             'ID_event',
+            'ID_User',
             'nama',
             'email',
             'gender',

@@ -32,6 +32,10 @@
       <label for="deskripsi" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-purple-600 peer-focus:dark:text-purple-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Deskripsi Event</label>
   </div>
 
+    <div class="relative z-0 w-full mb-6 group">
+      <input type="text" name="lokasi" id="lokasi" class="block py-2.5 px-0 w-full text-sm text-fuchsia-500 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-purple-700 peer" placeholder=" " required />
+      <label for="lokasi" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-purple-600 peer-focus:dark:text-purple-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Lokasi</label>
+  </div>
    <div class="relative z-0 w-full mb-6 group">
       <input type="text" name="alamat" id="alamat" class="block py-2.5 px-0 w-full text-sm text-fuchsia-500 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-purple-700 peer" placeholder=" " required />
       <label for="alamat" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-purple-600 peer-focus:dark:text-purple-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Alamat</label>
@@ -52,7 +56,7 @@
 <div class="my-8">
 
 <label for="kategori" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Kategori</label>
-<select id="kategori" name="kategori" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+<select id="kategori" name="ID_kategori" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
  
 </select>
 
@@ -63,7 +67,7 @@
   <div class="my-8">
 
 <label for="provinsi" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Provinsi</label>
-<select id="provinsi" name="provinsi" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+<select id="provinsi" name="ID_provinsi" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
 </select>
 
 </div>
@@ -71,7 +75,7 @@
 <div class="my-8">
 
 <label for="kabupaten" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Kabupaten</label>
-<select id="kabupaten" name="kabupaten" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+<select id="kabupaten" name="ID_kabupaten" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
 </select>
 
 </div>
@@ -123,24 +127,13 @@ startDatePicker.config.onChange.push(function(selectedDates, dateStr, instance) 
   const kabupatenSelect = document.getElementById('kabupaten');
 const KategoriSelect = document.getElementById('kategori');
 const IDPaket = document.getElementById('Paket');
+IDPaket.value = PaketEO;
+       //console.log("hello? : ",IDPaket.value);
 
-fetch('http://127.0.0.1:8000/api/profile/show',{
-    method : 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body : JSON.stringify({id : id})
-})
-      .then(response => response.json())
-      .then(Profile => {
-        const data = Profile.data;
-        IDPaket.value = data.Kategori_paket;
-       // console.log(IDPaket.value);
-      });
   // Fungsi untuk mengisi pilihan provinsi dari API
 
   function populateKategori() {
-    fetch('http://127.0.0.1:8000/api/event/kategori/all')
+    fetch(`http://${Endpoint}/api/event/kategori/populate`)
       .then(response => response.json())
       .then(jsonData => {
         const data = jsonData.data;
@@ -166,7 +159,7 @@ fetch('http://127.0.0.1:8000/api/profile/show',{
       });
   }
   function populateProvinsi() {
-    fetch('http://127.0.0.1:8000/api/provinsi/all')
+    fetch(`http://${Endpoint}/api/provinsi/all`)
       .then(response => response.json())
       .then(jsonData => {
         const data = jsonData.data;
@@ -194,7 +187,7 @@ fetch('http://127.0.0.1:8000/api/profile/show',{
 
   // Fungsi untuk mengisi pilihan kabupaten berdasarkan id provinsi yang dipilih
   function populateKabupaten(provinsiId) {
-    fetch('http://127.0.0.1:8000/api/kabupaten/show',{
+    fetch(`http://${Endpoint}/api/kabupaten/show`,{
           method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -253,12 +246,18 @@ const checkbox = document.getElementById('public');
 
 // Convert the checked state to 0 or 1
 const checkboxValue = checkbox.checked ? 1 : 0;
-
+const paket = IDPaket.value;
+//console.log('value ID_paket :',paket);
 //console.log(checkboxValue);
     const form = document.querySelector('form');
     const formData = new FormData(form);
     //console.log(formData);
+    formData.append('ID_paket',paket);
     formData.append('public',checkboxValue);
+
+    for (let [key, value] of formData.entries()) {
+    console.log(`${key}: ${value}`);
+}
 
     fetch(`http://${Endpoint}/api/event/save`, {
         method: 'POST',
@@ -267,37 +266,7 @@ const checkboxValue = checkbox.checked ? 1 : 0;
     .then(response => response.json())
     .then(data => {
         if (data.is_success) {
-            const ID_event = data.data.ID_event;
-            const alamat =formData.get('alamat');
-            const provinsi =formData.get('provinsi') ;
-            const kategori =formData.get('kategori');
-            const kabupaten =formData.get('kabupaten');
-            const latitude = formData.get('latitude');
-            const longitude = formData.get('longitude');
-
-            const secondApiData ={
-                ID_event: ID_event,
-                ID_kategori : kategori,
-                alamat : alamat,
-                ID_provinsi : provinsi,
-                ID_kabupaten :kabupaten,
-                latitude :latitude,
-                longitude:longitude
-            };
-           // return console.log(secondApiData);
-            fetch(`http://${Endpoint}/api/event/detail/save`,{
-              method:'POST',
-              headers: {
-              'Content-Type': 'application/json',
-              },
-              body : JSON.stringify(secondApiData),
-            })
-             .then(response => response.json())
-            .then(data => {
-               if (data.is_success) {
             window.location.href = '/event';
-               }
-            })
         } else {
             // Handle the case where save failed
             console.error('Failed to save data:', data.message);

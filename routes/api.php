@@ -48,6 +48,8 @@ Route::prefix('fitur-paket')->group(function () {
 });
 Route::prefix('paket')->group(function () {
     Route::get('/all', [PaketController::class, 'all']);
+    Route::get('/all/eo',[PaketController::class,'allForEO']);
+    Route::get('/all/active', [PaketController::class, 'all_active']);
     Route::post('/show', [PaketController::class, 'show']);
     Route::post('/save', [PaketController::class, 'store']);
     Route::post('/update', [PaketController::class, 'update']);
@@ -69,10 +71,12 @@ Route::prefix('event')->group(function () {
     Route::post('/search', [EventController::class, 'search']);
     Route::post('/update', [EventController::class, 'update']);
     Route::delete('/delete/{id}', [EventController::class, 'delete']);
-    
+    Route::post('/stats',[EventController::class,'statsAbsen']);
     Route::prefix('kategori')->group(function () {
 
     Route::get('/all', [EventController::class, 'all_kategori']);
+    Route::get('/populate', [EventController::class, 'populate_kategori']);
+   
     Route::post('/show', [EventController::class, 'show_kategori']);
     Route::post('/save', [EventController::class, 'store_kategori']);
     Route::post('/update', [EventController::class, 'update_kategori']);
@@ -169,20 +173,7 @@ Route::prefix('invoice')->group(function () {
     Route::delete('/delete/{id}', [InvoiceController::class, 'delete']);
     // Tambahkan rute lain di sini yang dimulai dengan '/fitur-paket'
 });
-Route::prefix('verify')->group(function () {
-    Route::get('/all', [VerificationController::class, 'all']);
-    Route::post('/show', [VerificationController::class, 'show']);
-    Route::post('/save', [VerificationController::class, 'store']);
-    Route::post('/update', [VerificationController::class, 'update']);
-    Route::delete('/delete/{id}', [VerificationController::class, 'delete']);
-    // Tambahkan rute lain di sini yang dimulai dengan '/fitur-paket'
-});
-Route::prefix('reset')->group(function () {
-    Route::get('/all', [ResetPwdController::class, 'all']);
-    Route::post('/save', [ResetPwdController::class, 'store']);
-    Route::delete('/delete', [ResetPwdController::class, 'delete']);
-    // Tambahkan rute lain di sini yang dimulai dengan '/fitur-paket'
-});
+
 // Laravel route
 Route::post('/user/GID', [RegisterController::class,'getUserByGoogleId']);
 

@@ -1,4 +1,6 @@
 @extends('admin.layouts.main')
+@section('title','update paket')
+@section('page_title','Update Paket')
 @section('content')
 
 <div class="flex flex-col p-8">
@@ -8,19 +10,41 @@
 @csrf
 <div class="mb-6">
     <label  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nama Paket</label>
-    <input name="nama_paket" type="text"  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-</div>
-<div class="mb-6">
-    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Fitur</label>
-    <select name="ID_fitur" id="fitur" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-    
-    </select>
+    <input id="nama" name="nama_paket" type="text"  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
 </div>
 <div class="mb-6">
     <label  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Harga</label>
-    <input name="harga" type="number"  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+    <input id="harga" name="harga" type="number"  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
 </div>
-<button onclick="updatePaket()" type="submit" class="max-w-lg text-white bg-gradient-to-br from-purple-600 to-fuchsia-400 hover:bg-gradient-to-bl hover:from-purple-600 hover:to-fuchsia-400 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center">
+
+<div class="mb-6">
+    <label  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Scan Count</label>
+    <input id="ScanCount" name="ScanCount" type="number"  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+</div>
+<div class="mb-6">
+    <label  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">File Upload Count</label>
+    <input id="FileUpCount" name="FileUpCount" type="number"  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+</div>
+<div class="mb-6">
+    <label  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Guest Count</label>
+    <input id="GuestCount" name="GuestCount" type="number"  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+</div>
+<div class="mb-6">
+    <label  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Operator Count</label>
+    <input id="OperatorCount" name="OperatorCount" type="number"  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+</div>
+<div class="mb-6">
+    <label  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Certificate Count</label>
+    <input id="SertifCount" name="SertifCount" type="number"  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+</div>
+<div class="mb-6">
+<label class="inline-flex items-center cursor-pointer">
+  <input id="status" type="checkbox" name="status" value="" class="sr-only peer" checked>
+  <div class="relative w-11 h-6 bg-red-600 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-600"></div>
+  <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Status</span>
+</label>
+</div>
+<button onclick="updatePaket(event)" type="submit" class="max-w-lg text-white bg-gradient-to-br from-purple-600 to-fuchsia-400 hover:bg-gradient-to-bl hover:from-purple-600 hover:to-fuchsia-400 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center">
 
 Save
 </button>
@@ -35,18 +59,10 @@ Save
 @section('script')
 <script>
 // Dapatkan path dari URL
-const path = window.location.pathname;
-
-// Tentukan pola ekspresi reguler untuk mengekstrak ID dari path
-const regex = /\/paket\/edit\/(\d+)/;
-
-// Cocokkan pola dengan path
-const match = path.match(regex);
-
-// Ambil ID dari hasil pencocokan (jika ada)
-const idPaket = match ? match[1] : null;
+const idPaket = window.location.pathname.split('/').pop();
 
 //console.log(idPaket);
+
 
 if (idPaket) {
     // Tentukan URL API
@@ -70,53 +86,47 @@ if (idPaket) {
         .then(apiData => {
             // Lakukan sesuatu dengan data yang diterima dari API
             console.log(apiData);
-            const namaPaketInput = document.querySelector('input[name="nama_paket"]');
-                const fiturSelect = document.getElementById('fitur');
+            document.getElementById('nama').value = apiData.data.nama_paket;
+            document.getElementById('harga').value =apiData.data.harga;
+            document.getElementById('ScanCount').value = apiData.data.ScanCount;
+            document.getElementById('FileUpCount').value = apiData.data.FileUpCount;
+            document.getElementById('GuestCount').value =apiData.data.GuestCount;
+            document.getElementById('OperatorCount').value = apiData.data.OperatorCount;   
+            document.getElementById('SertifCount').value = apiData.data.SertifCount;
+           if (apiData.data.status === 1) {
+                document.getElementById('status').value = 1; // Set nilai menjadi 1
+                document.getElementById('status').checked = true; // Set input toggle menjadi tercentang
+            } else {
+                document.getElementById('status').value = 0; // Set nilai menjadi 0 atau sesuai kebutuhan Anda
+                document.getElementById('status').checked = false; // Set input toggle menjadi tidak tercentang
+            }
 
-                if (namaPaketInput) {
-                    namaPaketInput.value = apiData.data.nama_paket;
-                }
-                if (fiturSelect) {
-                     fiturSelect.value = apiData.data.ID_fitur;
-                }
         })
         .catch(error => console.error('Error fetching data from API:', error));
 } else {
     console.error('ID not found in URL');
 }
-</script>
-<script>
-const fitur = document.getElementById('fitur');
 
-fetch(`http://${Endpoint}/api/fitur-paket/all`)
-.then(response => response.json())
-.then(data =>{
-    data.data.forEach(item =>{
-        const option = document.createElement('option');
-        option.value = item.ID_fitur;
-        option.text = item.ID_fitur;
-        fitur.appendChild(option);
-    })
-});
+
+
 </script>
+
 <script>
     function updatePaket(event) {
     event.preventDefault();  // Mencegah tindakan default formulir
 
     const form = document.querySelector('form');
     const formData = new FormData(form);
-
-    // Ambil ID dari URL
-    const path = window.location.pathname;
-    const regex = /\/paket\/edit\/(\d+)/;
-    const match = path.match(regex);
-    const idPaket = match ? match[1] : null;
-
+    const toggle = document.getElementById('status');
+    const togglevalue = toggle.checked ? 1 : 0;
+    console.log(togglevalue);
     // Pastikan ID ditemukan sebelum membuat permintaan fetch
     if (idPaket) {
+       
         // Tambahkan ID ke dalam FormData
         formData.append('ID_paket', idPaket);
-
+        formData.append('status',togglevalue);
+       
         fetch(`http://${Endpoint}/api/paket/update`, {
             method: 'POST',
             body: formData,

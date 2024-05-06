@@ -14,13 +14,21 @@ class paket extends Model
 
     public function events()
     {
-        return $this->hasMany(Event::class, 'ID_paket', 'ID_paket');
+        {
+            return $this->hasMany(Event::class, 'ID_paket', 'ID_paket');
+        }
     }
     
     protected $fillable =[
         'nama_paket',
         'ID_fitur',
-        'harga'
+        'harga',
+        'ScanCount',
+        'FileUpCount',
+        'GuestCount',
+        'OperatorCount',
+        'SertifCount',
+        'status'
     ];
 
 }

@@ -55,6 +55,12 @@ Download Data Tamu
                  <th scope="col" class="px-6 py-3">
                     Kode Doorprize
                 </th>
+                <th scope="col" class="hidden px-6 py-3">
+                    Payment URL
+                </th>
+                <th scope="col" class="hidden px-6 py-3">
+                    Payment Status
+                </th>
                 <th scope="col" class="px-6 py-3">
                     <span class="sr-only">Action<
                 </th>

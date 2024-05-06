@@ -26,6 +26,10 @@
       <input id="desc_event" type="text" name="desc_event" class="block py-2.5 px-0 w-full text-sm text-fuchsia-500 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-purple-700 peer" placeholder=" " required />
       <label for="deskripsi" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-purple-600 peer-focus:dark:text-purple-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Deskripsi Event</label>
   </div>
+<div class="relative z-0 w-full mb-6 group">
+      <input id="lokasi" type="text" name="lokasi" id="lokasi" class="block py-2.5 px-0 w-full text-sm text-fuchsia-500 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-purple-700 peer" placeholder=" " required />
+      <label for="lokasi" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-purple-600 peer-focus:dark:text-purple-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Lokasi</label>
+  </div>
 
    <div class="relative z-0 w-full mb-6 group">
       <input id="alamat" type="text" name="alamat" id="alamat" class="block py-2.5 px-0 w-full text-sm text-fuchsia-500 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-purple-700 peer" placeholder=" " required />
@@ -80,7 +84,7 @@
 </div>
   
   <button onclick="EditEvent(event)" type="submit" class="text-white bg-gradient-to-br from-purple-600 to-fuchsia-400 
-  hover:bg-gradient-to-bl :hover:from-fuchsia-400 group:hover:to-purple-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-purple-800">Create</button>
+  hover:bg-gradient-to-bl :hover:from-fuchsia-400 group:hover:to-purple-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-purple-800">Update</button>
 </form>
 </div>
 </section>

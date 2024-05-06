@@ -82,19 +82,19 @@ class PesertaController extends Controller
          
             $kode_doorprize = rand(10000000, 99999999);
             $check_user = peserta_event::where('ID_event',$request->ID_event)
-            ->where('ID_User',$request->ID_user)->first();
+            ->where('ID_User',$request->ID_User)->first();
             $check_event = event::where('ID_event',$request->ID_event)
             ->join('paket','event.id_paket','=','paket.id_paket')
             ->select('event.ID_event','paket.id_paket','nama_paket')
             ->get();
             $namaPaket = $check_event[0]->nama_paket;
-            return $namaPaket.tolowercase() ;
+            //return $namaPaket.tolowercase() ;
            //return $check_user;
             //dd($check_user);
                 if(!$check_user){
                     $peserta_event =peserta_event::Create([
                         'ID_event' => $request->ID_event,
-                        'ID_User' => $request->ID_user,
+                        'ID_User' => $request->ID_User,
                         'nama' => $request->nama,
                         'email' => $request->email,
                         'gender' => $request->gender,

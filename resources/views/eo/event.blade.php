@@ -160,6 +160,7 @@ function deleteRowAction(ID_paket) {
 async function fetchUserProfile() {
   try {
     // Fetch profile data
+   // console.log("ID User :"+id)
     const profileResponse = await fetch(`http://${Endpoint}/api/profile/show`, {
       method: 'POST',
       headers: {
@@ -168,13 +169,13 @@ async function fetchUserProfile() {
       body: JSON.stringify({ id: id }),
     });
     const profileData = await profileResponse.json();
-
+    //console.log("Profile Data Si User:",profileData.data.ID_Paket);
     if (profileData.is_success) {
       // Extract account type ID from the profile data
-      const accountTypeID = profileData.data.ID_paket;
-
+      const accountTypeID = profileData.data.ID_Paket;
+    //console.log("account Type ID:" + accountTypeID);
       // Fetch all package information
-      const packageResponse = await fetch(`http://${Endpoint}/api/paket/all`);
+      const packageResponse = await fetch(`http://${Endpoint}/api/paket/all/eo`);
       const packageData = await packageResponse.json();
       //console.log(packageData.data)
 
@@ -303,7 +304,7 @@ async function fetchDataAndCreateUI(page = 1) {
         });
 
         const responseData = await eventDataResponse.json();
-        console.log(responseData);
+        //console.log(responseData);
 
         const tableBody = document.getElementById('tableBody');
         let indexCount = (page - 1) * responseData.data.per_page + 1;

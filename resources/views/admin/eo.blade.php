@@ -74,7 +74,7 @@ async function fetchAndDisplayData(apiEndpoint, page = 1) {
         
         const response = await fetch(`${apiEndpoint}?page=${page}`);
         const apiData = await response.json();
-        //console.log(apiData);
+        console.log(apiData);
         if (apiData && apiData.is_success) {
             const tableBody = document.getElementById('tableBody');
             const paginationContainer = document.getElementById('paginationContainer');
@@ -105,12 +105,12 @@ async function fetchAndDisplayData(apiEndpoint, page = 1) {
                 row.appendChild(nameCell);
 
                 const provinsiCell = document.createElement('td');
-                provinsiCell.textContent = profile.nama_provinsi;
+                provinsiCell.textContent = profile.provinsi;
                 provinsiCell.classList.add('px-6', 'py-4', 'text-center'); // Assuming you have the provinsi name in the API response
                 row.appendChild(provinsiCell);
 
                 const kotaCell = document.createElement('td');
-                kotaCell.textContent = profile.nama_kabupaten;
+                kotaCell.textContent = profile.kabupaten;
                 kotaCell.classList.add('px-6', 'py-4', 'text-center'); // Assuming you have the kota name in the API response
                 row.appendChild(kotaCell);
 
@@ -200,7 +200,7 @@ function deleteRowAction(ID_user) {
     }
 }
 // Call the function to fetch and display data for the new API
-fetchAndDisplayData(`http://${Endpoint}/api/profile/eo?page=1`);
+fetchAndDisplayData(`http://${Endpoint}/api/profile/eo`);
 
 </script>
 

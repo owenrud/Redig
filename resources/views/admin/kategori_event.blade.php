@@ -38,30 +38,14 @@ Add data
            
         </tbody>
     </table>
-    <nav class="flex items-center flex-column flex-wrap md:flex-row justify-between pt-4 mb-4 px-8" aria-label="Table navigation">
-        <span class="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">Showing <span class="font-semibold text-gray-900 dark:text-white">1-10</span> of <span class="font-semibold text-gray-900 dark:text-white">1000</span></span>
-        <ul class="inline-flex -space-x-px rtl:space-x-reverse text-sm h-8">
-            <li>
-                <a href="#" class="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Previous</a>
-            </li>
-            <li>
-                <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">1</a>
-            </li>
-            <li>
-                <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">2</a>
-            </li>
-            <li>
-                <a href="#" aria-current="page" class="flex items-center justify-center px-3 h-8 text-violet-600 border border-gray-300 bg-violet-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white">3</a>
-            </li>
-            <li>
-                <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">4</a>
-            </li>
-            <li>
-                <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">5</a>
-            </li>
-            <li>
-        <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Next</a>
-            </li>
+     <nav class="flex items-center flex-column flex-wrap md:flex-row justify-between pt-4 mb-4 px-8" aria-label="Table navigation">
+    <span class="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">
+        Showing <span class="font-semibold text-gray-900 dark:text-white" id="startData">1</span>-
+        <span class="font-semibold text-gray-900 dark:text-white" id="endData">10</span> of 
+        <span class="font-semibold text-gray-900 dark:text-white" id="totalData">1000</span>
+    </span>
+<ul id="paginationContainer" class="inline-flex -space-x-px rtl:space-x-reverse text-sm h-8">
+            
         </ul>
     </nav>
 </div>
@@ -73,53 +57,80 @@ Add data
 @section('script')
 <script>
 let counter = 1;
-fetch(`http://${Endpoint}/api/event/kategori/all`)
-.then(response => response.json())
-.then(apiData =>{
-    const table = document.getElementById('tableBody');
-    
-    apiData.data.forEach(item =>{
-    const row = document.createElement('tr');
-    const no = document.createElement('td');
-    no.id = "nomor";
-    no.textContent = counter;
-    no.classList.add('px-6','py-4');
-    const nama = document.createElement('td');
-    nama.textContent = item.nama;
-    nama.classList.add('px-6','py-4');
-      const cellAction = document.createElement('td');
-                            cellAction.classList.add('flex', 'justify-center', 'space-x-4', 'px-6', 'py-4');
+async function fetchDataAndDisplay(page = 1) {
+    try {
+        const response = await fetch(`http://${Endpoint}/api/event/kategori/all?page=${page}`);
+        const apiData = await response.json();
+        const table = document.getElementById('tableBody');
 
-                            // Create Edit Button
-                            const editButton = document.createElement('a');
-                            editButton.textContent = 'Edit';
-                            editButton.href = `/event/kategori/edit/${item.id}`;  // Gantilah dengan URL yang sesuai jika Anda ingin mengarahkan ke halaman tertentu
-                            editButton.classList.add('cursor-pointer', 'text-yellow-400', 'hover:text-yellow-600', 'inline-block', 'px-3', 'py-1');
+        table.innerHTML = ''; // Clear existing table rows
 
+        apiData.data.data.forEach((item, index) => {
+            // Create table row and cells
+            const row = document.createElement('tr');
+            const no = document.createElement('td');
+            no.textContent = index + 1;
+            no.classList.add('px-6', 'py-4');
 
-                            // Create Delete Button
-                            const deleteButton = document.createElement('button');
-                            deleteButton.textContent = 'Delete';
-                            deleteButton.classList.add('cursor-pointer', 'text-rose-600', 'hover:text-rose-800');
-                            deleteButton.type = 'button';
-                            deleteButton.onclick = function() {
-                                // Define the action you want to perform when the "Delete" button is clicked
-                                deleteRowAction(item.id); // You need to implement the deleteRowAction function
-                            };
+            const nama = document.createElement('td');
+            nama.textContent = item.nama;
+            nama.classList.add('px-6', 'py-4');
 
-                            // Append buttons to the cellAction
-                            cellAction.appendChild(editButton);
-                            cellAction.appendChild(deleteButton);
-        row.appendChild(no);
-        row.appendChild(nama);
-        row.appendChild(cellAction);
-         tableBody.appendChild(row);
-         counter++;
-    })
-   
-   
-})
+            const cellAction = document.createElement('td');
+            cellAction.classList.add('flex', 'justify-center', 'space-x-4', 'px-6', 'py-4');
+
+            const editButton = document.createElement('a');
+            editButton.textContent = 'Edit';
+            editButton.href = `/event/kategori/edit/${item.id}`;
+            editButton.classList.add('cursor-pointer', 'text-yellow-400', 'hover:text-yellow-600', 'inline-block', 'px-3', 'py-1');
+
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Delete';
+            deleteButton.classList.add('cursor-pointer', 'text-rose-600', 'hover:text-rose-800');
+            deleteButton.type = 'button';
+            deleteButton.onclick = function() {
+                deleteRowAction(item.id);
+            };
+
+            cellAction.appendChild(editButton);
+            cellAction.appendChild(deleteButton);
+
+            row.appendChild(no);
+            row.appendChild(nama);
+            row.appendChild(cellAction);
+
+            table.appendChild(row);
+        });
+
+        // Clear existing pagination buttons
+        const paginationContainer = document.getElementById('paginationContainer');
+        paginationContainer.innerHTML = '';
+
+        // Create pagination buttons
+        for (let i = 1; i <= apiData.data.last_page; i++) {
+            const button = document.createElement('li');
+            button.innerHTML = `<a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">${i}</a>`;
+            paginationContainer.appendChild(button);
+            button.addEventListener('click', () => fetchDataAndDisplay(i)); // Pass page number to fetchDataAndDisplay
+        }
+
+        // Update total data information
+        const startData = document.getElementById('startData');
+        const endData = document.getElementById('endData');
+        const totalData = document.getElementById('totalData');
+
+        startData.textContent = apiData.data.from;
+        endData.textContent = apiData.data.to;
+        totalData.textContent = apiData.data.total;
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
+}
+
+fetchDataAndDisplay(); // Fetch and display data for the first page
+
 </script>
+
 <script>
 // Function to handle row deletion
 function showAlert(title, message) {

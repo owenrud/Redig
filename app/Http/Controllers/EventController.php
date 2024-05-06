@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Cache;
 use App\Models\event;
 use App\Models\kategori_event;
 
-use App\Models\detail_event;
+use App\Models\peserta_event;
 use App\Models\provinsi;
 use App\Models\kabupaten;
 use App\Models\paket;
@@ -19,7 +19,7 @@ class EventController extends Controller
          // Default to 10 items per page
         $events = Event::join('paket','event.ID_paket','paket.ID_paket')
         ->join('kategori_event','ID_kategori','kategori_event.id')
-        ->select('nama_event','start','end','public','status',
+        ->select('nama_event','start','end','public','event.status',
         'nama_paket','kategori_event.nama as nama_kategori')
         ->paginate(5);
     
@@ -31,72 +31,80 @@ class EventController extends Controller
     }
 
     public function all_mobile() {
-         // Default to 10 items per page
-         $events = Cache::remember('all_events', 60, function () {
-         return Event::join('paket','event.ID_paket','=','paket.ID_paket')
-         ->join('profile','event.ID_EO','=','profile.ID_User')
-         ->join('kategori_event','ID_kategori','=','kategori_event.id')
-         ->join('provinsi','event.ID_provinsi','=','provinsi.ID_provinsi')
-         ->join('kabupaten','ID_kabupaten','=','kabupaten.id')
-         ->select([
-          'event.ID_event as id',
-          'event.nama_event',
-          'event.desc_event as deskripsi',
-          'event.start',
-          'event.end',
-          'event.public',
-          'event.status',
-          'paket.nama_paket',
-          'profile.nama_lengkap',
-          'kategori_event.nama as kategori',
-          'provinsi.nama as provinsi',
-          'kabupaten.nama as kabupaten'
-         ])
-         ->get();
-        });
-         return response()->json([
-             'is_success' => true,
-             'data' => $events,
-             'message' => 'Semua data Event',
-         ], 200);
+        // Check if data is cached
+        if (Cache::has('all_mobile_events')) {
+            \Log::info('Data is retrieved from cache.');
+            $events = Cache::get('all_mobile_events');
+        } else {
+            \Log::info('Data is retrieved from database.');
+            // Retrieve data from database
+            $events = Event::join('paket','event.ID_paket','=','paket.ID_paket')
+                ->join('profile','event.ID_EO','=','profile.ID_User')
+                ->join('kategori_event','ID_kategori','=','kategori_event.id')
+                ->join('provinsi','event.ID_provinsi','=','provinsi.ID_provinsi')
+                ->join('kabupaten','ID_kabupaten','=','kabupaten.id')
+                ->select([
+                    'event.ID_event as id',
+                    'event.ID_EO',
+                    'event.ID_kategori',
+                    'event.nama_event',
+                    'event.desc_event as deskripsi',
+                    'event.start',
+                    'event.end',
+                    'event.public',
+                    'event.status',
+                    'paket.nama_paket',
+                    'profile.nama_lengkap',
+                    'kategori_event.nama as kategori',
+                    'provinsi.nama as provinsi',
+                    'kabupaten.nama as kabupaten'
+                ])
+                ->paginate(3);
+    
+            // Cache the data for future use with a 60-minute expiration time (adjust as needed)
+            Cache::put('all_mobile_events', $events, 60);
+        }
+    
+        return response()->json([
+            'is_success' => true,
+            'data' => $events,
+            'message' => 'Semua data Event',
+        ], 200);
     }
+    
     public function all_mobile_test() {
-        // Default to 10 items per page
-       $events = Event::join('detail_event','event.ID_event','=','detail_event.ID_event')
-       ->join('paket','event.ID_paket','=','paket.ID_paket')
-       ->join('profile','event.ID_EO','=','profile.ID_User')
-       ->join('kategori_event','detail_event.ID_kategori','=','kategori_event.id')
-       ->join('provinsi','detail_event.ID_provinsi','=','provinsi.ID_provinsi')
-       ->join('kabupaten','detail_event.ID_kabupaten','=','kabupaten.id')
-       ->select([
-        'event.ID_event as id',
-        'event.nama_event',
-        'event.desc_event as deskripsi',
-        'event.start',
-        'event.end',
-        'event.public',
-        'event.status',
-        'paket.nama_paket',
-        'profile.nama_lengkap',
-        'kategori_event.nama as kategori',
-        'provinsi.nama as provinsi',
-        'kabupaten.nama as kabupaten'
-       ])
-       ->get();
-        
-       return response()->json([
-           'is_success' => true,
-           'data' => $events,
-           'message' => 'Semua data Event',
-       ], 200);
+        $events =  Event::with([
+                    'paket',
+                    'profile',
+                    'kategoriEvent',
+                    'provinsi',
+                    'kabupaten'
+                ])
+                ->select([
+                    'event.ID_event as id',
+                    'event.nama_event',
+                    'event.desc_event as deskripsi',
+                    'event.start',
+                    'event.end',
+                    'event.public',
+                    'event.status'
+                ])
+                ->get();
+
+    
+        return response()->json([
+            'is_success' => true,
+            'data' => $events,
+            'message' => 'Semua data Event',
+        ], 200);
    }
    public function search(Request $request){
     $events = Event::where('nama_event','LIKE','%'.$request->input('search').'%')
        ->join('paket','event.ID_paket','=','paket.ID_paket')
        ->join('profile','event.ID_EO','=','profile.ID_User')
-       ->join('kategori_event','ID_kategori','=','kategori_event.id')
+       ->join('kategori_event','event.ID_kategori','=','kategori_event.id')
        ->join('provinsi','event.ID_provinsi','=','provinsi.ID_provinsi')
-       ->join('kabupaten','detail_event.ID_kabupaten','=','kabupaten.id')
+       ->join('kabupaten','event.ID_kabupaten','=','kabupaten.id')
        ->select([
         'event.ID_event as id',
         'event.nama_event',
@@ -123,6 +131,7 @@ class EventController extends Controller
         
         public function show(Request $request){
             $event = event::join('paket','event.ID_paket','=','paket.ID_paket')
+            ->join('kategori_event','event.ID_kategori','=','kategori_event.id')
             ->where('ID_Event',$request->ID_event)
             ->get();
             if($event){
@@ -151,7 +160,7 @@ class EventController extends Controller
                 'event.status',
                 
             ])
-            ->paginate(5);
+            ->orderBy('ID_event')->paginate(5);
             if($event){
                 return response()->json(['is_success'=>true,
                 'data'=>$event,
@@ -180,8 +189,7 @@ class EventController extends Controller
                     'start' => $request->start,
                     'end' => $request->end,
                     'public' => $request->public,
-                    'status' => $request->status,
-                    
+                    'status' => $request->status,  
                 ]);
                 if($event){
                     return response()->json(['is_success'=>true,
@@ -242,141 +250,33 @@ class EventController extends Controller
             return response()->json(['is_success'=>false,'message'=>"event Tidak ada"],'404');
         }
 
-
-//=====================DDDDETAILLL EVENTTTT================================
-
-
-        public function all_detail(){
-            $event =detail_event::all();
-            return response()->json(
-                ['is_success'=>true,
-                'data'=>$event,
-                'message'=>'data detail event'],'200');
-            
-        
-            }
-            
-            public function show_detail(Request $request){
-                $event = detail_event::find($request->ID_event);
-                if($event){
-                    return response()->json(
-                        ['is_success'=>true,
-                       'data'=>$event,
-                       'message'=>'data detail event'],'200');
-                       
-                }
-                return response()->json(
-                    ['is_success'=>false,
-                    'data'=>$event,
-                    'message'=>'data tidak ditemukan'],'404');
-                
-            }
-        
-            public function store_detail(Request $request){
-                    $event =detail_event::Create([
-                        'ID_event' => $request->ID_event,
-                        'ID_kategori' => $request->ID_kategori,
-                        'alamat' => $request->alamat,
-                        'ID_provinsi' => $request->ID_provinsi,
-                        'ID_kabupaten' => $request->ID_kabupaten,
-                        'lat' => $request->latitude,
-                        'long' => $request->longitude,
-                        'banner' => $request->banner,
-                        'file' => $request->file
-                    ]);
-                    if($event){
-                        return response()->json(
-                            ['is_success'=>true,
-                           'data'=>$event,
-                           'message'=>'data detail event berhasil ditambahkan'],'200');       
-                    }
-                    return response()->json(
-                        ['is_success'=>false,
-                       'data'=>$event,
-                       'message'=>'data detail event gagal ditambahkan'],'500');
-                       
-                    
-            }
-        
-            public function update_detail(Request $request){
-                    $event = detail_event::find($request->ID_event);
-                    try {
-                    if ($event) {
-                        // Daftar atribut yang ingin diperbarui
-                        $atributToUpdate = [
-                            'ID_event', 'ID_kategori', 'alamat',
-                            'ID_provinsi', 'ID_kabupaten', 'lat', 'long', 'banner', 'logo'
-                            ,'materi'
-                        ];
-            
-                        // Loop melalui atribut dan periksa apakah ada dalam permintaan
-                        foreach ($atributToUpdate as $atribut) {
-                            if ($request->has($atribut)) {
-                                // If the attribute is a file, handle the file upload
-                                if ($atribut == 'banner' || $atribut == 'logo' || $atribut =='materi') {
-                                    $file = $request->file($atribut);
-                                    //dd($request->file('banner'));
-                                    // Modify the filename
-                                    $modifiedFilename = time() . '_' . str_replace(' ', '_', $file->getClientOriginalName());
-            
-                                    // Store the file with the modified filename
-                                    $path = $file->storeAs('uploads', $modifiedFilename, 'public');
-            
-            
-                                    // Save the modified filename to the model
-                                    $event->$atribut = $modifiedFilename;
-                                } else {
-                                    // If it's not a file, update the attribute directly
-                                    $event->$atribut = $request->input($atribut);
-                                }
-                            }
-                        }
-            
-                    $event->save();
-            
-                    return response()->json(
-                        ['is_success'=>true,
-                        'data'=>$event,
-                        'message'=>'data berhasil diupdate'],'200');
-                    
-                    }
-                    return response()->json(
-                        ['is_success'=>false,
-                        'data'=>$event,
-                        'message'=>'data gagal diupdate'],'404');
-                    
-            }catch (\Exception $e) {
-                // Log the exception for further investigation
-                
+        public function statsAbsen(Request $request){
+            $stats = peserta_event::where('ID_event',$request->ID_event)
+            ->whereDate('updated_at', $request->date)
+            ->whereTime('updated_at', '>=', $request->time_start)
+            ->whereTime('updated_at', '<=', $request->time_end)
+            ->get();
+            return response()->json(['is_success'=>true,
+            'data'=>$stats,
+        'message'=>"Data Statistik Peserta berdasarkan Tanggal dan Waktu Absen"],200);
         }
-    }
-        
-            public function delete_detail($id){
-                $event =detail_event::find($id);
-                $event->delete();
-                if($event){
-                    return response()->json(
-                        ['is_success'=>true,
-                       'data'=>$event,
-                       'message'=>'data detail event berhasil dihapus'],'200');
-                       
-                }
-                return response()->json(
-                    ['is_success'=>false,
-                   'data'=>$event,
-                   'message'=>'data tidak ditemukan'],'404');
-                 
-            }
+
 
 //==================KATEGORIII====================================
 public function all_kategori(){
-    $event =kategori_event::all();
+    $event =kategori_event::paginate(3);
     return response()->json(
         ['is_success'=>true,
        'data'=>$event,
        'message'=>'data kategori'],'200');
     }
-    
+public function populate_kategori(){
+    $event =kategori_event::all();
+    return response()->json(
+        ['is_success'=>true,
+       'data'=>$event,
+       'message'=>'data kategori'],'200');
+}
     public function show_kategori(Request $request){
         $event = kategori_event::find($request->id);
     if($event){

@@ -19,8 +19,11 @@
 </div>
 <script>
 const id = {{ $authUser->ID_User }};
+const PaketEO = {{$authUser->ID_Paket}};
+//console.log("bisa gini kan ?:",PaketEO);
 const Endpoint = "localhost:8000";
 const nama = document.getElementById('username');
+let user = '';
 fetch(`http://${Endpoint}/api/profile/show`,{
       method: 'POST',
     headers: {
@@ -32,8 +35,8 @@ fetch(`http://${Endpoint}/api/profile/show`,{
 .then(response => response.json())
 .then(data =>{
    if (data.is_success && data.data) {
-            const user = data.data;
-            //console.log(user);
+            user = data.data;
+            //console.log("data User dari Main :",user);
             nama.textContent = user.nama_lengkap;
             // Access other properties and update your HTML as needed
         } else {

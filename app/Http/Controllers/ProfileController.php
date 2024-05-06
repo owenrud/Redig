@@ -20,7 +20,7 @@ class ProfileController extends Controller
         }
         
         public function show(Request $request){
-            $profile = profile::find($request->id);
+            $profile = user::find($request->id);
             if($profile){
                 return response()->json(['is_success'=>true,
                     'data'=>$profile,
@@ -119,6 +119,7 @@ class ProfileController extends Controller
 
         public function profile_EO(){
             $EO_prof = user::join('paket','users.ID_paket','=','paket.ID_paket')
+            ->where('Role','EO')
             ->select([
                     'ID_User',
                     'nama_lengkap',
@@ -127,6 +128,7 @@ class ProfileController extends Controller
                     'kabupaten',
                     'paket.nama_paket'
                 ])
+                ->orderBy('ID_User', 'asc')
              ->paginate(3);
             return response()->json([
                 'is_success'=>true,

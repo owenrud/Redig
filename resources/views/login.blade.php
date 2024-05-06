@@ -105,40 +105,6 @@ googleLoginButton.addEventListener('click', function() {
 });
 </script>
 
-<script>
-    document.getElementById('Login').addEventListener('submit', async function(event) {
-        event.preventDefault();
 
-        const formData = new FormData(this);
-
-        try {
-            const response = await fetch('/api/user/login', {
-                method: 'POST',
-                body: formData,
-            });
-
-            if (response.ok) {
-                const responseData = await response.json();
-
-                if (responseData.is_success) {
-                    console.log(responseData);
-
-                    // Store the access token in local storage
-                    localStorage.setItem('my_app_access_token', responseData.access_token);
-
-                    // Redirect to the dashboard
-                    window.location.href = '{{ route("home") }}';
-                } else {
-                    alert('Login failed. Please check your credentials.');
-                }
-            } else {
-                throw new Error('Login failed. Server error.');
-            }
-        } catch (error) {
-            console.error('Error during login:', error);
-            alert('Login failed. Please check your credentials.');
-        }
-    });
-</script> 
 
 </html>

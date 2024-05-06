@@ -74,17 +74,7 @@
       Admin</span>
       @endif
     </div>
-    <ul class="py-2 px-4 space-y-2 text-sm text-center text-gray-700 dark:text-gray-200" aria-labelledby="avatarButton">
-      <li>
-     <a href="/profile" class="block px-4 py-2 hover:bg-gradient-to-br from-fuchsia-200 via-fuchsia-300 to-fuchsia-400 rounded-2xl hover:text-white group:hover:shadow-sm group:hover:shadow-fuchsia-600/50 dark:hover:bg-gray-600 dark:hover:text-white"> 
-     <i class="mr-2 fa-regular fa-user"></i>Profile</a>
-      </li>
-      <li>
-        <a href="/help" class="block px-4 py-2 hover:bg-gradient-to-br from-fuchsia-200 via-fuchsia-300 to-fuchsia-400 hover:text-white rounded-2xl dark:hover:bg-gray-600 dark:hover:text-white">
-        <i class="mr-2 fa-solid fa-question"></i>
-        Bantuan </a>
-      </li>
-    </ul>
+    
     <div class="py-1 px-1 text-center w-full">
       <a href="/logout" class="block px-5 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
      <button class="relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-purple-500 to-fuchsia-400 group-hover:from-purple-500 group-hover:to-fuchsia-400 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800">

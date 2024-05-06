@@ -47,14 +47,15 @@ class OperatorController extends Controller
         }
         public function show_operator(Request $request){
             $operator = operator::find($request->ID_operator);
-            if($operator){
+            $user = user::find($operator->ID_User);
+            if($user){
                 return response()->json(['is_success'=>true,
-                'data'=>$operator,
+                'data'=>$user,
                 'message'=>'Data operator ditemukan'
             ],'200');
             }
             return response()->json(['is_success'=>false,
-            'data'=>$operator,
+            'data'=>$user,
             'message'=>'Data operator Tidak ditemukan'
         ],'404');
         }
@@ -105,21 +106,26 @@ class OperatorController extends Controller
     
         public function update(Request $request){
                 $operator = operator::find($request->ID_operator);
-            
-                if ($operator) {
+                $user = user::find($operator->ID_User);
+                //return $user;
+                if ($user) {
                     // Daftar atribut yang ingin diperbarui
                     $atributToUpdate = [
-                        'ID_event'];
+                        'nama_lengkap','email','password'];
                     
                     // Loop melalui atribut dan periksa apakah ada dalam permintaan
                     foreach ($atributToUpdate as $atribut) {
                         if ($request->has($atribut)) {
-                            $operator->$atribut = $request->input($atribut);
+                            if ($atribut === 'password') {
+                $user->$atribut = bcrypt($request->input($atribut));
+            } else {
+                $user->$atribut = $request->input($atribut);
+            }
                         }
                     }
-                $operator->save();
+                $user->save();
         
-                return response()->json(['is_success'=>true,'data'=>$operator,'message'=>'operator berhasil di update'],'200');
+                return response()->json(['is_success'=>true,'data'=>$user,'message'=>'operator berhasil di update'],'200');
                 }
                 return response()->json(['is_success'=>false,'message'=>"operator Tidak ada"],'404');
         

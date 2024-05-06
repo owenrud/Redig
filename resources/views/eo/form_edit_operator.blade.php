@@ -57,7 +57,7 @@ if (OpId) {
         .then(apiData => {
             // Lakukan sesuatu dengan data yang diterima dari API
             console.log(apiData);
-            document.getElementById('nama').value = apiData.data.nama;
+            document.getElementById('nama').value = apiData.data.nama_lengkap;
              document.getElementById('email').value = apiData.data.email;
              document.getElementById('password').value = apiData.data.password;
 

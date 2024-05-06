@@ -13,15 +13,32 @@
     <input name="nama_paket" type="text"  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
 </div>
 <div class="mb-6">
-    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Fitur</label>
-    <select name="ID_fitur" id="fitur" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-    
-    </select>
-</div>
-<div class="mb-6">
     <label  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Harga</label>
     <input name="harga" type="number"  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
 </div>
+<div class="mb-6">
+    <label  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Scan Count</label>
+    <input name="ScanCount" type="number"  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+</div>
+<div class="mb-6">
+    <label  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">File Upload Count</label>
+    <input name="FileUpCount" type="number"  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+</div>
+<div class="mb-6">
+    <label  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Guest Count</label>
+    <input name="GuestCount" type="number"  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+</div>
+<div class="mb-6">
+    <label  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Operator Count</label>
+    <input name="OperatorCount" type="number"  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+</div>
+<div class="mb-6">
+    <label  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Certificate Count</label>
+    <input name="SertifCount" type="number"  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+</div>
+
+    <input name="status" type="hidden" value="1"  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+
 <button onclick="postPaket(event)" type="submit" class="max-w-lg text-white bg-gradient-to-br from-purple-600 to-fuchsia-400 hover:bg-gradient-to-bl hover:from-purple-600 hover:to-fuchsia-400 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center">
 
 Save
@@ -35,20 +52,7 @@ Save
 @endsection
 
 @section('script')
-<script>
-const fitur = document.getElementById('fitur');
 
-fetch(`http://${Endpoint}/api/fitur-paket/all`)
-.then(response => response.json())
-.then(data =>{
-    data.data.forEach(item =>{
-        const option = document.createElement('option');
-        option.value = item.ID_fitur;
-        option.text = item.ID_fitur;
-        fitur.appendChild(option);
-    })
-});
-</script>
 <script>
     function postPaket(event) {
         event.preventDefault();  // Mencegah tindakan default formulir
@@ -63,7 +67,7 @@ fetch(`http://${Endpoint}/api/fitur-paket/all`)
         .then(response => {
             if (!response.ok) {
             // If the response status is not in the range 200-299, handle the error
-            throw new Error(`ID FITUR TELAH TERPAKAI`);
+            throw new Error(`test`);
         }
         return response.json();
          }) // Parse the response JSON)

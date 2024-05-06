@@ -1,5 +1,11 @@
 @extends('layouts.main')
 @section('page_title','Detail Event')
+@section('link')
+<!-- Include Lightbox2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/lightbox2/dist/css/lightbox.min.css" rel="stylesheet">
+
+
+@endsection
 @section('content')
 
 <div class="flex-1 flex-col justify-center items-center  p-4 w-full overflow-x-auto">
@@ -48,6 +54,8 @@
 
 @section('script')
 
+<!-- Include Lightbox2 JavaScript -->
+
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <!-- ... other head content ... -->
@@ -57,8 +65,9 @@
 
 <script>
 const UrlID = window.location.pathname.split('/').pop();
-console.log(UrlID);
-async function CheckPremium(){
+
+//console.log(UrlID);
+async function fetchEventData(){
     const APIURL = `http://${Endpoint}/api/event/show`;
     const response = await fetch(APIURL,{
         method: "POST",
@@ -71,16 +80,26 @@ async function CheckPremium(){
     })
 
     const responseData = await response.json();
-    if(responseData){
-        const check = responseData.data[0].nama_paket.toLowerCase();
-    if(check != 'gratis'){
-        document.getElementById('tiket_tamu').classList.remove('hidden');
-    }
-    
-    }
-    
+    const EventData = responseData.data; // No need for "let" here
+
+    return EventData;
 }
-CheckPremium();
+
+async function CheckPremium(){ 
+  const EventData = await fetchEventData();
+  const check = EventData[0].nama_paket.toLowerCase();
+  console.log("test debuf buat check premi:",check);
+    if(check != 'gratis'){
+         const thElements = document.querySelectorAll('th.hidden');
+        thElements.forEach((th) => {
+            th.classList.remove('hidden');
+        });
+    }
+       
+}
+
+fetchEventData();
+//CheckPremium();
 </script>
 <script>
    document.addEventListener('DOMContentLoaded', function () {
@@ -192,33 +211,32 @@ function setActiveSpan(activeSectionId) {
 
 </script>
 <script>
-  const jamId = window.location.pathname.split('/').pop();
   const provinsiSelect = document.getElementById('provinsi');
   const kabupatenSelect = document.getElementById('kabupaten');
   const KategoriSelect = document.getElementById('kategori');
   const StatsJamSelect =document.getElementById('Stats_Jam');
 
   function populateStatJam() {
-    fetch('http://127.0.0.1:8000/api/absen/show',{
+    fetch(`http://${Endpoint}/api/absen/show`,{
         method: 'POST',
         headers: {
          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ID_event: jamId,
+          ID_event: UrlID,
                     // Add other necessary data in the body if needed
           }),
     })
       .then(response => response.json())
       .then(jsonData => {
         const data = jsonData.data;
-        //console.log(data);
+        //console.log('Data Absen :',data);
 
       // Loop through the data and add options to the <select>
       data.forEach(item => {
         const option = document.createElement('option');
-        option.value = item.ID_absen;
-        option.text = item.nama;
+        option.value = item.mulai+','+item.berakhir;
+        option.text = item.mulai + ' - ' + item.berakhir;
         StatsJamSelect.appendChild(option);
       });
       })
@@ -229,7 +247,7 @@ function setActiveSpan(activeSectionId) {
 
   // Fungsi untuk mengisi pilihan provinsi dari API
   function populateProvinsi(preselectedProvinsiID) {
-    fetch('http://127.0.0.1:8000/api/provinsi/all')
+    fetch(`http://${Endpoint}/api/provinsi/all`)
       .then(response => response.json())
       .then(jsonData => {
         const data = jsonData.data;
@@ -259,7 +277,7 @@ function setActiveSpan(activeSectionId) {
   }
 
 async function populateKategori(preselectedKategoriID) {
-    fetch('http://127.0.0.1:8000/api/event/kategori/all')
+    fetch(`http://${Endpoint}/api/event/kategori/populate`)
       .then(response => response.json())
       .then(jsonData => {
         const data = jsonData.data;
@@ -289,7 +307,7 @@ async function populateKategori(preselectedKategoriID) {
   }
   // Fungsi untuk mengisi pilihan kabupaten berdasarkan id provinsi yang dipilih
   function populateKabupaten(provinsiId,preselectedKabuID) {
-    fetch('http://127.0.0.1:8000/api/kabupaten/show',{
+    fetch(`http://${Endpoint}/api/kabupaten/show`,{
           method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -356,22 +374,7 @@ async function populateKategori(preselectedKategoriID) {
 </script>
 
  <script>
-        async function fetchEventDates() {
-          const eventId = window.location.pathname.split('/').pop();
-            const apiUrl = `http://${Endpoint}/api/event/show`;
-            const response = await fetch(apiUrl,{
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    ID_event: eventId,
-                    // Add other necessary data in the body if needed
-                }),
-            });
-            const data = await response.json();
-            return data.data;
-        }
+       
 
         // Function to add days to a date
         function addDays(date, days) {
@@ -381,11 +384,14 @@ async function populateKategori(preselectedKategoriID) {
         }
 
         async function populateDateOptions() {
-            const eventDates = await fetchEventDates();
+            const eventDates = await fetchEventData();
 
             // Assuming eventDates contains start and end dates
-            const startDate = new Date(eventDates.start);
-            const endDate = new Date(eventDates.end);
+            //console.log(eventDates);
+            //console.log("Tanggal Mulai :",eventDates[0].start);
+            //console.log("Tanggal Selesai :",eventDates[0].end);
+            const startDate = new Date(eventDates[0].start);
+            const endDate = new Date(eventDates[0].end);
 
             const selectElement = document.getElementById("tgl");
             let currentDate = startDate;
@@ -403,7 +409,7 @@ async function populateKategori(preselectedKategoriID) {
             const tableBody = document.getElementById('StatsTable');
             
             try {
-                const eventId = { ID_event: jamId }; // Replace with the actual event ID
+                const eventId = { ID_event: UrlID }; // Replace with the actual event ID
                 const response = await fetch(`http://${Endpoint}/api/peserta/show`, {
                     method: 'POST',
                     headers: {
@@ -487,44 +493,18 @@ async function populateKategori(preselectedKategoriID) {
         });
     });
 </script>
+
 <script>
+
  async function fetchAndPopulateForm() {
     try {
-        const eventId = window.location.pathname.split('/').pop();
-        const apiUrl = `http://${Endpoint}/api/event/show`;
-        const detailApiUrl = `http://${Endpoint}/api/event/detail/show`;
-        const kategoriApiUrl = `http://${Endpoint}/api/event/kategori/show`;
+         const kategoriApiUrl = `http://${Endpoint}/api/event/kategori/show`;
         const provinsiApiUrl = `http://${Endpoint}/api/provinsi/show`;
         const kabupatenApiUrl = `http://${Endpoint}/api/kabupaten/show`;
 
-        // Fetch event data
-        const eventResponse = await fetch(apiUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                ID_event: eventId,
-            }),
-        });
 
-        const eventData = await eventResponse.json();
+        const eventData = await fetchEventData();
 
-        if (eventResponse.ok) {
-            // Fetch detail event data
-            const detailResponse = await fetch(detailApiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    ID_event: eventId,
-                }),
-            });
-
-            const detailData = await detailResponse.json();
-
-            if (detailResponse.ok) {
                 // Fetch kategori data
                 const kategoriResponse = await fetch(kategoriApiUrl, {
                     method: 'POST',
@@ -532,7 +512,7 @@ async function populateKategori(preselectedKategoriID) {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        id: detailData.data.ID_kategori,
+                        id: eventData[0].ID_kategori,
                     }),
                 });
 
@@ -547,7 +527,7 @@ async function populateKategori(preselectedKategoriID) {
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({
-                            id: detailData.data.ID_provinsi,
+                            id: eventData[0].ID_provinsi,
                         }),
                     });
 
@@ -560,11 +540,11 @@ async function populateKategori(preselectedKategoriID) {
                         // Fetch Kabupaten data
                         
                             // Populate the form with event, detail, kategori, provinsi, and kabupaten data
-                            populateForm(eventData.data);
-                            populateDetail(detailData.data);
+                            populateForm(eventData);
+                            
                             populateKategori(kategoriData.data.id);
                             populateProvinsi(provinsiData.data.ID_provinsi);
-                            populateKabupaten(provinsiData.data.ID_provinsi,detailData.data.ID_kabupaten);
+                            populateKabupaten(provinsiData.data.ID_provinsi,eventData[0].ID_kabupaten);
                         
                     } else {
                         console.error('Failed to fetch Provinsi data');
@@ -572,12 +552,6 @@ async function populateKategori(preselectedKategoriID) {
                 } else {
                     console.error('Failed to fetch kategori data:', kategoriData);
                 }
-            } else {
-                console.error('Failed to fetch event detail data:', detailData);
-            }
-        } else {
-            console.error('Failed to fetch event data:', eventData);
-        }
     } catch (error) {
         console.error('Error during fetch:', error);
     }
@@ -587,24 +561,26 @@ async function populateKategori(preselectedKategoriID) {
 async function populateForm(eventData) {
     try {
         // Assuming your form has elements with specific IDs, update their values here
-        document.getElementById('nama_event').value = eventData.nama_event;
-        document.getElementById('desc_event').value = eventData.desc_event;
+        document.getElementById('nama_event').value = eventData[0].nama_event;
+        document.getElementById('desc_event').value = eventData[0].desc_event;
         // Populate other form fields accordingly
-
+       document.getElementById('lokasi').value = eventData[0].lokasi;
+        
+        document.getElementById('alamat').value = eventData[0].alamat;
         // Add logic for populating checkbox, select, date fields, etc.
 
         // Example for date fields (replace 'mulai' and 'berakhir' with your actual date field IDs)
-        document.getElementById('mulai').value = eventData.start;
-        document.getElementById('berakhir').value = eventData.end;
+        document.getElementById('mulai').value = eventData[0].start;
+        document.getElementById('berakhir').value = eventData[0].end;
 
         const publicCheckbox = document.getElementById('public');
-        publicCheckbox.checked = eventData.public === 1;
+        publicCheckbox.checked = eventData[0].public === 1;
 
         // Set the value of the 'public' input
-        document.getElementById('public').value = eventData.public;
+        document.getElementById('public').value = eventData[0].public;
 
         // If you want to visually update the checkbox state, add the 'checked' class
-        if (eventData.public === 1) {
+        if (eventData[0].public === 1) {
             publicCheckbox.classList.add('checked');
         }
 
@@ -614,14 +590,7 @@ async function populateForm(eventData) {
         console.error('Error during form population:', error);
     }
 }
-async function populateDetail(detailData){
-    try{
- document.getElementById('alamat').value = detailData.alamat;
-    } catch(error){
-        console.error('Error during population:',error);
-    }
-   
-}
+
 
 
 document.addEventListener('DOMContentLoaded', fetchAndPopulateForm);
@@ -632,12 +601,12 @@ document.addEventListener('DOMContentLoaded', fetchAndPopulateForm);
  function postAbsen(event) {
     event.preventDefault();  // Mencegah tindakan default formulir
 //console.log(checkboxValue);
-const eventId = window.location.pathname.split('/').pop();
+
               //console.log(eventId);
     const form = document.getElementById('jam_absen');
    //console.log(form);
     const formData = new FormData(form);
-    formData.append('ID_event',eventId);
+    formData.append('ID_event',UrlID);
     //console.log(formData);
 
 
@@ -672,13 +641,13 @@ form.addEventListener('submit', postAbsen);
 const checkboxValue = checkbox.checked ? 1 : 0;
     event.preventDefault();  // Mencegah tindakan default formulir
 //console.log(checkboxValue);
-const eventId = window.location.pathname.split('/').pop();
+
               //console.log(eventId);
     const Editform = document.getElementById('EditForm');
    //console.log(form);
     const formData = new FormData(Editform);
     formData.append('public',checkboxValue);
-    formData.append('ID_event',eventId);
+    formData.append('ID_event',UrlID);
     //console.log(formData);
 
 
@@ -689,43 +658,10 @@ const eventId = window.location.pathname.split('/').pop();
     .then(response => response.json())
     .then(data => {
         if (data.is_success) {
-           const ID_event = data.data.ID_event;
-            const alamat =formData.get('alamat');
-            const provinsi =formData.get('provinsi') ;
-            const kategori =formData.get('kategori');
-            const kabupaten =formData.get('kabupaten');
-
-            const secondApiData ={
-                ID_event: ID_event,
-                ID_kategori : kategori,
-                alamat : alamat,
-                ID_provinsi : provinsi,
-                ID_kabupaten :kabupaten,
-            };
-            if(kabupaten !== '' && provinsi!== '' && kategori !==''){
-            fetch(`http://${Endpoint}/api/event/detail/update`,{
-              method:'POST',
-              headers: {
-              'Content-Type': 'application/json',
-              },
-              body : JSON.stringify(secondApiData),
-            })
-             .then(response => response.json())
-            .then(data => {
-               if (data.is_success) {
+           
                   window.location.reload();
-               }
-            })
-            
-               .catch(error => console.error('Error during fetch:', error));
-            }else{
-              alert("Kabupaten atau Provinsi atau Kategori belum terisi");
-            }
-        } else {
-            // Handle the case where save failed
-            console.error('Failed to save data:', data.message);
-            // You can display an error message to the user or take other actions
         }
+ 
     })
     .catch(error => console.error('Error during fetch:', error));
 }
@@ -740,8 +676,6 @@ async function ReadAbsen(){
    try {
             //console.log(eventId);
             const apiUrl = `http://${Endpoint}/api/absen/show`;
-            const detailApiUrl = `http://${Endpoint}/api/event/detail/show`;
-
 
             const response = await fetch(apiUrl, {
                 method: 'POST',
@@ -862,7 +796,7 @@ async function ReadTamu(){
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    ID_event: eventId,
+                    ID_event: UrlID,
                     // Add other necessary data in the body if needed
                 }),
             });
@@ -975,7 +909,6 @@ ReadTamu();
 <script>async function ReadOperator() {
     try {
         const operatorApiUrl = `http://${Endpoint}/api/operator/show`;
-        const profileApiUrl = `http://${Endpoint}/api/profile/show`;
         const userApiUrl = `http://${Endpoint}/api/profile/user`;
 await new Promise(resolve => setTimeout(resolve, 5000));
         const response = await fetch(operatorApiUrl, {
@@ -984,27 +917,18 @@ await new Promise(resolve => setTimeout(resolve, 5000));
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                ID_event: eventId,
+                ID_event: UrlID,
                 // Add other necessary data in the body if needed
             }),
         });
 
-        const eventData = await response.json();
+        const OperatorData = await response.json();
 
         // Create an array of promises for profile and user requests
         
-        if (eventData.data && eventData.data.length > 0) {
-        const requests = eventData.data.map(async (operatorDataItem) => {
-            const profileResponse = await fetch(profileApiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    id: operatorDataItem.ID_User,
-                    // Add other necessary data in the body if needed
-                }),
-            });
+        if (OperatorData.data && OperatorData.data.length > 0) {
+        const requests = OperatorData.data.map(async (operatorDataItem) => {
+           
 
             const userResponse = await fetch(userApiUrl, {
                 method: 'POST',
@@ -1018,7 +942,6 @@ await new Promise(resolve => setTimeout(resolve, 5000));
             });
 
             return {
-                profileData: await profileResponse.json(),
                 userData: await userResponse.json(),
                 operatorDataItem: operatorDataItem,
             };
@@ -1037,7 +960,7 @@ await new Promise(resolve => setTimeout(resolve, 5000));
             generateOperatorTableRows(results);
 
         } else {
-    console.error('No data in the first API response.');
+    console.log('No data Operator in the API response.');
 }
     } catch (error) {
         console.error('Error during fetch:', error);
@@ -1143,29 +1066,9 @@ function deleteOperatorRowAction(ID_paket) {
 
 async function ReadFile(){
    try {
-            //console.log(eventId);
-            const apiUrl = `http://${Endpoint}/api/event/detail/show`;
-
-
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    ID_event: eventId,
-                    // Add other necessary data in the body if needed
-                }),
-            });
-
-            const eventData = await response.json();
-
-            if (response.ok) {
-               const fileData = eventData.data;
-            generateFileTableRows(fileData);
-                 } else {
-                console.error('Failed to fetch event data:', eventData);
-            }
+        const fileData = await fetchEventData();
+        generateFileTableRows(fileData);
+                
         } catch (error) {
             console.error('Error during fetch:', error);
         }
@@ -1176,7 +1079,7 @@ async function ReadFile(){
     const columnsToDisplay = ['banner', 'logo', 'materi'];
     const table = document.getElementById('fileTable');
     let counter = 1;
-
+    console.log("File Data:" ,fileData[0]['banner']);
     // Iterate over the specified columns
     for (const columnName of columnsToDisplay) {
         // Create a row for each column
@@ -1195,12 +1098,12 @@ async function ReadFile(){
         // Create a cell for 'File'
         const cellFile = row.insertCell();
         cellFile.classList.add('px-6', 'py-3');
-        cellFile.textContent = fileData[columnName];
+        cellFile.textContent = fileData[0][columnName];
 
         // If the column is a file column, make the text clickable for image preview
-        if (fileData[columnName] && (fileData[columnName].toLowerCase().endsWith('.jpg') || fileData[columnName].toLowerCase().endsWith('.png'))) {
+        if (fileData[0][columnName] && (fileData[0][columnName].toLowerCase().endsWith('.jpg') || fileData[0][columnName].toLowerCase().endsWith('.png'))) {
             cellFile.style.cursor = 'pointer';
-            cellFile.addEventListener('click', () => previewImage(fileData[columnName]));
+            cellFile.addEventListener('click', () => previewImage(fileData[0][columnName]));
         }
 
         // If you want an "Action" column, you can add your action buttons here
@@ -1213,13 +1116,15 @@ async function ReadFile(){
 }
 
 // Function to handle image preview
-function previewImage(imageUrl) {
-    // Assuming you have a function to show the image preview (e.g., using FancyBox)
-    $.fancybox.open({
-        src: imageUrl,
-        type: 'image',
-    });
+function previewImage(imageName) {
+    const fullImagePath = `/public/storage/uploads/${imageName}`;
+    console.log("Full Image path:", fullImagePath);
+
+    // Open Lightbox to display the image
+    const lightbox = new Lightbox();
+    lightbox.load([{src: fullImagePath, type: 'image'}]);
 }
+
 
 
 function deleteOperatorRowAction(ID_paket) {
@@ -1273,9 +1178,9 @@ ReadOperator();
     const eventId = window.location.pathname.split('/').pop();
 
     // Tambahkan file ke FormData
-    formData.append('ID_event', eventId);
+    formData.append('ID_event', UrlID);
 
-    fetch(`http://${Endpoint}/api/event/detail/update`, {
+    fetch(`http://${Endpoint}/api/event/update`, {
         method: 'POST',
         body: formData,
     })
@@ -1302,63 +1207,83 @@ ReadOperator();
 
 </script>
 <script>
-     // Function to fetch data and update the donut chart
-    async function fetchDataAndUpdateChart() {
-        try {
-            const eventId = { ID_event: jamId }; // Replace with the actual event ID
-            const response = await fetch(`http://${Endpoint}/api/peserta/show`, {
+ // Function to fetch data and update the chart
+async function fetchDataAndUpdateChart() {
+    try {
+        const eventId = { ID_event: UrlID }; // Replace with the actual event ID
+        const urlParams = new URLSearchParams(window.location.search);
+        const tgl = urlParams.get('tgl');
+        const startTime = urlParams.get('start');
+        const endTime = urlParams.get('end');
+        
+        let response;
+        let requestBody;
+
+        if (tgl && startTime && endTime) {
+            // Use the first API endpoint if URL parameters are present
+            requestBody = {
+                ...eventId,
+                date: tgl,
+                time_start: startTime,
+                time_end: endTime
+            };
+            response = await fetch(`http://${Endpoint}/api/event/stats`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(eventId),
+                body: JSON.stringify(requestBody),
+            });
+        } else {
+            // Use the second API endpoint if URL parameters are not present
+            requestBody = eventId;
+            response = await fetch(`http://${Endpoint}/api/peserta/show`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestBody),
+            });
+        }
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const apiData = await response.json();
+        console.log(apiData);
+        if (apiData.is_success) {
+            const pesertaData = apiData.data;
+
+            // Counters for Hadir and Tidak Hadir
+            let countHadir = 0;
+            let countTidakHadir = 0;
+
+            pesertaData.forEach((data) => {
+                if (data.status_absen === 1) {
+                    countHadir++;
+                } else {
+                    countTidakHadir++;
+                }
             });
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
+            // Update chart options dynamically
+            const chartOptions = getChartOptions(countHadir, countTidakHadir);
 
-            const apiData = await response.json();
-
-            if (apiData.is_success) {
-                const pesertaData = apiData.data;
-
-                // Counters for Hadir and Tidak Hadir
-                let countHadir = 0;
-                let countTidakHadir = 0;
-
-                pesertaData.forEach((data) => {
-                    if (data.status_absen === 1) {
-                        countHadir++;
-                    } else {
-                        countTidakHadir++;
-                    }
-                });
-
-                // Update chart options dynamically
-                const chartOptions = getChartOptions(countHadir, countTidakHadir);
-
-                // Get existing chart object
-                const existingChart = ApexCharts.instances && ApexCharts.instances.length > 0
-                    ? ApexCharts.instances[0]
-                    : undefined;
-
-                // Check if the chart already exists
-                if (existingChart) {
-                    // Update the chart options and render
-                    existingChart.updateOptions(chartOptions);
-                } else {
-                    // Create a new chart and render
-                    const chart = new ApexCharts(document.getElementById("donut-chart"), chartOptions);
-                    chart.render();
-                }
-            } else {
-                console.error('API call unsuccessful. Message:', apiData.message);
-            }
-        } catch (error) {
-            console.error('Error fetching and updating chart:', error);
+            // Create a new chart and render
+            const chart = new ApexCharts(document.getElementById("donut-chart"), chartOptions);
+            chart.render();
+        } else {
+            console.error('API call unsuccessful. Message:', apiData.message);
         }
+    } catch (error) {
+        console.error('Error fetching and updating chart:', error);
     }
+}
+
+
+
+
 
     // Function to get chart options with dynamic data
     function getChartOptions(countHadir, countTidakHadir) {
@@ -1444,7 +1369,18 @@ ReadOperator();
             },
         };
     }
-
+// Add an event listener to the dropdown
+document.getElementById('Stats_Jam').addEventListener('change', function() {
+    if (this.value !== '---Pilih---') {
+        const [startValue, endValue] = this.value.split(',');
+        const tanggal = document.getElementById('tgl').value;
+        const queryParams = new URLSearchParams(window.location.search);
+        queryParams.set('tgl', tanggal);
+        queryParams.set('start', startValue);
+        queryParams.set('end', endValue);
+        window.location.href = `${window.location.pathname}?${queryParams.toString()}`;
+    }
+});
     // Call the function whenever you need to fetch and update the chart
     fetchDataAndUpdateChart();
 </script>
@@ -1454,41 +1390,23 @@ ReadOperator();
 <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 
 <script>
-const apiUrl = `http://${Endpoint}/api/event/detail/show`;
+
 
 async function fetchDataAndInitMap() {
-    const apiUrl = `http://${Endpoint}/api/event/detail/show`;
+   
 
-    try {
-        const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                ID_event: jamId,
-            }),
-        });
+        const mapData = await fetchEventData();
+        console.log('Map Data:',mapData[0]);
+        await initMap(mapData[0]);
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const detailData = await response.json();
-        //console.log(detailData);
-        await initMap(detailData.data);
-
-    } catch (error) {
-        console.error('Error fetching detail data:', error);
-    }
 }
 
-function initMap(detailData) {
-    if (!detailData || typeof detailData.lat === 'undefined' || typeof detailData.long === 'undefined') {
+function initMap(mapData) {
+    if (!mapData || typeof mapData.latitude === 'undefined' || typeof mapData.longitude === 'undefined') {
         return;
     }
 
-    const defaultLocation = [parseFloat(detailData.lat), parseFloat(detailData.long)];
+    const defaultLocation = [parseFloat(mapData.latitude), parseFloat(mapData.longitude)];
 
     const map = L.map('editmap').setView(defaultLocation, 15);
 
@@ -1504,7 +1422,7 @@ function initMap(detailData) {
         document.getElementById('longitude').value = updatedLocation.lng;
     });
 
-    // ... Populate other form fields with detailData ...
+    // ... Populate other form fields with mapData ...
 }
 fetchDataAndInitMap();
 
@@ -1520,7 +1438,7 @@ async function Export() {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                ID_event: eventId,
+                ID_event: UrlID,
             }),
         });
 

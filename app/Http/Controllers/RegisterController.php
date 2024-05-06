@@ -122,7 +122,7 @@ class RegisterController extends Controller
             if ($user->isAdmin()) {
                 return redirect()->route('admin.dashboard'); // Redirect Admin to their dashboard
             } elseif($user->isEO()) {
-                return redirect()->route('eo.dashboard'); // Redirect User to their dashboard
+                return redirect()->route('eo.dashboard'); // Redirect EO to their dashboard
             }else{
                 abort(403);
             }
@@ -175,7 +175,10 @@ private function generateOTP() {
           $namaProvinsi = Provinsi::find($request->provinsi);
           $namaKabupaten = kabupaten::find($request->kabupaten);
           //return $namaKabupaten->nama;
-          if (strtolower($request->role) !== "admin" || strtolower($request->role) !== "eo") {
+          //return strtolower($request->role) !== "admin";
+          if (strtolower($request->role) !== "admin" && strtolower($request->role) !== "eo") {
+            
+            
             $otp = $this->generateOTP();
             // Send OTP to user's email
             $this->sendOTPByEmail($request->email, $otp);
@@ -232,6 +235,7 @@ private function generateOTP() {
             'data'=> null,
          ],'500');
       }
+      
       public function verifyOTP(Request $request){
         $verify_user = User::where('otp',$request->otp)->first();
         if($verify_user){
@@ -243,12 +247,12 @@ private function generateOTP() {
                 'is_success'=>true,
                 'data'=>$verify_user,
                 'message'=>"User Berhasil di verifikasi"
-            ]);
+            ],200);
         }
         return response()->json([
             'is_success'=>false,
             'message'=>'OTP Salah'
-        ]);
+        ],500);
       }
       // UserController
 public function getUserByGoogleId(Request $request) {

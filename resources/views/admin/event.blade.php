@@ -86,7 +86,7 @@ let IndexCounter = 1;
 // Function to fetch data from the second API
 async function loadPage(pageNumber) {
     try {
-        const response = await fetch(`http://${Endpoint}/api/event/all?perPage=${perPage}&page=${pageNumber}`);
+        const response = await fetch(`http://${Endpoint}/api/event/all?page=${pageNumber}`);
         const responseData = await response.json();
 
         if (responseData.is_success && responseData.data) {

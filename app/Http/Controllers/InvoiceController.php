@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\invoice;
 use App\Models\User;
+use App\Models\paket;
 use Illuminate\Http\Request;
 
 class InvoiceController extends Controller
@@ -19,6 +20,19 @@ class InvoiceController extends Controller
         'message'=>"Semua data invoice"
     ],'200');
     }
+    public function count_paket()
+{
+    $paketCounts = Invoice::join('paket', 'invoice.ID_paket', '=', 'paket.ID_paket')
+        ->selectRaw('paket.ID_paket, paket.nama_paket, COUNT(*) as count')
+        ->groupBy('paket.ID_paket', 'paket.nama_paket')
+        ->get();
+
+    return response()->json([
+        'success' => true,
+        'data' => $paketCounts,
+        'message' => 'Visualization of invoice data'
+    ]);
+}
 
     /**
      * Show the form for creating a new resource.

@@ -31,7 +31,8 @@ class PaketController extends Controller
     
         }
     
-
+        
+     
     public function store(Request $request){
         
         $count_paket = paket::where('status', '1')

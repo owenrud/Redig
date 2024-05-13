@@ -22,14 +22,14 @@
 <div class="mb-6">
     <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="mulai">Mulai</label>
     <label class="block w-full p-2.5  rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 cursor-pointer">
-        <input name="mulai" type="time" class="w-1/12 bg-transparent focus:outline-none">
+        <input name="mulai" type="time" class="w-3/12 bg-transparent focus:outline-none">
     </label>
 </div>
 
 <div class="mb-6">
     <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="akhir">Berakhir</label>
     <label class="block w-full p-2.5  rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 cursor-pointer">
-        <input name="akhir" type="time" class="w-1/12 bg-transparent focus:outline-none">
+        <input name="akhir" type="time" class="w-3/12 bg-transparent focus:outline-none">
     </label>
 </div>
 

@@ -85,7 +85,7 @@
 <div id="map" style="height: 300px;"> <div id="search-form" class="absolute top-4 right-4 z-1000"></div>
 </div>
   
-  <button onclick="postEvent(event)" type="submit" class="text-white bg-gradient-to-br from-purple-600 to-fuchsia-400 
+  <button onclick="validateAndSubmit(event)" type="submit" class="text-white bg-gradient-to-br from-purple-600 to-fuchsia-400 
   hover:bg-gradient-to-bl :hover:from-fuchsia-400 group:hover:to-purple-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-purple-800">Create</button>
 </form>
 </div>
@@ -121,6 +121,24 @@ startDatePicker.config.onChange.push(function(selectedDates, dateStr, instance) 
 });
   });
 </script>
+<script>
+  function validateForm() {
+    // Get all input elements in the form
+    const inputs = document.querySelectorAll('input, select');
+
+    // Check if any input is empty
+    for (const input of inputs) {
+      if (input.hasAttribute('required') && !input.value.trim()) {
+        alert('Please fill all the fields.');
+        return false; // Stop form submission
+      }
+    }
+
+    // If all required fields are filled, return true
+    return true;
+  }
+</script>
+
 <script>
 
   const provinsiSelect = document.getElementById('provinsi');
@@ -346,6 +364,12 @@ form.addEventListener('submit', postEvent);
   }
 
   document.addEventListener('DOMContentLoaded', initMap);
+
+    function validateAndSubmit(event) {
+    if (validateForm()) {
+      postEvent(event);
+    }
+  }
 </script>
 
 @endsection

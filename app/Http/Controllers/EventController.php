@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use App\Models\event;
 use App\Models\kategori_event;
-
+use Illuminate\Support\Carbon;
 use App\Models\peserta_event;
 use App\Models\provinsi;
 use App\Models\kabupaten;
@@ -15,12 +15,15 @@ use App\Models\profile;
 
 class EventController extends Controller
 {
+
+
     public function all() {
          // Default to 10 items per page
         $events = Event::join('paket','event.ID_paket','paket.ID_paket')
         ->join('kategori_event','ID_kategori','kategori_event.id')
         ->select('nama_event','start','end','public','event.status',
         'nama_paket','kategori_event.nama as nama_kategori')
+        ->orderby('status','desc')
         ->paginate(5);
     
         return response()->json([
@@ -59,6 +62,7 @@ class EventController extends Controller
                     'provinsi.nama as provinsi',
                     'kabupaten.nama as kabupaten'
                 ])
+                ->where('event.status', '!=', 0)
                 ->paginate(3);
     
             // Cache the data for future use with a 60-minute expiration time (adjust as needed)
@@ -98,6 +102,8 @@ class EventController extends Controller
             'message' => 'Semua data Event',
         ], 200);
    }
+
+ 
    public function search(Request $request){
     $events = Event::where('nama_event','LIKE','%'.$request->input('search').'%')
        ->join('paket','event.ID_paket','=','paket.ID_paket')
@@ -119,6 +125,7 @@ class EventController extends Controller
         'provinsi.nama as provinsi',
         'kabupaten.nama as kabupaten'
        ])
+       ->where('event.status', '!=', 0)
        ->get();
        return response()->json([
         'is_success' => true,
@@ -129,22 +136,32 @@ class EventController extends Controller
     
    
         
-        public function show(Request $request){
-            $event = event::join('paket','event.ID_paket','=','paket.ID_paket')
-            ->join('kategori_event','event.ID_kategori','=','kategori_event.id')
-            ->where('ID_Event',$request->ID_event)
-            ->get();
-            if($event){
-                return response()->json(['is_success'=>true,
-                'data'=>$event,
-                'message'=>'Data Event ditemukan'
-            ],'200');
-            }
-            return response()->json(['is_success'=>false,
-            'data'=>$event,
-            'message'=>'Data Event Tidak ditemukan'
-        ],'404');
-        }
+   public function show(Request $request){
+    $event = Event::join('paket', 'event.ID_paket', '=', 'paket.ID_paket')
+        ->join('kategori_event', 'event.ID_kategori', '=', 'kategori_event.id')
+        ->select(
+            'event.*', // Select all columns from the event table
+            'paket.status as paket_status',
+            'kategori_event.*' // Alias the status column from the paket table
+        )
+        ->where('ID_Event', $request->ID_event)
+        ->get(); // Use first() instead of get() to retrieve a single record
+
+    if($event){
+        return response()->json([
+            'is_success' => true,
+            'data' => $event,
+            'message' => 'Data Event ditemukan'
+        ], 200);
+    }
+    
+    return response()->json([
+        'is_success' => false,
+        'data' => null,
+        'message' => 'Data Event Tidak ditemukan'
+    ], 404);
+}
+
         public function showEO(Request $request){
             $event = event::where('ID_EO',$request->ID_EO)
             ->join('paket','event.ID_paket','=','paket.ID_paket')
@@ -160,7 +177,7 @@ class EventController extends Controller
                 'event.status',
                 
             ])
-            ->orderBy('ID_event')->paginate(5);
+            ->orderBy('status','desc')->paginate(5);
             if($event){
                 return response()->json(['is_success'=>true,
                 'data'=>$event,

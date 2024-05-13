@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\sertifikat;
 use App\Models\event;
+use App\Models\peserta_event;
+
 use PDF;
 use Illuminate\Support\Facades\Response;
 
@@ -164,14 +166,18 @@ public function test_export(Request $request){
         set_time_limit(120);
 
         // Default view name and file name
-        $data = sertifikat::where("ID_Event",$request->ID_Event)->get();
-        $event = event::find($request->ID_Event);
+        $data_peserta = peserta_event::where('ID_event',$request->ID_event)
+        ->where('ID_User',$request->ID_user)->get();
+        //return $data_peserta->ID_event;
+        $data = sertifikat::where("ID_Event",$request->ID_event)->get();
+        $event = event::find($request->ID_event);
         //dd($data);
         $viewName = 'pdf_sertif';
         $fileName = 'sertifikat';
         //dd($event);
         // Load the specified view and generate the PDF
-        $pdf = PDF::loadView($viewName,['data' =>$data,'nama'=>$event]);
+        
+        $pdf = PDF::loadView($viewName,['data' =>$data,'event'=>$event,'peserta'=>$data_peserta]);
 
         // Get the PDF content as a string
         $pdfContent = $pdf->output();

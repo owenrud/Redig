@@ -2,7 +2,7 @@
 @section('title','Dashboard Admin')
 @section('page_title','Dashboard Admin')
 @section('content')
-<div class ="flex flex-row h-40 p-8 space-x-4">
+<div class ="flex flex-row h-40 p-8 space-x-4 justify-evenly">
 <div class="flex items-center w-3/12 border border-gray-200 rounded-lg shadow">
     <div class="flex items-center justify-center">
     <span class="p-6 bg-cyan-500 h-full w-full rounded-lg mx-2">
@@ -48,8 +48,17 @@
 
 
 </div>
+<div class ="flex flex-row p-8 justify-center">
+<div class="flex flex-col p-2 mx-2 items-center justify-center min-w-[600px]">
+<canvas id="myChart"></canvas>
+</div>
+<div class="flex-1 flex-col p-2 mx-2 leading-normal max-w-[500px] max-h-[500px]">
+<canvas id="myPieChart"></canvas>
+</div>
+</div>
 
 </div>
+
 @endsection
 
 @section('script')
@@ -70,7 +79,7 @@ fetch(`http://${Endpoint}/api/profile/eo`)
             eo.textContent= count_eo;
     });
 
-    fetch(`http://${Endpoint}/api/paket/all`)
+    fetch(`http://${Endpoint}/api/paket/all/eo`)
 .then(response => response.json())
 .then(apiData =>{
    // console.log(apiData);
@@ -86,7 +95,7 @@ fetch(`http://${Endpoint}/api/profile/eo`)
         })
         
     });
-fetch(`http://${Endpoint}/api/event/kategori/all`)
+fetch(`http://${Endpoint}/api/event/kategori/populate`)
 .then(response => response.json())
 .then(apiData =>{
    // console.log(apiData);
@@ -102,5 +111,97 @@ fetch(`http://${Endpoint}/api/event/kategori/all`)
         
     });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+ <script>
+        // Function to fetch data from API and create a bar chart
+        async function fetchDataAndCreateChart() {
+            try {
+                const response = await fetch(`http://${Endpoint}/api/count-EO`);
+                const data = await response.json();
 
+                const years = data.data.map(entry => entry.year);
+                const counts = data.data.map(entry => entry.count);
+
+                const ctx = document.getElementById('myChart').getContext('2d');
+                const myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: years,
+                        datasets: [{
+                            label: 'Number of EO Accounts Created',
+                            data: counts,
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        // Call the function to fetch data and create the chart
+        fetchDataAndCreateChart();
+    </script>
+    <script>
+        // Function to fetch data from API and create a pie chart
+        async function fetchDataAndCreatePieChart() {
+            try {
+                const response = await fetch('http://localhost:8000/api/count-paket');
+                const data = await response.json();
+
+                const labels = data.data.map(entry => `Package ${entry.nama_paket}`);
+                const counts = data.data.map(entry => entry.count);
+
+                const ctx = document.getElementById('myPieChart').getContext('2d');
+                const myPieChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Number of Invoices by Package',
+                            data: counts,
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.2)',
+                                'rgba(54, 162, 235, 0.2)',
+                                'rgba(255, 206, 86, 0.2)',
+                                'rgba(75, 192, 192, 0.2)',
+                                'rgba(153, 102, 255, 0.2)',
+                                'rgba(255, 159, 64, 0.2)'
+                            ],
+                            borderColor: [
+                                'rgba(255, 99, 132, 1)',
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(255, 206, 86, 1)',
+                                'rgba(75, 192, 192, 1)',
+                                'rgba(153, 102, 255, 1)',
+                                'rgba(255, 159, 64, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        // Call the function to fetch data and create the pie chart
+        fetchDataAndCreatePieChart();
+    </script>
 @endsection

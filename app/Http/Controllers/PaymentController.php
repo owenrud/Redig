@@ -1,9 +1,10 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 use Midtrans\Config;
+use Midtrans;
 use Midtrans\Snap;
 use App\Models\Paket;
 use App\Models\User;
@@ -74,6 +75,50 @@ class PaymentController extends Controller
             ]);
 
             return response()->json(['token' => $snapToken]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+    public function createPaymentLink(Request $request)
+    {
+        try {
+            $response = Http::withBasicAuth(env('MIDTRANS_SERVER_KEY'), '')
+                ->post('https://api.sandbox.midtrans.com/v1/payment-links', [
+                    'transaction_details' => [
+                        'order_id' => uniqid(), // Adjust order ID as needed
+                        'gross_amount' => $request->input('amount'), // Adjust gross amount as needed// Adjust payment link ID as needed
+                  
+                    ],
+                    "customer_required"=> false,
+                    "expiry"=> [
+                        "start_time" => now(),
+                    "duration"=> 7,
+                    "unit"=> "days"
+                    ],
+                    "item_details"=> [
+                        ["id"=> "pil-001",
+                        "name"=> "Pillow",
+                        "price"=> 10500,
+                        "quantity"=> 1,
+                        "brand"=> "Midtrans",
+                        "category"=> "Furniture",
+                        "merchant_name"=> "PT. Midtrans"]
+                        ],
+                        "customer_details"=>[
+                            "first_name"=> "Owen",
+                        "last_name"=> "Rudianto",
+                        "email"=> "owenrudiantoso@gmail.com",
+                        
+                        "notes"=> "Thank you for register premium Event. Please follow the instructions to pay."
+                        ],
+            ]);
+
+            if ($response->successful()) {
+                $responseData = $response->json();
+                return $responseData;
+            } else {
+                throw new \Exception('Failed to create payment link: ' . $response->body());
+            }
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }

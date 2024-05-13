@@ -39,10 +39,10 @@ Unggah</button>
 <form id="FileMateri">
 
 <div class="border-2 flex flex-col space-y-4 my-4 mx-auto p-4 rounded-lg shadow-lg">
-<label class="block pl-4 mb-2 font-medium text-xl text-purple-900 dark:text-white" >File</label>
+<label class="block pl-4 mb-2 font-medium text-xl text-purple-900 dark:text-white" >File Materi</label>
 <hr class="my-2">
 
-<div class="flex-1 flex-col justify-center items-center py-4 px-8  w-full">
+{{-- <div class="flex-1 flex-col justify-center items-center py-4 px-8  w-full">
 <div id="alert-border-4" class="flex items-center mx-4  p-4 mb-4  border-l-8 font-semibold text-amber-600 border-yellow-300 bg-yellow-50/50 dark:text-yellow-300 dark:bg-gray-800 dark:border-yellow-800 rounded-lg" role="alert">
     <div class="flex flex-col space-y-4">
     <div class="flex flex-row">
@@ -63,7 +63,7 @@ Unggah</button>
     </div>
 
     </div>
-</div>
+</div> --}}
 
 <div class="space-y-4">
 <label class="block mb-2 font-medium  text-purple-900 dark:text-white" >File Input</label>

@@ -17,6 +17,19 @@ use Illuminate\Support\Facades\Mail;
 
 class RegisterController extends Controller
 {
+    public function statsAccEO()
+{
+    $EOCounts = User::where('Role', 'EO')
+        ->selectRaw('YEAR(created_at) as year, COUNT(*) as count')
+        ->groupByRaw('YEAR(created_at)')
+        ->get();
+
+    return response()->json([
+        'success' => true,
+        'data' => $EOCounts,
+        'message' => 'Visualization of EO account creation statistics'
+    ]);
+}
     public function Login_G(Request $request){
         $request->session()->forget(['google_login_completed', 'Guser']);
         $Guser = Socialite::driver('google')->user();

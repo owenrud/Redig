@@ -36,7 +36,11 @@ Route::post('/verify/otp',[RegisterController::class,'verifyOTP']);
 Route::post('/user/login',[RegisterController::class,'Login_API']);
 Route::post('/export',[PesertaController::class,'export_excel']);
 Route::get('/test/pdf/export', [SertifikatController::class,'export']);
-
+Route::post('/test/postpdf/export', [SertifikatController::class,'test_export']);
+Route::post('/generate-links',[PaymentController::class, 'createPaymentLink']);
+Route::get('/count-paket',[InvoiceController::class, 'count_paket']);
+Route::get('/count-EO',[RegisterController::class, 'statsAccEO']);
+ 
 
 Route::prefix('fitur-paket')->group(function () {
     Route::get('/all', [PaketController::class, 'all_fitur']);
@@ -126,6 +130,7 @@ Route::prefix('profile')->group(function () {
 Route::prefix('peserta')->group(function () {
     Route::get('/all', [PesertaController::class, 'all']);
     Route::post('/show', [PesertaController::class, 'show']);
+    Route::post('/me', [PesertaController::class, 'me']);
     Route::post('/show/guest', [PesertaController::class, 'show_guest']);
     Route::post('/show/user', [PesertaController::class, 'user']);
     Route::post('/save', [PesertaController::class, 'store']);

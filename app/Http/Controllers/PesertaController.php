@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\peserta_event;
+use Illuminate\Support\Facades\Http;
 use App\Models\event;
 use App\Models\paket;
 use Maatwebsite\Excel\Facades\Excel;
-
+use Midtrans\Config;
+use Midtrans;
+use Midtrans\Snap;
 use Maatwebsite\Excel\Exceptions\LaravelExcelException;
 use App\Models\detail_peserta;
 use App\Exports\PesertaExport;
@@ -63,10 +66,67 @@ class PesertaController extends Controller
     
     
 }
+public function createPaymentLink(Request $request)
+{
+    try {
+        $response = Http::withBasicAuth(env('MIDTRANS_SERVER_KEY'), '')
+            ->post('https://api.sandbox.midtrans.com/v1/payment-links', [
+                'transaction_details' => [
+                    'order_id' => uniqid(), // Adjust order ID as needed
+                    'gross_amount' => '10500', // Adjust gross amount as needed// Adjust payment link ID as needed
+              
+                ],
+                "customer_required"=> false,
+                "expiry"=> [
+                    "start_time" => now(),
+                "duration"=> 7,
+                "unit"=> "days"
+                ],
+                "item_details"=> [
+                    ["id"=>$request->ID_event,
+                    "name"=> "Premium Event",
+                    "price"=> 10500,
+                    "quantity"=> 1,
+                    "brand"=> "Midtrans",
+                    "category"=> "Event",
+                    "merchant_name"=> "PT. Midtrans"]
+                    ],
+                    "customer_details"=>[
+                        "first_name"=> $request->nama,
+                    "email"=> $request->email,
+                    "notes"=> "Thank you for register premium Event. Please follow the instructions to pay."
+                    ],
+        ]);
+
+        if ($response->successful()) {
+            $responseData = $response->json();
+            return $responseData['payment_url'];
+        } else {
+            throw new \Exception('Failed to create payment link: ' . $response->body());
+        }
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
+}
 
 
         public function show_guest(Request $request){
+            $peserta_event = peserta_event::where('ID_user',$request->ID_user)
+            ->where('ID_event',$request->ID_event)->first();
+            //return $peserta_event;
+            if($peserta_event){
+                return response()->json(['is_success'=>true,
+            'data'=>$peserta_event,
+            'message'=>'Data peserta event ditemukan'],'200');
+            }
+            return response()->json(['is_success'=>false,
+            'data'=>$peserta_event,
+            'message'=>'Data peserta tidak ditemukan'],'404');
+        }
+
+        public function me(Request $request){
             $peserta_event = peserta_event::find($request->id);
+            //return $peserta_event;
             if($peserta_event){
                 return response()->json(['is_success'=>true,
             'data'=>$peserta_event,
@@ -78,6 +138,7 @@ class PesertaController extends Controller
         }
     
     
+    
         public function store(Request $request){
          
             $kode_doorprize = rand(10000000, 99999999);
@@ -87,8 +148,16 @@ class PesertaController extends Controller
             ->join('paket','event.id_paket','=','paket.id_paket')
             ->select('event.ID_event','paket.id_paket','nama_paket')
             ->get();
-            $namaPaket = $check_event[0]->nama_paket;
-            //return $namaPaket.tolowercase() ;
+            $namaPaket =strtolower ($check_event[0]->nama_paket);
+            if($namaPaket != "gratis"){
+                $payment_url = $this->createPaymentLink($request);
+                $payment_status =  0;
+            }
+            else {
+                $payment_url = null;
+                $payment_status = null;
+            }
+            //return $namaPaket ;
            //return $check_user;
             //dd($check_user);
                 if(!$check_user){
@@ -104,7 +173,9 @@ class PesertaController extends Controller
                         'no_meja' => $request->no_meja,
                         'kode_doorprize' => $kode_doorprize,
                         'status_absen' =>$request->status_absen,
-                        'absen_oleh'=>$request->absen_oleh
+                        'absen_oleh'=>$request->absen_oleh,
+                        'payment_url'=>$payment_url,
+                        'payment_status'=>$payment_status,
                         
                     ]);
                     if($peserta_event){
@@ -129,7 +200,7 @@ class PesertaController extends Controller
                     $atributToUpdate = [
                         'ID_event','nama','email','gender',
                     'type','instansi','nama_ruang','no_meja','status_absen',
-                'absen_oleh'];
+                'absen_oleh','payment_status'];
                 
                     // Loop melalui atribut dan periksa apakah ada dalam permintaan
                     foreach ($atributToUpdate as $atribut) {

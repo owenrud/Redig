@@ -67,17 +67,15 @@ class OperatorController extends Controller
             $user = User::Create([
                 'email' => $request->email,
                 'password'=> bcrypt($request->password),
+                'ID_paket'=>'2',
                 'Role'=> $request->role,
                 'email_valid' => 1,
+                'nama_lengkap' => $request->nama
             ]);
             $id = $user->ID_User;
                 $operator =operator::Create([
                     'ID_event' => $request->ID_event,
                     'ID_User' => $id
-                ]);
-                $profile = Profile::Create([
-                    'ID_User'=>$id,
-                    'nama_lengkap' => $request->nama
                 ]);
                 if($operator){
                     return response()->json(['is_success'=>true,

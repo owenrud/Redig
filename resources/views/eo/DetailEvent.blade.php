@@ -1,8 +1,10 @@
 @extends('layouts.main')
 @section('page_title','Detail Event')
 @section('link')
-<!-- Include Lightbox2 CSS -->
-<link href="https://cdn.jsdelivr.net/npm/lightbox2/dist/css/lightbox.min.css" rel="stylesheet">
+<!-- Lightbox CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
 
 @endsection
@@ -17,9 +19,9 @@
 <span id="absen" class="flex hover:text-violet-400 w-24 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('absen', 'Jam Absen')">Jam Absen</span>
 <span id="file" class="flex hover:text-violet-400 w-32 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('file', 'File Tambahan')">File Tambahan</span>
 <span id="tiket_tamu" class="hidden flex hover:text-violet-400 w-24 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('tiket_tamu', 'Tiket Tamu')">Tiket Tamu</span>
-<span id="tamu" class="flex hover:text-violet-400 w-24 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('tamu', 'Tamu')">Tamu</span>
+<span id="tamu" class="flex hover:text-violet-400 w-24 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('tamu', 'Peserta')">Peserta</span>
 <span id="op" class="flex hover:text-violet-400 w-24 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('op', 'Operator')">Operator</span>
-<span id="sertifikat" class="flex hover:text-violet-400 w-24 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('sertifikat', 'Sertifikat')">Sertifikat</span>
+<span id="sertifikat" class="hidden flex hover:text-violet-400 w-24 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('sertifikat', 'Sertifikat')">Sertifikat</span>
 
 </div>
 <hr class="flex-1 w-full mt-2 mb-4">
@@ -48,6 +50,7 @@
 
 
 
+
 </div>
 </div>
 @endsection
@@ -55,6 +58,7 @@
 @section('script')
 
 <!-- Include Lightbox2 JavaScript -->
+<!-- Lightbox JavaScript -->
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
@@ -85,21 +89,35 @@ async function fetchEventData(){
     return EventData;
 }
 
-async function CheckPremium(){ 
-  const EventData = await fetchEventData();
-  const check = EventData[0].nama_paket.toLowerCase();
-  console.log("test debuf buat check premi:",check);
-    if(check != 'gratis'){
-         const thElements = document.querySelectorAll('th.hidden');
-        thElements.forEach((th) => {
-            th.classList.remove('hidden');
-        });
+async function CheckPremium() { 
+    try {
+        const EventData = await fetchEventData();
+        const check = EventData[0].nama_paket.toLowerCase();
+        console.log("test debug for checking premium:", check);
+        
+        // Hide elements if the package is not "gratis"
+        if (check !== 'gratis') {
+            const thElements = document.querySelectorAll('th.hidden');
+            thElements.forEach((th) => {
+                th.classList.remove('hidden');
+            });
+            document.getElementById('sertifikat').classList.remove('hidden');
+        } else {
+            // If the package is "gratis", you can choose to show elements here
+        }
+        
+        // Return true if the package is not "gratis", false otherwise
+        return check !== 'gratis';
+    } catch (error) {
+        console.error('Error checking premium:', error);
+        // If there's an error, default to assuming it's not premium and return true
+        return true;
     }
-       
 }
 
+
 fetchEventData();
-//CheckPremium();
+CheckPremium();
 </script>
 <script>
    document.addEventListener('DOMContentLoaded', function () {
@@ -813,9 +831,10 @@ async function ReadTamu(){
             console.error('Error during fetch:', error);
         }
     }
-  function generateTamuTableRows(tamuData) {
+  async function generateTamuTableRows(tamuData) {
     const tableBody = document.getElementById('tamuTable');
-
+     const isPremium = await CheckPremium();
+    console.log("Test true or not:" + isPremium);
     // Clear existing rows
     
 
@@ -830,11 +849,11 @@ async function ReadTamu(){
 
     // Type Cell
     const cellName = row.insertCell(1);
-    cellName.classList.add('font-bold', 'px-6', 'py-2');
+    cellName.classList.add('font-bold', 'px-6', 'py-2','truncate','max-w-[100px]');
     cellName.textContent = tamu.nama; // Replace with the actual property name from your API response
 
     const cellEmail = row.insertCell(2);
-    cellEmail.classList.add('font-bold', 'px-6', 'py-2');
+    cellEmail.classList.add('font-bold', 'px-6', 'py-2','truncate','max-w-[120px]');
     cellEmail.textContent = tamu.email;
     const cellGender = row.insertCell(3);
     cellGender.classList.add('font-bold', 'px-6', 'py-2');
@@ -855,6 +874,18 @@ async function ReadTamu(){
     const cellDoorPrize = row.insertCell(8);
     cellDoorPrize.classList.add('px-6', 'py-4');
     cellDoorPrize.textContent = tamu.kode_doorprize; // Replace with the actual property name from your API response
+    if(isPremium){
+        
+        const cellPaymentURL = row.insertCell(9);
+    cellPaymentURL.classList.add('px-6','py-4','truncate','max-w-[120px]');
+    cellPaymentURL.textContent = tamu.payment_url; 
+    const cellPaymentStatus = row.insertCell(10);
+    cellPaymentStatus.classList.add('px-6', 'py-4');
+    cellPaymentStatus.textContent = tamu.payment_status == 1 ? "Paid":"Not Paid"; 
+    // Add a dynamic class based on the value of tamu.status_absen
+cellPaymentStatus.classList.add(tamu.payment_status == 1 ? 'text-blue-500' : 'text-red-500');
+    }
+    
 const cellAction = document.createElement('td');
                  cellAction.classList.add('flex', 'justify-center', 'space-x-4', 'px-6', 'py-4');
 
@@ -998,13 +1029,8 @@ function generateOperatorTableRows(results) {
         // Type Cell
         const cellName = row.insertCell(1);
         cellName.classList.add('font-bold', 'px-6', 'py-2');
-        
-        // Check if profileData is not null
-        if (result.profileData && result.profileData.data) {
-            cellName.textContent = result.profileData.data.nama_lengkap || 'N/A';
-        } else {
-            cellName.textContent = 'N/A';
-        }
+        cellName.textContent = result.userData.data.nama_lengkap || 'N/A';
+    
 
         const cellEmail = row.insertCell(2);
         cellEmail.classList.add('font-bold', 'px-6', 'py-2');
@@ -1073,13 +1099,12 @@ async function ReadFile(){
             console.error('Error during fetch:', error);
         }
     }
-
- function generateFileTableRows(fileData) {
+function generateFileTableRows(fileData) {
     // Assuming 'table' is your table element
     const columnsToDisplay = ['banner', 'logo', 'materi'];
     const table = document.getElementById('fileTable');
     let counter = 1;
-    console.log("File Data:" ,fileData[0]['banner']);
+    console.log("File Data:", fileData[0]);
     // Iterate over the specified columns
     for (const columnName of columnsToDisplay) {
         // Create a row for each column
@@ -1098,12 +1123,38 @@ async function ReadFile(){
         // Create a cell for 'File'
         const cellFile = row.insertCell();
         cellFile.classList.add('px-6', 'py-3');
-        cellFile.textContent = fileData[0][columnName];
+        const fileName = fileData[0][columnName];
 
-        // If the column is a file column, make the text clickable for image preview
-        if (fileData[0][columnName] && (fileData[0][columnName].toLowerCase().endsWith('.jpg') || fileData[0][columnName].toLowerCase().endsWith('.png'))) {
-            cellFile.style.cursor = 'pointer';
-            cellFile.addEventListener('click', () => previewImage(fileData[0][columnName]));
+        // Check if the file is an image
+        if (fileName && !fileName.toLowerCase().endsWith('.pdf')) {
+            // Create an anchor element
+            const anchor = document.createElement('a');
+            // Set the href attribute to the full image path
+            anchor.href = "{{ asset('storage/uploads') }}/" + fileName;
+            // Set other attributes if needed (e.g., alt)
+            // Append the anchor to the cell
+            cellFile.appendChild(anchor);
+
+            // Create an image element
+            const img = document.createElement('img');
+            // Set the src attribute to the full image path
+            img.src = "{{ asset('storage/uploads') }}/" + fileName;
+            // Set the maximum size of the image
+            img.style.maxWidth = '50px';
+            img.style.maxHeight = '50px';
+            // Set other attributes if needed (e.g., alt)
+            anchor.appendChild(img);
+
+            // Make the anchor clickable for preview using Lightbox
+            anchor.style.cursor = 'pointer';
+            anchor.setAttribute('data-lightbox', 'gallery'); // Group images into a gallery
+            anchor.addEventListener('click', (event) => {
+                event.preventDefault(); // Prevent the default anchor behavior
+                previewImage(fileName); // Call the function to open the Lightbox image preview
+            });
+        } else {
+            // If it's not an image, display the file name as text
+            cellFile.textContent = fileName;
         }
 
         // If you want an "Action" column, you can add your action buttons here
@@ -1114,16 +1165,23 @@ async function ReadFile(){
         counter++;
     }
 }
-
-// Function to handle image preview
+// Function to handle image preview by opening a blank page
 function previewImage(imageName) {
-    const fullImagePath = `/public/storage/uploads/${imageName}`;
+    const fullImagePath = "{{ asset('storage/uploads') }}/" + imageName;
     console.log("Full Image path:", fullImagePath);
 
-    // Open Lightbox to display the image
-    const lightbox = new Lightbox();
-    lightbox.load([{src: fullImagePath, type: 'image'}]);
+    // Open a new window with the image
+    const imageWindow = window.open(fullImagePath, "_blank", "width=600,height=400");
+    if (imageWindow) {
+        imageWindow.focus();
+    } else {
+        alert("Please allow pop-ups for this site to view the image.");
+    }
 }
+
+
+
+
 
 
 
@@ -1482,7 +1540,3 @@ document.addEventListener('DOMContentLoaded', function() {
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 @endsection
 
-@section('link')
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-
-@endsection

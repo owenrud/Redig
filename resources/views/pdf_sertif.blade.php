@@ -71,11 +71,18 @@
 
             <h1 class="text-4xl font-bold mb-4">SERTIFIKAT APRESIASI</h1>
             <p class="text-lg mb-8">DIBERIKAN KEPADA :</p>
+            @isset($peserta)
+            @foreach($peserta as $p)
+            <h1 class="text-3xl font-semibold mb-8">{{$p->nama}}</h1>
+            @endforeach
+            @else
             <h1 class="text-3xl font-semibold mb-8">John Doe</h1>
+            @endisset
+             
             <hr>
             <small class="text-xl">Atas Partisipasinya sebagai Peserta di acara webinar</small>
             <br>
-            <small class="small mt-8">{{$nama->nama_event}}</small>
+            <small class="small mt-8">{{$event->nama_event}}</small>
             <br>
             
             <img src="data:image/png;base64,<?php echo base64_encode(file_get_contents(base_path('public/storage/uploads/'.$item->ttd))); ?>" alt="logo" class="logo">

@@ -50,9 +50,11 @@
 </div>
 <div class ="flex flex-row p-8 justify-center">
 <div class="flex flex-col p-2 mx-2 items-center justify-center min-w-[600px]">
+<h2 class="mb-2 font-bold">Jumlah Akun EO Per Tahun</h2>
 <canvas id="myChart"></canvas>
 </div>
 <div class="flex-1 flex-col p-2 mx-2 leading-normal max-w-[500px] max-h-[500px]">
+<h2 class="flex-1 text-center mb-2 font-bold">Grafik Paket Akun</h2>
 <canvas id="myPieChart"></canvas>
 </div>
 </div>
@@ -112,6 +114,7 @@ fetch(`http://${Endpoint}/api/event/kategori/populate`)
     });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
  <script>
         // Function to fetch data from API and create a bar chart
         async function fetchDataAndCreateChart() {
@@ -152,55 +155,64 @@ fetch(`http://${Endpoint}/api/event/kategori/populate`)
         fetchDataAndCreateChart();
     </script>
     <script>
-        // Function to fetch data from API and create a pie chart
-        async function fetchDataAndCreatePieChart() {
-            try {
-                const response = await fetch('http://localhost:8000/api/count-paket');
-                const data = await response.json();
+       // Function to fetch data from API and create a pie chart
+async function fetchDataAndCreatePieChart() {
+    try {
+        const response = await fetch('http://localhost:8000/api/count-paket');
+        const data = await response.json();
 
-                const labels = data.data.map(entry => `Package ${entry.nama_paket}`);
-                const counts = data.data.map(entry => entry.count);
+        const labels = data.data.map(entry => `Package ${entry.nama_paket}`);
+        const counts = data.data.map(entry => entry.count);
 
-                const ctx = document.getElementById('myPieChart').getContext('2d');
-                const myPieChart = new Chart(ctx, {
-                    type: 'pie',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Number of Invoices by Package',
-                            data: counts,
-                            backgroundColor: [
-                                'rgba(255, 99, 132, 0.2)',
-                                'rgba(54, 162, 235, 0.2)',
-                                'rgba(255, 206, 86, 0.2)',
-                                'rgba(75, 192, 192, 0.2)',
-                                'rgba(153, 102, 255, 0.2)',
-                                'rgba(255, 159, 64, 0.2)'
-                            ],
-                            borderColor: [
-                                'rgba(255, 99, 132, 1)',
-                                'rgba(54, 162, 235, 1)',
-                                'rgba(255, 206, 86, 1)',
-                                'rgba(75, 192, 192, 1)',
-                                'rgba(153, 102, 255, 1)',
-                                'rgba(255, 159, 64, 1)'
-                            ],
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        scales: {
-                            y: {
-                                beginAtZero: true
-                            }
-                        }
+        const ctx = document.getElementById('myPieChart').getContext('2d');
+        const myPieChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Number of Invoices by Package',
+                    data: counts,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(255, 159, 64, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                plugins: {
+                    datalabels: {
+                        formatter: (value, context) => {
+                            const dataset = context.chart.data.datasets[0];
+                            const total = dataset.data.reduce((sum, current) => sum + current, 0);
+                            const percentage = ((value / total) * 100).toFixed(2);
+                            return `${percentage}%`;
+                        },
+                        color: '#fff',
+                        backgroundColor: '#000',
+                        borderRadius: 3,
+                        padding: 6
                     }
-                });
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-        }
-
+                }
+            },
+            plugins: [ChartDataLabels]
+        });
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
+}
         // Call the function to fetch data and create the pie chart
         fetchDataAndCreatePieChart();
     </script>

@@ -24,6 +24,9 @@ Riwayat Invoice
                     No
                 </th>
                 <th scope="col" class="px-6 py-3">
+                    Tanggal
+                </th>
+                <th scope="col" class="px-6 py-3">
                     Status
                 </th>
                 <th scope="col" class="px-6 py-3">
@@ -116,16 +119,28 @@ Riwayat Invoice
       const invoicePromises = invoiceData.map(async (item, index) => {
         const row = invoiceBody.insertRow();
         const cellNo = row.insertCell(0);
-        const cellStatus = row.insertCell(1);
-        const cellNamaPaket = row.insertCell(2);
-        const cellHarga = row.insertCell(3);
-        const cellAction = row.insertCell(4);
+        const cellTgl = row.insertCell(1);
+        const cellStatus = row.insertCell(2);
+        const cellNamaPaket = row.insertCell(3);
+        const cellHarga = row.insertCell(4);
+        const cellAction = row.insertCell(5);
+
+        const Tanggal = new Date(item.created_at);
+        // Extract the year, month, and day
+const year = Tanggal.getFullYear();
+const month = String(Tanggal.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
+const day = String(Tanggal.getDate()).padStart(2, '0');
+
+// Format the date as YYYY-MM-DD
+const formattedDate = `${year}-${month}-${day}`;
 
         // Populate cells with data
        // Populate cells with data
         cellNo.textContent = index + 1;
         cellNo.classList.add('px-6', 'py-4'); // Add classes to cellNo
         
+        cellTgl.textContent = formattedDate;
+         cellTgl.classList.add('px-6', 'py-4'); 
         //console.log(item.status);
         if(item.status !== 200){
             cellStatus.textContent = "Failed";

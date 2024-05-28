@@ -46,10 +46,7 @@ class Kernel extends HttpKernel
         ],
 
         
-        'role' => [
-            \App\Http\Middleware\CheckRole::class,
-        ],
-        'admin.role' =>[\App\Http\Middleware\AdminRoleMiddleware::class,],
+      
     ];
 
     /**

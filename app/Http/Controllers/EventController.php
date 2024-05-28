@@ -21,7 +21,7 @@ class EventController extends Controller
          // Default to 10 items per page
         $events = Event::join('paket','event.ID_paket','paket.ID_paket')
         ->join('kategori_event','ID_kategori','kategori_event.id')
-        ->select('nama_event','start','end','public','event.status',
+        ->select('ID_event','ID_EO as idEO','nama_event','start','end','public','event.status',
         'nama_paket','kategori_event.nama as nama_kategori')
         ->orderby('status','desc')
         ->paginate(5);
@@ -63,6 +63,7 @@ class EventController extends Controller
                     'kabupaten.nama as kabupaten'
                 ])
                 ->where('event.status', '!=', 0)
+                ->where('event.public','!=',0)
                 ->paginate(3);
     
             // Cache the data for future use with a 60-minute expiration time (adjust as needed)
@@ -142,6 +143,11 @@ class EventController extends Controller
         ->select(
             'event.*', // Select all columns from the event table
             'paket.status as paket_status',
+            'paket.nama_paket',
+            'paket.sertifCount',
+            'paket.GuestCount',
+            'paket.ScanCount',
+            'paket.OperatorCount',
             'kategori_event.*' // Alias the status column from the paket table
         )
         ->where('ID_Event', $request->ID_event)
@@ -225,8 +231,8 @@ class EventController extends Controller
                     // Daftar atribut yang ingin diperbarui
                     $atributToUpdate = [
                         'ID_paket','nama_event','desc_event',
-                    'start','end','public','status', 'ID_kategori', 'alamat',
-                    'ID_provinsi', 'ID_kabupaten', 'lat', 'long', 'banner', 'logo'
+                    'start','end','public','status', 'ID_kategori','lokasi', 'alamat',
+                    'ID_provinsi', 'ID_kabupaten', 'latitude', 'longitude', 'banner', 'logo'
                     ,'materi'];
                     
                     // Loop melalui atribut dan periksa apakah ada dalam permintaan

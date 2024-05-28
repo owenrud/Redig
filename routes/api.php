@@ -130,6 +130,7 @@ Route::prefix('profile')->group(function () {
 Route::prefix('peserta')->group(function () {
     Route::get('/all', [PesertaController::class, 'all']);
     Route::post('/show', [PesertaController::class, 'show']);
+    Route::post('/search', [PesertaController::class, 'search']);
     Route::post('/me', [PesertaController::class, 'me']);
     Route::post('/show/guest', [PesertaController::class, 'show_guest']);
     Route::post('/show/user', [PesertaController::class, 'user']);

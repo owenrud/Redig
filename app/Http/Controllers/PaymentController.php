@@ -96,12 +96,12 @@ class PaymentController extends Controller
                     "unit"=> "days"
                     ],
                     "item_details"=> [
-                        ["id"=> "pil-001",
-                        "name"=> "Pillow",
+                        ["id"=> "E-001",
+                        "name"=> "Event",
                         "price"=> 10500,
                         "quantity"=> 1,
                         "brand"=> "Midtrans",
-                        "category"=> "Furniture",
+                        "category"=> "All",
                         "merchant_name"=> "PT. Midtrans"]
                         ],
                         "customer_details"=>[

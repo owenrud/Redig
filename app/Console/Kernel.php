@@ -15,10 +15,17 @@ class Kernel extends ConsoleKernel
 {
     // Get the current date
     $currentDate = Carbon::today();
+
+    // Get events where the current date is smaller than event.start and status is 0
+    $eventsToUpdateSoon = Event::where('start', '>=', $currentDate)
+        ->get();
+        foreach ($eventsToUpdateSoon as $event) {
+            $event->status = 2;
+            $event->save();
+        }
     
     // Get events where the current date is bigger than event.start and status is 0
     $eventsToUpdateStart = Event::where('start', '<=', $currentDate)
-        ->where('status', 2)
         ->get();
 
     // Update status to 1 for events where start date condition is met
@@ -29,7 +36,6 @@ class Kernel extends ConsoleKernel
 
     // Get events where the current date is bigger than event.end and status is 1
     $eventsToUpdateEnd = Event::where('end', '<', $currentDate)
-        ->where('status', 1)
         ->get();
 
     // Update status to 0 for events where end date condition is met

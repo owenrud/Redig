@@ -17,19 +17,20 @@
 
   
   @yield('content')
-<script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/js/lightbox.min.js" integrity="sha512-Ixzuzfxv1EqafeQlTCufWfaC6ful6WFqIz4G+dWvK0beHw0NVJwvCKSgafpy5gwNqKmgUfIBraVwkKI+Cz0SEQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  </div>
+ </div>
 </div>
 <script>
 const Endpoint = "localhost:8000";
 const id = {{ $authUser->ID_User }};
 const PaketEO = {{$authUser->ID_Paket}};
+
 //console.log("bisa gini kan ?:",PaketEO);
 
-console.log("Test :"+Endpoint);
+//console.log("Test :"+Endpoint);
 const nama = document.getElementById('username');
 let user = '';
-fetch(`http://${Endpoint}/api/profile/show`,{
+
+  fetch(`http://${Endpoint}/api/profile/show`,{
       method: 'POST',
     headers: {
               'Content-Type': 'application/json',
@@ -41,8 +42,12 @@ fetch(`http://${Endpoint}/api/profile/show`,{
 .then(data =>{
    if (data.is_success && data.data) {
             user = data.data;
+            
             //console.log("data User dari Main :",user);
             nama.textContent = user.nama_lengkap;
+            
+            //console.log("COunt Operator:",countOP);
+            
             // Access other properties and update your HTML as needed
         } else {
             console.error('Invalid data structure or missing properties.');
@@ -50,11 +55,13 @@ fetch(`http://${Endpoint}/api/profile/show`,{
     })
     .catch(error => {
         console.error('Error fetching data:', error);
+        
 });   
+
 </script>
 
 <script src="https://unpkg.com/flowbite@1.5.1/dist/flowbite.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
+
 
 </body>
 @yield('script')

@@ -20,7 +20,10 @@ class ProfileController extends Controller
         }
         
         public function show(Request $request){
-            $profile = user::find($request->id);
+            $profile = user::join('paket','users.ID_paket','=','paket.ID_paket')
+            ->select('ID_User','email','Role','nama_lengkap','no_telp',
+            'alamat','provinsi','kabupaten','foto','nama_paket','ScanCount',
+            'FileUpCount','GuestCount','OperatorCount','sertifCount','users.ID_paket')->find($request->id);
             if($profile){
                 return response()->json(['is_success'=>true,
                     'data'=>$profile,

@@ -17,13 +17,27 @@
 Daftar Event
 </span>
 <hr>
-<div class="justify-between">
+<div class="flex flex-row justify-between">
 <button id="openModalBtn" type="button" class="max-w-sm text-white bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 hover:bg-gradient-to-l hover:from-purple-500 hover:via-purple-600 hover:to-purple-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center">
 <svg class="w-5 h-5 me-2 text-white" xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
 <path fill="white" d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z"/>
 </svg>
 Add data
 </button>
+
+<form class="flex-1 max-w-xs" id="searchForm">   
+    <label for="default-search" class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
+    <div class="relative ">
+        <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+            </svg>
+        </div>
+        <input type="search" id="default-search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search Event"  />
+        <button type="submit" class="text-white absolute end-2.5 bottom-2.5 bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Search</button>
+    </div>
+</form>
+
 </div>
 <div class="flex flex-col overflow-x-auto  shadow-lg  sm:rounded-lg">
     <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
@@ -61,7 +75,7 @@ Add data
         <tbody id="tableBody">
         </tbody>
     </table>
-    <nav class="flex items-center flex-column flex-wrap md:flex-row justify-between pt-4 mb-4 px-8" aria-label="Table navigation">
+    <nav id="paginav" class="flex items-center flex-column flex-wrap md:flex-row justify-between pt-4 mb-4 px-8" aria-label="Table navigation">
      <span class="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">
         Showing <span class="font-semibold text-gray-900 dark:text-white" id="startData">1</span>-
         <span class="font-semibold text-gray-900 dark:text-white" id="endData">10</span> of 
@@ -172,7 +186,7 @@ async function fetchUserProfile() {
     //console.log("Profile Data Si User:",profileData.data.ID_Paket);
     if (profileData.is_success) {
       // Extract account type ID from the profile data
-      const accountTypeID = profileData.data.ID_Paket;
+      const accountTypeID = profileData.data.ID_paket;
     //console.log("account Type ID:" + accountTypeID);
       // Fetch all package information
       const packageResponse = await fetch(`http://${Endpoint}/api/paket/all/eo`);
@@ -270,8 +284,7 @@ fetchUserProfile();
 </script>
 
 <script>
-
-async function fetchDataAndCreateUI(page = 1) {
+async function fetchDataAndCreateUI(page = 1, query = '') {
     const maxRetries = 3;
     const retryDelay = 1000; // 1 second delay between retries
 
@@ -295,22 +308,106 @@ async function fetchDataAndCreateUI(page = 1) {
     }
 
     try {
-        const eventDataResponse = await fetch(`http://${Endpoint}/api/event/show/eo?page=${page}`, {
-            method: 'POST',
+        const url = query 
+            ? `http://localhost:8000/api/event/search` 
+            : `http://localhost:8000/api/event/all?page=${page}`;
+
+        const options = {
+            method: query ? 'POST' : 'GET',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ ID_EO: id }),
-        });
+            body: query ? JSON.stringify({ search: query }) : null,
+        };
 
-        const responseData = await eventDataResponse.json();
-        //console.log(responseData);
+        const responseData = await fetchWithRetry(url, options);
 
         const tableBody = document.getElementById('tableBody');
+        let counterData = 0;
         let indexCount = (page - 1) * responseData.data.per_page + 1;
         tableBody.innerHTML = '';
+        
+         if (query) {
+            // Handle response for search API
+            responseData.data.forEach((event,index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td class="px-6 py-4">${index+1}</td>
+                                    <td class="px-6 py-4">${event.nama_event}</td>
+                                    <td class="px-6 py-4">${event.start}</td>
+                                    <td class="px-6 py-4">${event.end}</td>`;
+                
+                counterData++;
+                const public = document.createElement('td');
+                public.textContent = event.public == 1 ? 'Public' : 'Private';
+                public.classList.add(
+                    event.public == 1 ? 'text-green-600' : 'text-rose-600',
+                    'px-6',
+                    'py-4'
+                );
+                row.appendChild(public);
 
-        responseData.data.data.forEach((event) => {
+                const tipe = document.createElement('td');
+                tipe.textContent = event.nama_paket;
+                if (event.nama_paket !== 'Gratis') {
+                    tipe.classList.add('text-purple-600', 'font-bold', 'px-6', 'py-4');
+                } else {
+                    tipe.classList.add('text-blue-700', 'font-bold', 'px-6', 'py-4');
+                }
+                row.appendChild(tipe);
+
+                const kategori = document.createElement('td');
+                kategori.textContent = event.kategori;
+                kategori.classList.add('font-bold', 'px-6', 'py-4');
+                row.appendChild(kategori);
+
+                const status = document.createElement('td');
+                if (event.status == 0) {
+                    status.textContent = 'Selesai';
+                    status.classList.add('text-rose-600', 'px-6', 'py-4');
+                } else if (event.status == 1) {
+                    status.textContent = 'Sedang Berlangsung';
+                    status.classList.add('text-yellow-400', 'px-6', 'py-4');
+                } else {
+                    status.textContent = 'Akan Datang';
+                    status.classList.add('text-green-600', 'px-6', 'py-4');
+                }
+                row.appendChild(status);
+
+                const cellAction = document.createElement('td');
+                cellAction.classList.add('flex', 'justify-center', 'space-x-4', 'px-6', 'py-4');
+                console.log("ID EO:",event.idEO)
+                if(event.idEO == id){
+                const detailButton = document.createElement('a');
+                detailButton.textContent = 'Detail';
+                detailButton.href = `/event/detail/${event.id}`;
+                detailButton.classList.add(
+                    'cursor-pointer',
+                    'text-sky-500',
+                    'hover:text-sky-700',
+                    'px-3',
+                    'py-1'
+                );
+                cellAction.appendChild(detailButton);
+                if(event.status != 1){
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Delete';
+                deleteButton.classList.add(
+                    'cursor-pointer',
+                    'text-rose-600',
+                    'hover:text-rose-800'
+                );
+                deleteButton.type = 'button';
+                deleteButton.onclick = function () {
+                    deleteRowAction(event.id);
+                };
+                cellAction.appendChild(deleteButton);
+                }
+                row.appendChild(cellAction);
+                }
+                tableBody.appendChild(row);
+            });
+        }else{
+            responseData.data.data.forEach((event) => {
             const row = document.createElement('tr');
             row.innerHTML = `<td class="px-6 py-4">${indexCount}</td>
                                 <td class="px-6 py-4">${event.nama_event}</td>
@@ -354,7 +451,8 @@ async function fetchDataAndCreateUI(page = 1) {
                 status.classList.add('text-green-600', 'px-6', 'py-4');
             }
             row.appendChild(status);
-
+            console.log("ID EO:",event.idEO)
+             if(event.idEO == id){
             const cellAction = document.createElement('td');
             cellAction.classList.add('flex', 'justify-center', 'space-x-4', 'px-6', 'py-4');
 
@@ -369,7 +467,7 @@ async function fetchDataAndCreateUI(page = 1) {
                 'py-1'
             );
             cellAction.appendChild(detailButton);
-
+            if(event.status != 1){
             const deleteButton = document.createElement('button');
             deleteButton.textContent = 'Delete';
             deleteButton.classList.add(
@@ -382,13 +480,17 @@ async function fetchDataAndCreateUI(page = 1) {
                 deleteRowAction(event.ID_event);
             };
             cellAction.appendChild(deleteButton);
-
+            }
             row.appendChild(cellAction);
+             }
             tableBody.appendChild(row);
         });
+        }
+        
 
         // Pagination logic
-        const paginationContainer = document.getElementById('paginationContainer');
+        if(!query){
+             const paginationContainer = document.getElementById('paginationContainer');
         paginationContainer.innerHTML = '';
         for (let i = 1; i <= responseData.data.last_page; i++) {
             const button = document.createElement('li');
@@ -398,7 +500,7 @@ async function fetchDataAndCreateUI(page = 1) {
 
         const paginationButtons = document.querySelectorAll('#paginationContainer a');
         paginationButtons.forEach((button, index) => {
-            button.addEventListener('click', () => fetchDataAndCreateUI(index + 1));
+            button.addEventListener('click', () => fetchDataAndCreateUI(index + 1, query));
         });
 
         const startData = document.getElementById('startData');
@@ -408,13 +510,32 @@ async function fetchDataAndCreateUI(page = 1) {
         startData.textContent = responseData.data.from;
         endData.textContent = responseData.data.to;
         totalData.textContent = responseData.data.total;
+        }else{
+            document.getElementById('paginav').classList.add('hidden');
+            document.getElementById('paginationContainer').classList.add('hidden');
+        }
+       
     } catch (error) {
         console.error('Error fetching data event:', error);
     }
 }
 
+
 // Call fetchDataAndCreateUI with initial page value
 fetchDataAndCreateUI(1);
+
+async function search() {
+    const query = document.getElementById('default-search').value.trim();
+    console.log("Search Query:",query);
+    fetchDataAndCreateUI(1, query); // Pass the search query to fetchDataAndCreateUI
+}
+// Prevent form submission and call the search function
+    const searchForm = document.getElementById('searchForm');
+    searchForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        search();
+    });
+
 </script>
 
 @endsection

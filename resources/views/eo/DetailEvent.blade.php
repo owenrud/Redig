@@ -20,7 +20,7 @@
 <span id="file" class="flex hover:text-violet-400 w-32 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('file', 'File Tambahan')">File Tambahan</span>
 <span id="tiket_tamu" class="hidden flex hover:text-violet-400 w-24 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('tiket_tamu', 'Tiket Tamu')">Tiket Tamu</span>
 <span id="tamu" class="flex hover:text-violet-400 w-24 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('tamu', 'Peserta')">Peserta</span>
-<span id="op" class="flex hover:text-violet-400 w-24 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('op', 'Operator')">Operator</span>
+<span id="op" class="hidden flex hover:text-violet-400 w-24 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('op', 'Operator')">Operator</span>
 <span id="sertifikat" class="hidden flex hover:text-violet-400 w-24 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('sertifikat', 'Sertifikat')">Sertifikat</span>
 
 </div>
@@ -59,7 +59,7 @@
 
 <!-- Include Lightbox2 JavaScript -->
 <!-- Lightbox JavaScript -->
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <!-- ... other head content ... -->
@@ -70,7 +70,15 @@
 <script>
 const UrlID = window.location.pathname.split('/').pop();
 
-//console.log(UrlID);
+
+
+//console.log("Count Guest :" countGuest);
+//console.log("Count Sertif :" countSertif);
+//console.log("Count OFile :" countFile);
+let countOP = 0;
+let countGuest = 0;
+let countSertif = 0;
+let countFile = 0;
 async function fetchEventData(){
     const APIURL = `http://${Endpoint}/api/event/show`;
     const response = await fetch(APIURL,{
@@ -85,7 +93,10 @@ async function fetchEventData(){
 
     const responseData = await response.json();
     const EventData = responseData.data; // No need for "let" here
-
+    countOP = EventData[0].OperatorCount;
+            countGuest = EventData[0].GuestCount;
+            countSertif = EventData[0].sertifCount;
+            console.log("COunt OP dri Fetch Event:",countOP);
     return EventData;
 }
 
@@ -101,7 +112,13 @@ async function CheckPremium() {
             thElements.forEach((th) => {
                 th.classList.remove('hidden');
             });
-            document.getElementById('sertifikat').classList.remove('hidden');
+            if(countSertif != 0){
+                document.getElementById('sertifikat').classList.remove('hidden');
+            }
+            if(countOP != 0){
+                document.getElementById('op').classList.remove('hidden');
+            }
+            
         } else {
             // If the package is "gratis", you can choose to show elements here
         }
@@ -453,8 +470,8 @@ async function populateKategori(preselectedKategoriID) {
                         const cell2 = row.insertCell(1);
                         const cell3 = row.insertCell(2);
                         const cell4 = row.insertCell(3);
-                        const cell5 = row.insertCell(4);
-                         [cell1, cell2, cell3, cell4, cell5].forEach(cell => {
+                        
+                         [cell1, cell2, cell3, cell4].forEach(cell => {
                             cell.classList.add('px-6', 'py-3');
                         });
                         // Assign data to the cells
@@ -469,13 +486,6 @@ async function populateKategori(preselectedKategoriID) {
                         }
                         cell4.textContent = data.absen_oleh;
 
-                        // You can add an edit button in cell5 if needed
-                        const editButton = document.createElement('button');
-                        editButton.textContent = 'Edit';
-                        editButton.classList.add('text-purple-600');
-                        // Add event listener or link to your edit page
-
-                        cell5.appendChild(editButton);
                     });
                 } else {
                     console.error('API call unsuccessful. Message:', apiData.message);
@@ -666,7 +676,8 @@ const checkboxValue = checkbox.checked ? 1 : 0;
     const formData = new FormData(Editform);
     formData.append('public',checkboxValue);
     formData.append('ID_event',UrlID);
-    //console.log(formData);
+    
+    //console.log(document.getElementById('latitude').value);
 
 
     fetch(`http://${Endpoint}/api/event/update`, {
@@ -837,9 +848,10 @@ async function ReadTamu(){
     console.log("Test true or not:" + isPremium);
     // Clear existing rows
     
-
+    let CounterLimitGuest = 0;
     // Loop through the absenData and create table rows
     tamuData.forEach((tamu, index) => {
+        CounterLimitGuest++;
     const row = tableBody.insertRow();
     
     // Number Cell
@@ -863,13 +875,13 @@ async function ReadTamu(){
     cellType.textContent = tamu.type;
     const cellInstansi = row.insertCell(5);
     cellInstansi.classList.add('font-bold', 'px-6', 'py-2');
-    cellInstansi.textContent = tamu.instansi;
+    cellInstansi.textContent = tamu.instansi != null ? tamu.instansi :"-";
     const cellNamaRuang = row.insertCell(6);
     cellNamaRuang.classList.add('font-bold', 'px-6', 'py-2');
-    cellNamaRuang.textContent = tamu.nama_ruang;
+    cellNamaRuang.textContent = tamu.nama_ruang != null ? tamu.nama_ruang :"-";
     const cellNoMeja = row.insertCell(7);
     cellNoMeja.classList.add('font-bold', 'px-6', 'py-2');
-    cellNoMeja.textContent = tamu.no_meja;
+    cellNoMeja.textContent = tamu.no_meja != null ? tamu.no_meja :"-";
     // Start Time Cell
     const cellDoorPrize = row.insertCell(8);
     cellDoorPrize.classList.add('px-6', 'py-4');
@@ -878,7 +890,7 @@ async function ReadTamu(){
         
         const cellPaymentURL = row.insertCell(9);
     cellPaymentURL.classList.add('px-6','py-4','truncate','max-w-[120px]');
-    cellPaymentURL.textContent = tamu.payment_url; 
+    cellPaymentURL.textContent = tamu.payment_url != null ? tamu.payment_url :"-"; 
     const cellPaymentStatus = row.insertCell(10);
     cellPaymentStatus.classList.add('px-6', 'py-4');
     cellPaymentStatus.textContent = tamu.payment_status == 1 ? "Paid":"Not Paid"; 
@@ -886,6 +898,7 @@ async function ReadTamu(){
 cellPaymentStatus.classList.add(tamu.payment_status == 1 ? 'text-blue-500' : 'text-red-500');
     }
     
+if(tamu.payment_status != 1){
 const cellAction = document.createElement('td');
                  cellAction.classList.add('flex', 'justify-center', 'space-x-4', 'px-6', 'py-4');
 
@@ -909,7 +922,16 @@ const cellAction = document.createElement('td');
                             
                             cellAction.appendChild(deleteButton);
                         row.append(cellAction);
+                        }
 });
+const LimitGuest = countGuest - CounterLimitGuest;
+    const btnTamu = document.getElementById('btnTamu');
+    //console.log(btnTamu);
+    document.getElementById('CountGuestText').textContent = LimitGuest;
+    if(CounterLimitGuest >= countGuest){
+        
+        btnTamu.classList.add('hidden');
+    }
 }
 function deleteTamuRowAction(ID_paket) {
     const confirmation = confirm("Are you sure you want to delete this row?");
@@ -1015,7 +1037,7 @@ function generateOperatorTableRows(results) {
 
     // Clear existing rows
     tableBody.innerHTML = '';
-
+    let CounterLimitOP = 0;
     // Iterate through each result in the array
     results.forEach((result, index) => {
         // Create a new table row for each result
@@ -1062,7 +1084,15 @@ function generateOperatorTableRows(results) {
         cellAction.appendChild(editButton);
         cellAction.appendChild(deleteButton);
         row.append(cellAction);
+        CounterLimitOP++;
     });
+    console.log("Count OP:",countOP);
+    const LimitOP = countOP - CounterLimitOP;
+    document.getElementById('CountOpText').textContent = LimitOP;
+    if(CounterLimitOP >= countOP){
+        document.getElementById('ModalOp').classList.add('hidden');
+        console.log("hello?")
+    }
 }
 
 
@@ -1473,7 +1503,8 @@ function initMap(mapData) {
     }).addTo(map);
 
     const marker = L.marker(defaultLocation, { draggable: true }).addTo(map);
-
+    document.getElementById('latitude').value = defaultLocation[0];
+    document.getElementById('longitude').value = defaultLocation[1];
     marker.on('dragend', function (event) {
         const updatedLocation = marker.getLatLng();
         document.getElementById('latitude').value = updatedLocation.lat;

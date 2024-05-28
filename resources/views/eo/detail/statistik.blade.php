@@ -73,9 +73,6 @@
                 <th scope="col" class="px-6 py-3">
                     Di absen oleh
                 </th>
-                <th scope="col" class="px-6 py-3">
-                    <span class="sr-only">Edit</span>
-                </th>
             </tr>
         </thead>
         <tbody id="StatsTable">

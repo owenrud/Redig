@@ -66,7 +66,7 @@ class PesertaController extends Controller
     
     
 }
-public function createPaymentLink(Request $request)
+public function createPaymentLink(Request $request,$event)
 {
     try {
         $response = Http::withBasicAuth(env('MIDTRANS_SERVER_KEY'), '')
@@ -84,10 +84,10 @@ public function createPaymentLink(Request $request)
                 ],
                 "item_details"=> [
                     ["id"=>$request->ID_event,
-                    "name"=> "Premium Event",
+                    "name"=> $event->nama_event,
                     "price"=> 10500,
                     "quantity"=> 1,
-                    "brand"=> "Midtrans",
+                    "brand"=> "SPRED",
                     "category"=> "Event",
                     "merchant_name"=> "PT. Midtrans"]
                     ],
@@ -146,21 +146,30 @@ public function createPaymentLink(Request $request)
             ->where('ID_User',$request->ID_User)->first();
             $check_event = event::where('ID_event',$request->ID_event)
             ->join('paket','event.id_paket','=','paket.id_paket')
-            ->select('event.ID_event','paket.id_paket','nama_paket')
+            ->select('event.*','paket.id_paket','nama_paket','GuestCount')
             ->get();
             $namaPaket =strtolower ($check_event[0]->nama_paket);
+            $LimitGuest = $check_event[0]->GuestCount;
+            $CountPesertaEvent = peserta_event::where('ID_event',$request->ID_event)->count();
+            $isNotLimit = true;
+            if($CountPesertaEvent >= $LimitGuest){
+                $isNotLimit = false;
+                $message = "Kuota Peserta sudah Terpenuhi";
+            }
+            //return $isNotLimit;
             if($namaPaket != "gratis"){
-                $payment_url = $this->createPaymentLink($request);
+                $payment_url = $this->createPaymentLink($request,$check_event);
                 $payment_status =  0;
             }
             else {
                 $payment_url = null;
                 $payment_status = null;
             }
+            
             //return $namaPaket ;
            //return $check_user;
             //dd($check_user);
-                if(!$check_user){
+                if(!$check_user && $isNotLimit){
                     $peserta_event =peserta_event::Create([
                         'ID_event' => $request->ID_event,
                         'ID_User' => $request->ID_User,
@@ -184,12 +193,19 @@ public function createPaymentLink(Request $request)
             'message'=>'Data peserta Berhasil Ditambahkan'],'200');
                     }
                     return response()->json(['is_success'=>false,
-                    'message'=>'Data peserta Gagal ditambahkann'],'404');
+                    'message'=>'Data peserta Gagal ditambahkann'],500);
                 }else{
                     return response()->json(['is_success'=>false,
-                    'message'=>'Data peserta Sudah ada'],'500');
+                    'message'=>'Data peserta Sudah ada atau Kuota Peserta Penuh'],500);
                 }
                 
+        }
+
+        public function search(Request $request){
+            $peserta_event = peserta_event::where('nama','LIKE','%'.$request->input('search').'%')
+            ->get();
+            return response()->json(['is_success'=>true,
+            'data'=>$peserta_event,'message'=>'Data Pencarian Peserta'],200);
         }
     
         public function update(Request $request){

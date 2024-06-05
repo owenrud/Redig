@@ -37,7 +37,7 @@ Route::post('/user/login',[RegisterController::class,'Login_API']);
 Route::post('/export',[PesertaController::class,'export_excel']);
 Route::get('/test/pdf/export', [SertifikatController::class,'export']);
 Route::post('/test/postpdf/export', [SertifikatController::class,'test_export']);
-Route::post('/generate-links',[PaymentController::class, 'createPaymentLink']);
+Route::post('/generate-links',[PesertaController::class, 'createPaymentLink']);
 Route::get('/count-paket',[InvoiceController::class, 'count_paket']);
 Route::get('/count-EO',[RegisterController::class, 'statsAccEO']);
  
@@ -134,6 +134,7 @@ Route::prefix('peserta')->group(function () {
     Route::post('/me', [PesertaController::class, 'me']);
     Route::post('/show/guest', [PesertaController::class, 'show_guest']);
     Route::post('/show/user', [PesertaController::class, 'user']);
+    Route::post('/saveEO', [PesertaController::class, 'storeAsEO']);
     Route::post('/save', [PesertaController::class, 'store']);
     Route::post('/update', [PesertaController::class, 'update']);
     Route::delete('/delete/{id}', [PesertaController::class, 'delete']);

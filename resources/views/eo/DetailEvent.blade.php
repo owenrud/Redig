@@ -96,7 +96,7 @@ async function fetchEventData(){
     countOP = EventData[0].OperatorCount;
             countGuest = EventData[0].GuestCount;
             countSertif = EventData[0].sertifCount;
-            console.log("COunt OP dri Fetch Event:",countOP);
+            //console.log("COunt OP dri Fetch Event:",countOP);
     return EventData;
 }
 
@@ -104,7 +104,7 @@ async function CheckPremium() {
     try {
         const EventData = await fetchEventData();
         const check = EventData[0].nama_paket.toLowerCase();
-        console.log("test debug for checking premium:", check);
+        //console.log("test debug for checking premium:", check);
         
         // Hide elements if the package is not "gratis"
         if (check !== 'gratis') {
@@ -787,7 +787,7 @@ function deleteRowAction(ID_paket) {
         .then(response => response.json())
         .then(data => {
             if (data && data.is_success) {
-                console.log('Row deleted successfully');
+                //console.log('Row deleted successfully');
                 
                 // Reload the page after successful deletion
                 location.reload();
@@ -845,7 +845,7 @@ async function ReadTamu(){
   async function generateTamuTableRows(tamuData) {
     const tableBody = document.getElementById('tamuTable');
      const isPremium = await CheckPremium();
-    console.log("Test true or not:" + isPremium);
+    //console.log("Test true or not:" + isPremium);
     // Clear existing rows
     
     let CounterLimitGuest = 0;
@@ -914,7 +914,7 @@ const cellAction = document.createElement('td');
                             deleteButton.type = 'button';
                             deleteButton.onclick = function() {
                                 // Define the action you want to perform when the "Delete" button is clicked
-                                deleteTamuRowAction(tamu.ID_event); // You need to implement the deleteRowAction function
+                                deleteTamuRowAction(tamu.ID_peserta); // You need to implement the deleteRowAction function
                             };
 
                             // Append buttons to the cellAction
@@ -933,18 +933,19 @@ const LimitGuest = countGuest - CounterLimitGuest;
         btnTamu.classList.add('hidden');
     }
 }
-function deleteTamuRowAction(ID_paket) {
+function deleteTamuRowAction(ID_peserta) {
     const confirmation = confirm("Are you sure you want to delete this row?");
 
     if (confirmation) {
         // Make a DELETE request to the API
-        fetch(`http://${Endpoint}/api/peserta/delete/${ID_paket}`, {
+        console.log("ID Peserta",ID_peserta);
+        fetch(`http://${Endpoint}/api/peserta/delete/${ID_peserta}`, {
             method: 'DELETE',
         })
         .then(response => response.json())
         .then(data => {
             if (data && data.is_success) {
-                console.log('Row deleted successfully');
+                //console.log('Row deleted successfully');
                 
                 // Reload the page after successful deletion
                 location.reload();
@@ -1086,12 +1087,12 @@ function generateOperatorTableRows(results) {
         row.append(cellAction);
         CounterLimitOP++;
     });
-    console.log("Count OP:",countOP);
+    //("Count OP:",countOP);
     const LimitOP = countOP - CounterLimitOP;
     document.getElementById('CountOpText').textContent = LimitOP;
     if(CounterLimitOP >= countOP){
         document.getElementById('ModalOp').classList.add('hidden');
-        console.log("hello?")
+        //console.log("hello?")
     }
 }
 
@@ -1107,7 +1108,7 @@ function deleteOperatorRowAction(ID_paket) {
         .then(response => response.json())
         .then(data => {
             if (data && data.is_success) {
-                console.log('Row deleted successfully');
+                //console.log('Row deleted successfully');
                 
                 // Reload the page after successful deletion
                 location.reload();
@@ -1134,7 +1135,7 @@ function generateFileTableRows(fileData) {
     const columnsToDisplay = ['banner', 'logo', 'materi'];
     const table = document.getElementById('fileTable');
     let counter = 1;
-    console.log("File Data:", fileData[0]);
+    //("File Data:", fileData[0]);
     // Iterate over the specified columns
     for (const columnName of columnsToDisplay) {
         // Create a row for each column
@@ -1198,7 +1199,7 @@ function generateFileTableRows(fileData) {
 // Function to handle image preview by opening a blank page
 function previewImage(imageName) {
     const fullImagePath = "{{ asset('storage/uploads') }}/" + imageName;
-    console.log("Full Image path:", fullImagePath);
+    //console.log("Full Image path:", fullImagePath);
 
     // Open a new window with the image
     const imageWindow = window.open(fullImagePath, "_blank", "width=600,height=400");
@@ -1339,7 +1340,7 @@ async function fetchDataAndUpdateChart() {
         }
 
         const apiData = await response.json();
-        console.log(apiData);
+        //console.log(apiData);
         if (apiData.is_success) {
             const pesertaData = apiData.data;
 
@@ -1484,7 +1485,7 @@ async function fetchDataAndInitMap() {
    
 
         const mapData = await fetchEventData();
-        console.log('Map Data:',mapData[0]);
+        //console.log('Map Data:',mapData[0]);
         await initMap(mapData[0]);
 
 }

@@ -43,12 +43,19 @@
 </div>
 
 <div class="mb-6">
+    <label id="tagPrice" class="hidden block mb-2 text-sm font-medium text-gray-900 dark:text-white">Harga Tiket</label>
+    <input id="price" name="price" type="number" class=" hidden disabled bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+    <small id="descPrice" class="hidden">Harga tiket di tambah Rp. 500 untuk biaya admin<small>
+</div>
+
+
+<div class="mb-6">
 <label id="premiumInput" class="hidden relative inline-flex items-center mb-5 cursor-pointer">
   <input id="toggleStatus" name="payment_status" type="checkbox" class="sr-only peer">
   <div class="w-11 h-6 bg-red-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-violet-300 dark:peer-focus:ring-violet-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:w-5 after:h-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-700"></div>
   <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Payment Status</span>
 </label>
-<p class="mb-4 text-xs font-light">Keterangan : Merah = Belum membayar , Biru = Sudah membayar</p>
+<p id="textStatus" class="hidden mb-4 text-xs font-light">Keterangan : Merah = Belum membayar , Biru = Sudah membayar</p>
 
 </div>
 
@@ -98,6 +105,10 @@ async function CheckPremium() {
         const check = EventData[0].nama_paket.toLowerCase();
         if(check !== 'gratis'){
             document.getElementById('premiumInput').classList.remove('hidden')
+            document.getElementById('price').classList.remove('hidden','disabled')
+            document.getElementById('tagPrice').classList.remove('hidden');
+            document.getElementById('descPrice').classList.remove('hidden');
+            document.getElementById('textStatus').classList.remove('hidden');
         }
         
         // Return true if the package is not "gratis", false otherwise

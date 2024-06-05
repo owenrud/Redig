@@ -86,7 +86,7 @@ class PaymentController extends Controller
                 ->post('https://api.sandbox.midtrans.com/v1/payment-links', [
                     'transaction_details' => [
                         'order_id' => uniqid(), // Adjust order ID as needed
-                        'gross_amount' => $request->input('amount'), // Adjust gross amount as needed// Adjust payment link ID as needed
+                        'gross_amount' => 10500, // Adjust gross amount as needed// Adjust payment link ID as needed
                   
                     ],
                     "customer_required"=> false,
@@ -95,19 +95,11 @@ class PaymentController extends Controller
                     "duration"=> 7,
                     "unit"=> "days"
                     ],
-                    "item_details"=> [
-                        ["id"=> "E-001",
-                        "name"=> "Event",
-                        "price"=> 10500,
-                        "quantity"=> 1,
-                        "brand"=> "Midtrans",
-                        "category"=> "All",
-                        "merchant_name"=> "PT. Midtrans"]
-                        ],
+                    
                         "customer_details"=>[
                             "first_name"=> "Owen",
                         "last_name"=> "Rudianto",
-                        "email"=> "owenrudiantoso@gmail.com",
+                        
                         
                         "notes"=> "Thank you for register premium Event. Please follow the instructions to pay."
                         ],

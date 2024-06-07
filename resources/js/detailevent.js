@@ -1,79 +1,4 @@
-@extends('layouts.main')
-@section('page_title','Detail Event')
-@section('link')
-<!-- Lightbox CSS -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css">
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-
-
-@endsection
-@section('content')
-
-<div class="flex-1 flex-col justify-center items-center  p-4 w-full overflow-x-auto">
-<div href="#" class=" flex-1 block flex-col  p-2 bg-white border border-gray-200 rounded-lg shadow  dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
-
-<div id="span-nav" class="flex flex-row p-2 space-x-3">
-<span id="stats" class="flex bg-purple-600 w-24 h-10 p-2 justify-center items-center rounded-lg text-white"  onclick="toggleSection('stats', 'Statistik')">Statistik</span>
-<span id="edit" class="flex hover:text-violet-400 w-24 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('edit', 'Detail & Edit Event')" >Detail/Edit</span>
-<span id="absen" class="flex hover:text-violet-400 w-24 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('absen', 'Jam Absen')">Jam Absen</span>
-<span id="file" class="flex hover:text-violet-400 w-32 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('file', 'File Tambahan')">File Tambahan</span>
-<span id="tiket_tamu" class="hidden flex hover:text-violet-400 w-24 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('tiket_tamu', 'Tiket Tamu')">Tiket Tamu</span>
-<span id="tamu" class="flex hover:text-violet-400 w-24 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('tamu', 'Peserta')">Peserta</span>
-<span id="op" class="hidden flex hover:text-violet-400 w-24 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('op', 'Operator')">Operator</span>
-<span id="sertifikat" class="hidden flex hover:text-violet-400 w-24 h-10 p-2 justify-center items-center rounded-lg text-black" onclick="toggleSection('sertifikat', 'Sertifikat')">Sertifikat</span>
-
-</div>
-<hr class="flex-1 w-full mt-2 mb-4">
-
-@include('eo.detail.statistik')
-
-@include('eo.detail.edit')
-
-@include('eo.detail.absen')
-
-@include('eo.detail.file')
-
-@include('eo.detail.tiket_tamu')
-
-@include('eo.detail.tamu')
-
-@include('eo.detail.operator')
-
-@include('eo.detail.sertifikat')
-
-
-</div>
-</div>
-
-@include('eo.modalabsen')
-
-
-
-
-</div>
-</div>
-@endsection
-
-@section('script')
-
-<!-- Include Lightbox2 JavaScript -->
-<!-- Lightbox JavaScript -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- ... other head content ... -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" />
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
-
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
-    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
-    
-    
-<script>
 const UrlID = window.location.pathname.split('/').pop();
 
 
@@ -85,246 +10,6 @@ let countOP = 0;
 let countGuest = 0;
 let countSertif = 0;
 let countFile = 0;
-const provinsiSelect = document.getElementById('provinsi');
-  const kabupatenSelect = document.getElementById('kabupaten');
-  const KategoriSelect = document.getElementById('kategori');
-  const StatsJamSelect =document.getElementById('Stats_Jam');
-
-async function ReadTamu(){
-   try {
-            //console.log(eventId);
-            const apiUrl = `http://${Endpoint}/api/peserta/show`;
-
-
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    ID_event: UrlID,
-                    // Add other necessary data in the body if needed
-                }),
-            });
-
-            const eventData = await response.json();
-
-            if (response.ok) {
-               const absenData = eventData.data;
-            generateTamuTableRows(absenData);
-                 } else {
-                console.error('Failed to fetch event data:', eventData);
-            }
-        } catch (error) {
-            console.error('Error during fetch:', error);
-        }
-    }
-  async function generateTamuTableRows(tamuData) {
-    const tableBody = document.getElementById('tamuTable');
-     const isPremium = await CheckPremium();
-    //console.log("Test true or not:" + isPremium);
-    // Clear existing rows
-    
-    let CounterLimitGuest = 0;
-    // Loop through the absenData and create table rows
-    tamuData.forEach((tamu, index) => {
-        CounterLimitGuest++;
-    const row = tableBody.insertRow();
-    
-    // Number Cell
-    const cellNumber = row.insertCell(0);
-    cellNumber.classList.add('px-6', 'py-4', 'font-medium', 'text-gray-900', 'whitespace-nowrap', 'dark:text-white');
-    cellNumber.textContent = index + 1;
-
-    // Type Cell
-    const cellName = row.insertCell(1);
-    cellName.classList.add('font-bold', 'px-6', 'py-2','truncate','max-w-[100px]');
-    cellName.textContent = tamu.nama; // Replace with the actual property name from your API response
-
-    const cellEmail = row.insertCell(2);
-    cellEmail.classList.add('font-bold', 'px-6', 'py-2','truncate','max-w-[120px]');
-    cellEmail.textContent = tamu.email;
-    const cellGender = row.insertCell(3);
-    cellGender.classList.add('font-bold', 'px-6', 'py-2');
-    cellGender.textContent = tamu.gender;
-    const cellType = row.insertCell(4);
-    cellType.classList.add('font-bold', 'px-6', 'py-2');
-    cellType.textContent = tamu.type;
-    const cellInstansi = row.insertCell(5);
-    cellInstansi.classList.add('font-bold', 'px-6', 'py-2');
-    cellInstansi.textContent = tamu.instansi != null ? tamu.instansi :"-";
-    const cellNamaRuang = row.insertCell(6);
-    cellNamaRuang.classList.add('font-bold', 'px-6', 'py-2');
-    cellNamaRuang.textContent = tamu.nama_ruang != null ? tamu.nama_ruang :"-";
-    const cellNoMeja = row.insertCell(7);
-    cellNoMeja.classList.add('font-bold', 'px-6', 'py-2');
-    cellNoMeja.textContent = tamu.no_meja != null ? tamu.no_meja :"-";
-    // Start Time Cell
-    const cellDoorPrize = row.insertCell(8);
-    cellDoorPrize.classList.add('px-6', 'py-4');
-    cellDoorPrize.textContent = tamu.kode_doorprize; // Replace with the actual property name from your API response
-    if(isPremium){
-        
-        const cellPaymentURL = row.insertCell(9);
-    cellPaymentURL.classList.add('px-6','py-4','truncate','max-w-[120px]');
-    cellPaymentURL.textContent = tamu.payment_url != null ? tamu.payment_url :"-"; 
-    const cellPaymentStatus = row.insertCell(10);
-    cellPaymentStatus.classList.add('px-6', 'py-4');
-    cellPaymentStatus.textContent = tamu.payment_status == 1 ? "Paid":"Not Paid"; 
-    // Add a dynamic class based on the value of tamu.status_absen
-cellPaymentStatus.classList.add(tamu.payment_status == 1 ? 'text-blue-500' : 'text-red-500');
-    }
-    
-if(tamu.payment_status != 1){
-const cellAction = document.createElement('td');
-                 cellAction.classList.add('flex', 'justify-center', 'space-x-4', 'px-6', 'py-4');
-
-                            const DetailButton = document.createElement('a');
-                            DetailButton.textContent = 'Edit';
-                            DetailButton.href =`/event/detail/${tamu.ID_event}/tamu/${tamu.ID_peserta}`;
-                            DetailButton.classList.add('cursor-pointer','text-sky-500','hover:text-sky-700','px-3','py-1');
-                       
-                            // Create Delete Button
-                            const deleteButton = document.createElement('button');
-                            deleteButton.textContent = 'Delete';
-                            deleteButton.classList.add('cursor-pointer', 'text-rose-600', 'hover:text-rose-800');
-                            deleteButton.type = 'button';
-                            deleteButton.onclick = function() {
-                                // Define the action you want to perform when the "Delete" button is clicked
-                                deleteTamuRowAction(tamu.ID_peserta); // You need to implement the deleteRowAction function
-                            };
-
-                            // Append buttons to the cellAction
-                            cellAction.appendChild(DetailButton);
-                            
-                            cellAction.appendChild(deleteButton);
-                        row.append(cellAction);
-                        }
-});
-const LimitGuest = countGuest - CounterLimitGuest;
-    const btnTamu = document.getElementById('btnTamu');
-    //console.log(btnTamu);
-    document.getElementById('CountGuestText').textContent = LimitGuest;
-    if(CounterLimitGuest >= countGuest){
-        
-        btnTamu.classList.add('hidden');
-    }
-}
-function deleteTamuRowAction(ID_peserta) {
-    const confirmation = confirm("Are you sure you want to delete this row?");
-
-    if (confirmation) {
-        // Make a DELETE request to the API
-        console.log("ID Peserta",ID_peserta);
-        fetch(`http://${Endpoint}/api/peserta/delete/${ID_peserta}`, {
-            method: 'DELETE',
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data && data.is_success) {
-                //console.log('Row deleted successfully');
-                
-                // Reload the page after successful deletion
-                location.reload();
-            } else {
-                console.error('Failed to delete row');
-            }
-        })
-        .catch(error => console.error('Error deleting row:', error));
-    }
-}
-
-ReadTamu();
-
-
-        // Function to add days to a date
-        function addDays(date, days) {
-            const result = new Date(date);
-            result.setDate(result.getDate() + days);
-            return result;
-        }
-
-        async function populateDateOptions() {
-            const eventDates = await fetchEventData();
-
-            // Assuming eventDates contains start and end dates
-            //console.log(eventDates);
-            //console.log("Tanggal Mulai :",eventDates[0].start);
-            //console.log("Tanggal Selesai :",eventDates[0].end);
-            const startDate = new Date(eventDates[0].start);
-            const endDate = new Date(eventDates[0].end);
-
-            const selectElement = document.getElementById("tgl");
-            let currentDate = startDate;
-
-            while (currentDate <= endDate) {
-                const option = document.createElement("option");
-                option.value = currentDate.toISOString().split("T")[0];
-                option.text = currentDate.toISOString().split("T")[0];
-                selectElement.add(option);
-
-                currentDate = addDays(currentDate, 1);
-            }
-        }
-       async function fetchDataAndPopulateTable() {
-            const tableBody = document.getElementById('StatsTable');
-            
-            try {
-                const eventId = { ID_event: UrlID }; // Replace with the actual event ID
-                const response = await fetch(`http://${Endpoint}/api/peserta/show`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(eventId),
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-
-                const apiData = await response.json();
-
-                // Check if the API call was successful
-                if (apiData.is_success) {
-                    const pesertaData = apiData.data;
-//console.log(pesertaData);
-                    // Loop through the data and populate the table
-                    pesertaData.forEach((data, index) => {
-                        const row = tableBody.insertRow();
-                        const cell1 = row.insertCell(0);
-                        const cell2 = row.insertCell(1);
-                        const cell3 = row.insertCell(2);
-                        const cell4 = row.insertCell(3);
-                        
-                         [cell1, cell2, cell3, cell4].forEach(cell => {
-                            cell.classList.add('px-6', 'py-3');
-                        });
-                        // Assign data to the cells
-                        cell1.textContent = index + 1;
-                        cell2.textContent = data.nama;
-                        if (data.status_absen === 1) {
-                            cell3.textContent = 'Hadir';
-                            cell3.classList.add('text-green-600');
-                        } else {
-                            cell3.textContent = 'Tidak Hadir';
-                            cell3.classList.add('text-rose-600');
-                        }
-                        cell4.textContent = data.absen_oleh;
-
-                    });
-                } else {
-                    console.error('API call unsuccessful. Message:', apiData.message);
-                }
-            } catch (error) {
-                console.error('Error fetching and displaying data:', error);
-            }
-        }
-        // Call the function to populate date options
-        fetchDataAndPopulateTable();
-        populateDateOptions();
-
-
 async function fetchEventData(){
     const APIURL = `http://${Endpoint}/api/event/show`;
     const response = await fetch(APIURL,{
@@ -488,6 +173,10 @@ function setActiveSpan(activeSectionId) {
 }
 
 
+  const provinsiSelect = document.getElementById('provinsi');
+  const kabupatenSelect = document.getElementById('kabupaten');
+  const KategoriSelect = document.getElementById('kategori');
+  const StatsJamSelect =document.getElementById('Stats_Jam');
 
   function populateStatJam() {
     fetch(`http://${Endpoint}/api/absen/show`,{
@@ -645,8 +334,97 @@ async function populateKategori(preselectedKategoriID) {
   populateKategori();
   populateStatJam();
 
+       
 
-//Script untuk ModalAbsen
+        // Function to add days to a date
+        function addDays(date, days) {
+            const result = new Date(date);
+            result.setDate(result.getDate() + days);
+            return result;
+        }
+
+        async function populateDateOptions() {
+            const eventDates = await fetchEventData();
+
+            // Assuming eventDates contains start and end dates
+            //console.log(eventDates);
+            //console.log("Tanggal Mulai :",eventDates[0].start);
+            //console.log("Tanggal Selesai :",eventDates[0].end);
+            const startDate = new Date(eventDates[0].start);
+            const endDate = new Date(eventDates[0].end);
+
+            const selectElement = document.getElementById("tgl");
+            let currentDate = startDate;
+
+            while (currentDate <= endDate) {
+                const option = document.createElement("option");
+                option.value = currentDate.toISOString().split("T")[0];
+                option.text = currentDate.toISOString().split("T")[0];
+                selectElement.add(option);
+
+                currentDate = addDays(currentDate, 1);
+            }
+        }
+       async function fetchDataAndPopulateTable() {
+            const tableBody = document.getElementById('StatsTable');
+            
+            try {
+                const eventId = { ID_event: UrlID }; // Replace with the actual event ID
+                const response = await fetch(`http://${Endpoint}/api/peserta/show`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(eventId),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const apiData = await response.json();
+
+                // Check if the API call was successful
+                if (apiData.is_success) {
+                    const pesertaData = apiData.data;
+//console.log(pesertaData);
+                    // Loop through the data and populate the table
+                    pesertaData.forEach((data, index) => {
+                        const row = tableBody.insertRow();
+                        const cell1 = row.insertCell(0);
+                        const cell2 = row.insertCell(1);
+                        const cell3 = row.insertCell(2);
+                        const cell4 = row.insertCell(3);
+                        
+                         [cell1, cell2, cell3, cell4].forEach(cell => {
+                            cell.classList.add('px-6', 'py-3');
+                        });
+                        // Assign data to the cells
+                        cell1.textContent = index + 1;
+                        cell2.textContent = data.nama;
+                        if (data.status_absen === 1) {
+                            cell3.textContent = 'Hadir';
+                            cell3.classList.add('text-green-600');
+                        } else {
+                            cell3.textContent = 'Tidak Hadir';
+                            cell3.classList.add('text-rose-600');
+                        }
+                        cell4.textContent = data.absen_oleh;
+
+                    });
+                } else {
+                    console.error('API call unsuccessful. Message:', apiData.message);
+                }
+            } catch (error) {
+                console.error('Error fetching and displaying data:', error);
+            }
+        }
+        // Call the function to populate date options
+        fetchDataAndPopulateTable();
+        populateDateOptions();
+   
+
+//Script untuk ModalAbsen 
 
     document.addEventListener('DOMContentLoaded', function () {
         const openModalAbsen = document.getElementById('openModalAbsen');
@@ -952,6 +730,151 @@ function OpenSertifikat(event){
   event.preventDefault();
   window.location.href = `/event/detail/${eventId}/sertifikat`
 }
+async function ReadTamu(){
+   try {
+            //console.log(eventId);
+            const apiUrl = `http://${Endpoint}/api/peserta/show`;
+
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    ID_event: UrlID,
+                    // Add other necessary data in the body if needed
+                }),
+            });
+
+            const eventData = await response.json();
+
+            if (response.ok) {
+               const absenData = eventData.data;
+            generateTamuTableRows(absenData);
+                 } else {
+                console.error('Failed to fetch event data:', eventData);
+            }
+        } catch (error) {
+            console.error('Error during fetch:', error);
+        }
+    }
+  async function generateTamuTableRows(tamuData) {
+    const tableBody = document.getElementById('tamuTable');
+     const isPremium = await CheckPremium();
+    //console.log("Test true or not:" + isPremium);
+    // Clear existing rows
+    
+    let CounterLimitGuest = 0;
+    // Loop through the absenData and create table rows
+    tamuData.forEach((tamu, index) => {
+        CounterLimitGuest++;
+    const row = tableBody.insertRow();
+    
+    // Number Cell
+    const cellNumber = row.insertCell(0);
+    cellNumber.classList.add('px-6', 'py-4', 'font-medium', 'text-gray-900', 'whitespace-nowrap', 'dark:text-white');
+    cellNumber.textContent = index + 1;
+
+    // Type Cell
+    const cellName = row.insertCell(1);
+    cellName.classList.add('font-bold', 'px-6', 'py-2','truncate','max-w-[100px]');
+    cellName.textContent = tamu.nama; // Replace with the actual property name from your API response
+
+    const cellEmail = row.insertCell(2);
+    cellEmail.classList.add('font-bold', 'px-6', 'py-2','truncate','max-w-[120px]');
+    cellEmail.textContent = tamu.email;
+    const cellGender = row.insertCell(3);
+    cellGender.classList.add('font-bold', 'px-6', 'py-2');
+    cellGender.textContent = tamu.gender;
+    const cellType = row.insertCell(4);
+    cellType.classList.add('font-bold', 'px-6', 'py-2');
+    cellType.textContent = tamu.type;
+    const cellInstansi = row.insertCell(5);
+    cellInstansi.classList.add('font-bold', 'px-6', 'py-2');
+    cellInstansi.textContent = tamu.instansi != null ? tamu.instansi :"-";
+    const cellNamaRuang = row.insertCell(6);
+    cellNamaRuang.classList.add('font-bold', 'px-6', 'py-2');
+    cellNamaRuang.textContent = tamu.nama_ruang != null ? tamu.nama_ruang :"-";
+    const cellNoMeja = row.insertCell(7);
+    cellNoMeja.classList.add('font-bold', 'px-6', 'py-2');
+    cellNoMeja.textContent = tamu.no_meja != null ? tamu.no_meja :"-";
+    // Start Time Cell
+    const cellDoorPrize = row.insertCell(8);
+    cellDoorPrize.classList.add('px-6', 'py-4');
+    cellDoorPrize.textContent = tamu.kode_doorprize; // Replace with the actual property name from your API response
+    if(isPremium){
+        
+        const cellPaymentURL = row.insertCell(9);
+    cellPaymentURL.classList.add('px-6','py-4','truncate','max-w-[120px]');
+    cellPaymentURL.textContent = tamu.payment_url != null ? tamu.payment_url :"-"; 
+    const cellPaymentStatus = row.insertCell(10);
+    cellPaymentStatus.classList.add('px-6', 'py-4');
+    cellPaymentStatus.textContent = tamu.payment_status == 1 ? "Paid":"Not Paid"; 
+    // Add a dynamic class based on the value of tamu.status_absen
+cellPaymentStatus.classList.add(tamu.payment_status == 1 ? 'text-blue-500' : 'text-red-500');
+    }
+    
+if(tamu.payment_status != 1){
+const cellAction = document.createElement('td');
+                 cellAction.classList.add('flex', 'justify-center', 'space-x-4', 'px-6', 'py-4');
+
+                            const DetailButton = document.createElement('a');
+                            DetailButton.textContent = 'Edit';
+                            DetailButton.href =`/event/detail/${tamu.ID_event}/tamu/${tamu.ID_peserta}`;
+                            DetailButton.classList.add('cursor-pointer','text-sky-500','hover:text-sky-700','px-3','py-1');
+                       
+                            // Create Delete Button
+                            const deleteButton = document.createElement('button');
+                            deleteButton.textContent = 'Delete';
+                            deleteButton.classList.add('cursor-pointer', 'text-rose-600', 'hover:text-rose-800');
+                            deleteButton.type = 'button';
+                            deleteButton.onclick = function() {
+                                // Define the action you want to perform when the "Delete" button is clicked
+                                deleteTamuRowAction(tamu.ID_peserta); // You need to implement the deleteRowAction function
+                            };
+
+                            // Append buttons to the cellAction
+                            cellAction.appendChild(DetailButton);
+                            
+                            cellAction.appendChild(deleteButton);
+                        row.append(cellAction);
+                        }
+});
+const LimitGuest = countGuest - CounterLimitGuest;
+    const btnTamu = document.getElementById('btnTamu');
+    //console.log(btnTamu);
+    document.getElementById('CountGuestText').textContent = LimitGuest;
+    if(CounterLimitGuest >= countGuest){
+        
+        btnTamu.classList.add('hidden');
+    }
+}
+function deleteTamuRowAction(ID_peserta) {
+    const confirmation = confirm("Are you sure you want to delete this row?");
+
+    if (confirmation) {
+        // Make a DELETE request to the API
+        console.log("ID Peserta",ID_peserta);
+        fetch(`http://${Endpoint}/api/peserta/delete/${ID_peserta}`, {
+            method: 'DELETE',
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.is_success) {
+                //console.log('Row deleted successfully');
+                
+                // Reload the page after successful deletion
+                location.reload();
+            } else {
+                console.error('Failed to delete row');
+            }
+        })
+        .catch(error => console.error('Error deleting row:', error));
+    }
+}
+
+ReadTamu();
 
 async function ReadOperator() {
     try {
@@ -1279,7 +1202,7 @@ ReadOperator();
     .catch(error => console.error('Error during fetch:', error));
 }
 
-
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 
 
@@ -1463,6 +1386,38 @@ document.getElementById('Stats_Jam').addEventListener('change', function() {
     // Call the function whenever you need to fetch and update the chart
     fetchDataAndUpdateChart();
 
+    function includeExternalResources() {
+        // Function to include external CSS file
+        function includeCSS(url) {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = url;
+            document.head.appendChild(link);
+        }
+    
+        // Function to include external JavaScript file
+        function includeJS(url) {
+            const script = document.createElement('script');
+            script.src = url;
+            document.head.appendChild(script);
+        }
+    
+        // Include Leaflet CSS
+        includeCSS('https://unpkg.com/leaflet/dist/leaflet.css');
+    
+        // Include Leaflet JavaScript
+        includeJS('https://unpkg.com/leaflet/dist/leaflet.js');
+    
+        // Include Leaflet Control Geocoder CSS
+        includeCSS('https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css');
+    
+        // Include Leaflet Control Geocoder JavaScript
+        includeJS('https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js');
+    }
+    
+    // Call the function to include external resources
+    includeExternalResources();
+    
 
 
 async function fetchDataAndInitMap() {
@@ -1550,8 +1505,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
       document.getElementById('ID_Event').value = eventId;
-</script>
+
 
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-@endsection
-

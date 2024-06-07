@@ -200,39 +200,69 @@ private function generateOTP() {
         } 
           $paket = Paket::where('nama_paket','LIKE','%Gratis%')->first();
           $default_Paket = $paket->ID_paket;
+          
           if(isset($request->google_id)){
-              $user = User::Create([
-                  'email' => $request->email,
-                  'password' => bcrypt($request->password),
-                  'Role'=> $request->role,
-                  'email_valid'=>$request->verify_email,
-                  'google_id' =>$request->google_id,
-                  'nama_lengkap' => $request->full_name,
-                  'otp'=>$otp,
-                      'no_telp' => $request->no_telp,
-                      'ID_paket'=> $default_Paket,
-                      'alamat' => $request->alamat,
-                      'provinsi'=> $namaProvinsi->nama,
-                      'kabupaten' => $namaKabupaten->nama,
-                      'foto' => $request->profile_picture
-              ]);
+            $userData = [
+                'email' => $request->email,
+                'password' => bcrypt($request->password),
+                'Role'=> $request->role,
+                'email_valid'=>$request->verify_email,
+                'google_id' =>$request->google_id,
+                'nama_lengkap' => $request->full_name,
+                'otp'=>$otp,
+                'no_telp' => $request->no_telp,
+                'ID_paket'=> $default_Paket,
+                'alamat' => $request->alamat,
+                'provinsi'=> $namaProvinsi->nama,
+                'kabupaten' => $namaKabupaten->nama,
+            ];
+            
+            if ($request->hasFile('profile_picture')) {
+                $file = $request->file('profile_picture');
+                
+                // Modify the filename
+                $modifiedFilename = time() . '_' . str_replace(' ', '_', $file->getClientOriginalName());
+                
+                // Store the file with the modified filename
+                $path = $file->storeAs('uploads', $modifiedFilename, 'public');
+                
+                // Save the modified filename to the model
+                $userData['foto'] = $modifiedFilename;
+            }
+            
+            $user = User::create($userData);
+            
              
                   }else{
-              $user = User::Create([
-                  'email' => $request->email,
-                  'password' => bcrypt($request->password),
-                  'Role'=> $request->role,
-                  'email_valid'=>$request->verify_email,
-                  'google_id' =>null,
-                  'nama_lengkap' => $request->full_name,
-                  'otp'=>$otp,
-                      'no_telp' => $request->no_telp,
-                      'ID_paket'=> $default_Paket,
-                      'alamat' => $request->alamat,
-                      'provinsi'=> $namaProvinsi->nama,
-                      'kabupaten' => $namaKabupaten->nama,
-                      'foto' => $request->profile_picture
-              ]);
+                    $userData = [
+                        'email' => $request->email,
+                        'password' => bcrypt($request->password),
+                        'Role'=> $request->role,
+                        'email_valid'=>$request->verify_email,
+                        'google_id' =>null,
+                        'nama_lengkap' => $request->full_name,
+                        'otp'=>$otp,
+                        'no_telp' => $request->no_telp,
+                        'ID_paket'=> $default_Paket,
+                        'alamat' => $request->alamat,
+                        'provinsi'=> $namaProvinsi->nama,
+                        'kabupaten' => $namaKabupaten->nama,
+                    ];
+                    
+                    if ($request->hasFile('profile_picture')) {
+                        $file = $request->file('profile_picture');
+                        
+                        // Modify the filename
+                        $modifiedFilename = time() . '_' . str_replace(' ', '_', $file->getClientOriginalName());
+                        
+                        // Store the file with the modified filename
+                        $path = $file->storeAs('uploads', $modifiedFilename, 'public');
+                        
+                        // Save the modified filename to the model
+                        $userData['foto'] = $modifiedFilename;
+                    }
+                    
+                    $user = User::create($userData);
           }
           if($user !== null){
             return response()->json([

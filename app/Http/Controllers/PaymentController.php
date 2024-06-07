@@ -16,15 +16,11 @@ class PaymentController extends Controller
     {
         $user = User::find($request->input('id'));
         $profileUser = Profile::find($user->ID_User);
-        //return $profileUser;
+ 
         // Set your Midtrans credentials
         Config::$serverKey = env('MIDTRANS_SERVER_KEY');
-        // Get the value of Config::$serverKey
-// $serverKey = Config::$serverKey;
 
-// // Return the value as part of the response
-// return response()->json(['serverKey' => $serverKey]);
-        //$serverKey = "SB-Mid-server-82xg1Gbhq0VxjRzMcFLketCi";
+
         Config::$isProduction = env('MIDTRANS_IS_PRODUCTION');
         Config::$isSanitized = true;
         
@@ -33,21 +29,21 @@ class PaymentController extends Controller
 
         // Get the plan details (you need to replace this with your logic)
         $plan = Paket::findOrFail($planId);
-        //return $plan;
+
         // Create the transaction details
         $transactionDetails = [
             'order_id' => uniqid(),
             'gross_amount' => $plan->harga,
         ];
-        //return $transactionDetails;
+        
         // Create the customer details (you need to replace this with your logic)
         $customerDetails = [
-            'first_name' => $profileUser->nama_lengkap,
+            'first_name' => $user->nama_lengkap,
             'email' => $user->email,
-            'phone' => $profileUser->no_telp,
-            'address'=> $profileUser->alamat,
+            'phone' => $user->no_telp,
+            'address'=> $user->alamat,
         ];
-        //return $customerDetails;
+        
         // Create the item details
         $itemDetails = [
             [

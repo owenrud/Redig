@@ -95,9 +95,11 @@ class PaketController extends Controller
                         $paket->$atribut = $request->input($atribut);
                     }
                 }
-                $count_paket = paket::where('status', '1')->where('nama_paket', '!=', 'gratis')->count();
-        if ($count_paket == 3) {
-            $paket->status = 0; // Force status to 0 if count equals 3
+                $count_paket = paket::where('status', '1')->where('nama_paket', 'NOT LIKE', '%gratis%')->count();
+                //return $count_paket;
+                if ($count_paket >= 3) {
+            $paket->status = 0;
+            $paket ->save(); // Force status to 0 if count equals 3
         }
             $paket->save();
             return response()->json(['is_success'=>true,

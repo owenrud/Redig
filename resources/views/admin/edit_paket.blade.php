@@ -94,10 +94,10 @@ if (idPaket) {
             document.getElementById('OperatorCount').value = apiData.data.OperatorCount;   
             document.getElementById('SertifCount').value = apiData.data.SertifCount;
            if (apiData.data.status === 1) {
-                document.getElementById('status').value = 1; // Set nilai menjadi 1
+                
                 document.getElementById('status').checked = true; // Set input toggle menjadi tercentang
             } else {
-                document.getElementById('status').value = 0; // Set nilai menjadi 0 atau sesuai kebutuhan Anda
+                
                 document.getElementById('status').checked = false; // Set input toggle menjadi tidak tercentang
             }
 

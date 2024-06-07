@@ -106,34 +106,41 @@ class EventController extends Controller
 
  
    public function search(Request $request){
-    $events = Event::where('nama_event','LIKE','%'.$request->input('search').'%')
-       ->join('paket','event.ID_paket','=','paket.ID_paket')
-       ->join('profile','event.ID_EO','=','profile.ID_User')
-       ->join('kategori_event','event.ID_kategori','=','kategori_event.id')
-       ->join('provinsi','event.ID_provinsi','=','provinsi.ID_provinsi')
-       ->join('kabupaten','event.ID_kabupaten','=','kabupaten.id')
-       ->select([
-        'event.ID_event as id',
-        'event.nama_event',
-        'event.desc_event as deskripsi',
-        'event.start',
-        'event.end',
-        'event.public',
-        'event.status',
-        'paket.nama_paket',
-        'profile.nama_lengkap',
-        'kategori_event.nama as kategori',
-        'provinsi.nama as provinsi',
-        'kabupaten.nama as kabupaten'
-       ])
-       ->where('event.status', '!=', 0)
-       ->get();
-       return response()->json([
+    $searchTerm = $request->input('search');
+
+    $events = Event::join('paket', 'event.ID_paket', '=', 'paket.ID_paket')
+        ->join('profile', 'event.ID_EO', '=', 'profile.ID_User')
+        ->join('kategori_event', 'event.ID_kategori', '=', 'kategori_event.id')
+        ->join('provinsi', 'event.ID_provinsi', '=', 'provinsi.ID_provinsi')
+        ->join('kabupaten', 'event.ID_kabupaten', '=', 'kabupaten.id')
+        ->select([
+            'event.ID_event as id',
+            'event.nama_event',
+            'event.desc_event as deskripsi',
+            'event.start',
+            'event.end',
+            'event.public',
+            'event.status',
+            'paket.nama_paket',
+            'profile.nama_lengkap',
+            'kategori_event.nama as kategori',
+            'provinsi.nama as provinsi',
+            'kabupaten.nama as kabupaten'
+        ])
+        ->where('event.status', '!=', 0)
+        ->where(function($query) use ($searchTerm) {
+            $query->where('event.nama_event', 'LIKE', '%' . $searchTerm . '%')
+                  ->orWhere('event.start', 'LIKE', '%' . $searchTerm . '%');
+        })
+        ->get();
+    
+    return response()->json([
         'is_success' => true,
         'data' => $events,
         'message' => 'Semua data Event',
-    ], 200);
-   }
+    ], 200);  
+}
+
     
    
         

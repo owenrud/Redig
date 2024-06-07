@@ -57,9 +57,13 @@
       <div class="max-w-screen-xl flex items-center justify-between mx-auto pt-4">
        <p id="page_title" class="text-2xl font-bold text-purple-900">@yield('page_title')</p>
        
-       
-<img id="avatarButton" type="button" data-dropdown-toggle="userDropdown" data-dropdown-placement="bottom-start" class="w-10 h-10 rounded-full cursor-pointer" src="https://flowbite.com/docs/images/logo.svg" alt="User dropdown">
-
+@if($authUser->foto)
+<img  data-dropdown-toggle="userDropdown" data-dropdown-placement="bottom-start" class="w-10 h-10 rounded-full" src="{{ asset('storage/uploads/' . $authUser->foto) }}" alt="Rounded avatar">
+@else
+<div data-dropdown-toggle="userDropdown" data-dropdown-placement="bottom-start" class="relative w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600">
+  <svg   class="absolute w-12 h-12 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+</div>
+@endif
 <!-- Dropdown menu -->
 @if($authUser)
 <div id="userDropdown" class="z-10 hidden bg-slate-50 divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600">
